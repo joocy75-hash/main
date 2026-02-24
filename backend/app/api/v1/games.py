@@ -32,6 +32,7 @@ router = APIRouter(prefix="/games", tags=["games"])
 # GameProvider endpoints
 # ═══════════════════════════════════════════════════════════════════
 
+
 @router.get("/providers", response_model=GameProviderListResponse)
 async def list_providers(
     page: int = Query(1, ge=1),
@@ -49,19 +50,22 @@ async def list_providers(
     if is_active is not None:
         base = base.where(GameProvider.is_active == is_active)
     if search:
+        safe_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         base = base.where(
             or_(
-                GameProvider.name.ilike(f"%{search}%"),
-                GameProvider.code.ilike(f"%{search}%"),
+                GameProvider.name.ilike(f"%{safe_search}%", escape="\\"),
+                GameProvider.code.ilike(f"%{safe_search}%", escape="\\"),
             )
         )
 
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    stmt = base.order_by(GameProvider.category, GameProvider.name).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(GameProvider.category, GameProvider.name)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     result = await session.execute(stmt)
     providers = result.scalars().all()
 
@@ -145,6 +149,7 @@ async def delete_provider(
 # GameRound endpoints (MUST be before /{game_id} to avoid route conflict)
 # ═══════════════════════════════════════════════════════════════════
 
+
 async def _build_round_response(session: AsyncSession, round: GameRound) -> GameRoundResponse:
     game = await session.get(Game, round.game_id)
     user = await session.get(User, round.user_id)
@@ -194,9 +199,9 @@ async def list_rounds(
     sums = (await session.execute(sum_stmt)).one()
     total_bet, total_win = sums[0], sums[1]
 
-    stmt = base.order_by(GameRound.created_at.desc()).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(GameRound.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    )
     result = await session.execute(stmt)
     rounds = result.scalars().all()
 
@@ -206,16 +211,16 @@ async def list_rounds(
 
     game_name_map: dict[int, str] = {}
     if game_ids:
-        game_rows = (await session.execute(
-            select(Game.id, Game.name).where(Game.id.in_(game_ids))
-        )).all()
+        game_rows = (
+            await session.execute(select(Game.id, Game.name).where(Game.id.in_(game_ids)))
+        ).all()
         game_name_map = {row[0]: row[1] for row in game_rows}
 
     user_name_map: dict[int, str] = {}
     if round_user_ids:
-        user_rows = (await session.execute(
-            select(User.id, User.username).where(User.id.in_(round_user_ids))
-        )).all()
+        user_rows = (
+            await session.execute(select(User.id, User.username).where(User.id.in_(round_user_ids)))
+        ).all()
         user_name_map = {row[0]: row[1] for row in user_rows}
 
     items = [
@@ -236,8 +241,12 @@ async def list_rounds(
         for r in rounds
     ]
     return GameRoundListResponse(
-        items=items, total=total, page=page, page_size=page_size,
-        total_bet=total_bet, total_win=total_win,
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_bet=total_bet,
+        total_win=total_win,
     )
 
 
@@ -256,6 +265,7 @@ async def get_round(
 # ═══════════════════════════════════════════════════════════════════
 # Game endpoints
 # ═══════════════════════════════════════════════════════════════════
+
 
 async def _build_game_response(session: AsyncSession, game: Game) -> GameResponse:
     provider = await session.get(GameProvider, game.provider_id)
@@ -300,19 +310,22 @@ async def list_games(
     if is_active is not None:
         base = base.where(Game.is_active == is_active)
     if search:
+        safe_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         base = base.where(
             or_(
-                Game.name.ilike(f"%{search}%"),
-                Game.code.ilike(f"%{search}%"),
+                Game.name.ilike(f"%{safe_search}%", escape="\\"),
+                Game.code.ilike(f"%{safe_search}%", escape="\\"),
             )
         )
 
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    stmt = base.order_by(Game.category, Game.sort_order, Game.name).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(Game.category, Game.sort_order, Game.name)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     result = await session.execute(stmt)
     games = result.scalars().all()
 
@@ -334,9 +347,7 @@ async def create_game(
         raise HTTPException(status_code=400, detail="Provider not found")
 
     # Check code uniqueness
-    existing = await session.execute(
-        select(Game).where(Game.code == body.code)
-    )
+    existing = await session.execute(select(Game).where(Game.code == body.code))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Game code already exists")
 

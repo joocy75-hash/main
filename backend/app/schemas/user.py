@@ -11,7 +11,7 @@ class UserCreate(BaseModel):
     real_name: str | None = None
     phone: str | None = None
     email: str | None = None
-    referrer_code: str | None = None  # referrer's username
+    referrer_code: str = Field(min_length=1, description="추천인 아이디 (필수)")
     level: int = Field(default=1, ge=1, le=99)
     memo: str | None = None
 
@@ -192,3 +192,14 @@ class UserSummaryStats(BaseModel):
 class BulkStatusUpdate(BaseModel):
     user_ids: list[int] = Field(min_length=1, max_length=100)
     status: str = Field(pattern=r"^(active|suspended|banned)$")
+
+
+class StatusChangeRequest(BaseModel):
+    reason: str | None = None
+
+
+class PointAdjustmentCreate(BaseModel):
+    user_id: int
+    action: str = Field(pattern=r"^(credit|debit)$")
+    amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
+    memo: str | None = None

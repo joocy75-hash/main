@@ -18,6 +18,7 @@ from app.api.v1.content import router as content_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.deposit_bonus import router as deposit_bonus_router
 from app.api.v1.events import router as events_router
+from app.api.v1.external_api import router as external_api_router
 from app.api.v1.exchange_rate import router as exchange_rate_router
 from app.api.v1.finance import router as finance_router
 from app.api.v1.fraud import router as fraud_router
@@ -34,6 +35,7 @@ from app.api.v1.payback import router as payback_router
 from app.api.v1.point_config import router as point_config_router
 from app.api.v1.popup import router as popup_router
 from app.api.v1.promotions import router as promotions_router
+from app.api.v1.rewards import router as rewards_router
 from app.api.v1.reports import router as reports_router
 from app.api.v1.roles import router as roles_router
 from app.api.v1.salary import router as salary_router
@@ -42,7 +44,7 @@ from app.api.v1.settlements import router as settlements_router
 from app.api.v1.spin import router as spin_router
 from app.api.v1.user_history import router as user_history_router
 from app.api.v1.user_inquiry import router as user_inquiry_router
-from app.api.v1.user_message import router as user_message_router
+from app.api.v1.user_message import message_admin_router, router as user_message_router
 from app.api.v1.users import router as users_router
 from app.api.v1.vip import router as vip_router
 from app.config import settings
@@ -79,8 +81,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "Retry-After"],
 )
 
@@ -104,6 +106,7 @@ app.include_router(connector_router, prefix="/api/v1")
 app.include_router(user_history_router, prefix="/api/v1")
 app.include_router(user_inquiry_router, prefix="/api/v1")
 app.include_router(user_message_router, prefix="/api/v1")
+app.include_router(message_admin_router, prefix="/api/v1")
 app.include_router(limits_router, prefix="/api/v1")
 app.include_router(salary_router, prefix="/api/v1")
 app.include_router(vip_router, prefix="/api/v1")
@@ -125,7 +128,9 @@ app.include_router(point_config_router, prefix="/api/v1")
 app.include_router(exchange_rate_router, prefix="/api/v1")
 app.include_router(popup_router, prefix="/api/v1")
 app.include_router(mission_router, prefix="/api/v1")
+app.include_router(rewards_router, prefix="/api/v1")
 app.include_router(admin_log_router, prefix="/api/v1")
+app.include_router(external_api_router, prefix="/api/v1")
 
 
 @app.get("/health")

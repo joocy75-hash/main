@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/stores/auth-store';
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002';
 
 type RequestOptions = {
@@ -66,6 +68,13 @@ async function doRefresh(): Promise<string | null> {
       parsed.state.refreshToken = data.refresh_token;
       localStorage.setItem('auth-storage', JSON.stringify(parsed));
     }
+
+    // Sync Zustand store
+    useAuthStore.setState({
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+    });
+
     return data.access_token;
   } catch {
     return null;
@@ -105,6 +114,21 @@ async function fetchApi<T>(endpoint: string, options: RequestOptions = {}): Prom
         'Authorization': `Bearer ${newToken}`,
       };
       response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    } else {
+      // Best-effort server logout before clearing client session
+      const oldRefresh = getRefreshToken();
+      if (oldRefresh) {
+        fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ refresh_token: oldRefresh }),
+        }).catch(() => {}); // Fire and forget
+      }
+      localStorage.removeItem('auth-storage');
+      useAuthStore.getState().logout();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
   }
 

@@ -30,16 +30,14 @@ EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetm
 
 
 def _parse_dates(start_date: str | None, end_date: str | None) -> tuple[datetime, datetime]:
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     start = datetime.combine(
         datetime.strptime(start_date, "%Y-%m-%d").date() if start_date else today.replace(day=1),
         time_type.min,
-        tzinfo=timezone.utc,
     )
     end = datetime.combine(
         datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else today,
         time_type.max,
-        tzinfo=timezone.utc,
     )
     return start, end
 

@@ -25,7 +25,7 @@ from app.schemas.auth import (
     TwoFactorSetupResponse,
     TwoFactorVerifyRequest,
 )
-from app.services.cache_service import blacklist_token, is_token_blacklisted
+from app.services.cache_service import blacklist_token, get_redis, is_token_blacklisted
 from app.utils.security import (
     create_access_token,
     create_refresh_token,
@@ -76,17 +76,36 @@ def _parse_browser(ua: str) -> str:
     return "Unknown"
 
 
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_LOCKOUT_SECONDS = 900  # 15 minutes
+
+
 @router.post("/login", response_model=TokenResponse)
 async def login(
     body: LoginRequest,
     request: Request,
     session: AsyncSession = Depends(get_session),
 ):
+    # Account lockout check
+    r = await get_redis()
+    lockout_key = f"login_attempts:{body.username}"
+    attempts = await r.get(lockout_key)
+    if attempts and int(attempts) >= MAX_LOGIN_ATTEMPTS:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="로그인 시도 횟수 초과. 15분 후 다시 시도하세요.",
+        )
+
     stmt = select(AdminUser).where(AdminUser.username == body.username)
     result = await session.execute(stmt)
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(body.password, user.password_hash):
+        # Increment failed login counter
+        pipe = r.pipeline()
+        pipe.incr(lockout_key)
+        pipe.expire(lockout_key, LOGIN_LOCKOUT_SECONDS)
+        await pipe.execute()
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     if user.status != "active":
@@ -103,6 +122,9 @@ async def login(
         totp = pyotp.TOTP(user.two_factor_secret)
         if not totp.verify(body.totp_code):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid 2FA code")
+
+    # Clear failed login counter on success
+    await r.delete(lockout_key)
 
     # Update login info
     now = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -165,6 +187,14 @@ async def refresh_token(
     if not user or user.status != "active":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
+    # Blacklist old refresh token (rotation)
+    old_jti = payload.get("jti")
+    old_exp = payload.get("exp")
+    if old_jti and old_exp:
+        ttl = int(old_exp - datetime.now(timezone.utc).timestamp())
+        if ttl > 0:
+            await blacklist_token(old_jti, ttl)
+
     token_data = {"sub": str(user.id), "role": user.role, "agent_code": user.agent_code}
     access_token = create_access_token(token_data)
     new_refresh = create_refresh_token(token_data)
@@ -179,8 +209,23 @@ async def refresh_token(
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
     body: RefreshRequest,
+    request: Request,
     user: AdminUser = Depends(get_current_user),
 ):
+    # Blacklist access token from Authorization header
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        access_token_str = auth_header[7:]
+        access_payload = decode_token(access_token_str)
+        if access_payload:
+            access_jti = access_payload.get("jti")
+            access_exp = access_payload.get("exp")
+            if access_jti and access_exp:
+                ttl = int(access_exp - datetime.now(timezone.utc).timestamp())
+                if ttl > 0:
+                    await blacklist_token(access_jti, ttl)
+
+    # Blacklist refresh token
     payload = decode_token(body.refresh_token)
     if payload and payload.get("type") == "refresh":
         jti = payload.get("jti")

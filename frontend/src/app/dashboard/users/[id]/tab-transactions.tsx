@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTransactionList } from '@/hooks/use-transactions';
 import { getTxExplorerUrl, getAddressExplorerUrl, getExplorerName, shortenHash } from '@/lib/blockchain';
-import { ArrowDownCircle, ArrowUpCircle, Copy, Check, ExternalLink } from 'lucide-react';
+import { formatAmount } from '@/lib/utils';
+import { ArrowDownCircle, ArrowUpCircle, Copy, Check, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기', approved: '승인', rejected: '거부', completed: '완료',
@@ -19,8 +20,6 @@ const STATUS_COLORS: Record<string, string> = {
   completed: 'bg-blue-100 text-blue-800',
 };
 
-function formatAmount(n: number) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 }); }
-
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -29,7 +28,7 @@ function CopyBtn({ text }: { text: string }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={handleCopy}>
+    <Button aria-label={copied ? '복사됨' : '복사'} variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={handleCopy}>
       {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
     </Button>
   );
@@ -65,19 +64,20 @@ function HashWithLink({ hash, network, type }: { hash: string; network?: string 
 type Props = { userId: number };
 
 export default function TabTransactions({ userId }: Props) {
-  const [page] = useState(1);
+  const [depositPage, setDepositPage] = useState(1);
+  const [withdrawalPage, setWithdrawalPage] = useState(1);
 
   const { data: depositData, loading: depositLoading } = useTransactionList({
     user_id: userId,
     type: 'deposit',
-    page,
+    page: depositPage,
     page_size: 10,
   });
 
   const { data: withdrawalData, loading: withdrawalLoading } = useTransactionList({
     user_id: userId,
     type: 'withdrawal',
-    page: 1,
+    page: withdrawalPage,
     page_size: 10,
   });
 
@@ -138,6 +138,20 @@ export default function TabTransactions({ userId }: Props) {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {depositData && depositData.total > 10 && (
+            <div className="flex items-center justify-between border-t px-4 py-3">
+              <span className="text-xs text-muted-foreground">총 {depositData.total}건</span>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled={depositPage <= 1} onClick={() => setDepositPage((p) => p - 1)}>
+                  <ChevronLeft className="h-3.5 w-3.5 mr-1" />이전
+                </Button>
+                <span className="text-xs tabular-nums">{depositPage} / {Math.ceil(depositData.total / 10)}</span>
+                <Button variant="outline" size="sm" disabled={depositPage >= Math.ceil(depositData.total / 10)} onClick={() => setDepositPage((p) => p + 1)}>
+                  다음<ChevronRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
@@ -204,6 +218,20 @@ export default function TabTransactions({ userId }: Props) {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {withdrawalData && withdrawalData.total > 10 && (
+            <div className="flex items-center justify-between border-t px-4 py-3">
+              <span className="text-xs text-muted-foreground">총 {withdrawalData.total}건</span>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled={withdrawalPage <= 1} onClick={() => setWithdrawalPage((p) => p - 1)}>
+                  <ChevronLeft className="h-3.5 w-3.5 mr-1" />이전
+                </Button>
+                <span className="text-xs tabular-nums">{withdrawalPage} / {Math.ceil(withdrawalData.total / 10)}</span>
+                <Button variant="outline" size="sm" disabled={withdrawalPage >= Math.ceil(withdrawalData.total / 10)} onClick={() => setWithdrawalPage((p) => p + 1)}>
+                  다음<ChevronRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

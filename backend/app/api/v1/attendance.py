@@ -1,18 +1,23 @@
-"""Attendance config management endpoints."""
+"""Attendance config management + check-in execution endpoints."""
 
+import datetime as dt
 from datetime import datetime, timezone
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from pydantic import Field as PydanticField
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import PermissionChecker
 from app.database import get_session
 from app.models.admin_user import AdminUser
 from app.models.attendance_config import AttendanceConfig
+from app.models.user import User
+from app.models.user_attendance_log import UserAttendanceLog
+from app.services import reward_engine
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
 
@@ -89,6 +94,89 @@ async def get_attendance_config(
         raise HTTPException(status_code=404, detail="Attendance config not found")
 
     return AttendanceConfigResponse.model_validate(config)
+
+
+# ─── Check-In (Reward Execution) ────────────────────────────────────
+
+class CheckInRequest(BaseModel):
+    user_id: int
+
+
+class CheckInResponse(BaseModel):
+    user_id: int
+    check_in_date: dt.date
+    day_number: int
+    reward_amount: Decimal
+    reward_type: str
+    reward_status: str  # "granted" or "pending"
+
+
+@router.post("/check-in", response_model=CheckInResponse, status_code=status.HTTP_201_CREATED)
+async def attendance_check_in(
+    body: CheckInRequest,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("attendance.manage")),
+):
+    # Lock user row to prevent race condition
+    user_stmt = select(User).where(User.id == body.user_id).with_for_update()
+    user = (await session.execute(user_stmt)).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    today = datetime.now(ZoneInfo("Asia/Seoul")).date()
+
+    # Duplicate check (re-check after lock)
+    dup_stmt = select(UserAttendanceLog).where(
+        and_(UserAttendanceLog.user_id == body.user_id, UserAttendanceLog.check_in_date == today)
+    )
+    if (await session.execute(dup_stmt)).scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="이미 오늘 출석 처리되었습니다")
+
+    # Calculate consecutive days
+    yesterday = today - dt.timedelta(days=1)
+    prev_stmt = select(UserAttendanceLog).where(
+        and_(UserAttendanceLog.user_id == body.user_id, UserAttendanceLog.check_in_date == yesterday)
+    )
+    prev_log = (await session.execute(prev_stmt)).scalar_one_or_none()
+    day_number = (prev_log.day_number % 30) + 1 if prev_log else 1
+
+    # Get reward config for this day
+    config_stmt = select(AttendanceConfig).where(
+        and_(AttendanceConfig.day_number == day_number, AttendanceConfig.is_active == True)
+    )
+    config = (await session.execute(config_stmt)).scalar_one_or_none()
+
+    reward_amount = config.reward_amount if config else Decimal("0")
+    reward_type = config.reward_type if config else "cash"
+
+    # Record attendance
+    log = UserAttendanceLog(
+        user_id=body.user_id,
+        check_in_date=today,
+        day_number=day_number,
+        reward_amount=reward_amount,
+        reward_type=reward_type,
+    )
+    session.add(log)
+
+    # Grant reward via engine
+    reward_status = "granted"
+    if reward_amount > 0:
+        result = await reward_engine.grant_reward(
+            session, body.user_id, reward_amount, reward_type,
+            "attendance", f"출석 {day_number}일차 보상",
+        )
+        reward_status = result.status
+
+    await session.commit()
+    return CheckInResponse(
+        user_id=body.user_id,
+        check_in_date=today,
+        day_number=day_number,
+        reward_amount=reward_amount,
+        reward_type=reward_type,
+        reward_status=reward_status,
+    )
 
 
 # ─── Create Config ───────────────────────────────────────────────────

@@ -50,3 +50,13 @@ from app.models.payback_config import PaybackConfig  # noqa: F401
 from app.models.point_config import PointConfig  # noqa: F401
 from app.models.popup_notice import PopupNotice  # noqa: F401
 from app.models.spin_config import SpinConfig  # noqa: F401
+
+# Phase 2: Reward engine models
+from app.models.pending_reward import PendingReward  # noqa: F401
+from app.models.user_attendance_log import UserAttendanceLog  # noqa: F401
+from app.models.user_mission import UserMission  # noqa: F401
+from app.models.user_spin_log import UserSpinLog  # noqa: F401
+
+# Phase 5: Auto-approve rules + user memos
+from app.models.auto_approve_rule import AutoApproveRule  # noqa: F401
+from app.models.user_memo import UserMemo  # noqa: F401

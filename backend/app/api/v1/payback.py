@@ -1,18 +1,22 @@
-"""Payback config management endpoints."""
+"""Payback config management + payback calculation endpoints."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from pydantic import Field as PydanticField
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import PermissionChecker
 from app.database import get_session
 from app.models.admin_user import AdminUser
+from app.models.bet_record import BetRecord
+from app.models.money_log import MoneyLog
 from app.models.payback_config import PaybackConfig
+from app.models.user import User
+from app.services import reward_engine
 
 router = APIRouter(prefix="/payback", tags=["payback"])
 
@@ -153,3 +157,116 @@ async def update_payback_config(
     await session.refresh(config)
 
     return PaybackConfigResponse.model_validate(config)
+
+
+# ─── Payback Calculation ────────────────────────────────────────────
+
+class PaybackCalculateRequest(BaseModel):
+    user_id: int
+    period: str = PydanticField(default="daily", pattern=r"^(daily|weekly|monthly)$")
+
+
+class PaybackCalculateResponse(BaseModel):
+    user_id: int
+    period: str
+    total_bet: Decimal
+    total_win: Decimal
+    net_loss: Decimal
+    payback_percent: Decimal
+    payback_amount: Decimal
+    reward_status: str  # "granted", "pending", "none", "no_loss"
+
+
+@router.post("/calculate", response_model=PaybackCalculateResponse, status_code=200)
+async def calculate_payback(
+    body: PaybackCalculateRequest,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("payback.manage")),
+):
+    user = await session.get(User, body.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Get active payback config for this period
+    config_stmt = select(PaybackConfig).where(
+        and_(PaybackConfig.period == body.period, PaybackConfig.is_active == True)
+    ).order_by(PaybackConfig.id)
+    config = (await session.execute(config_stmt)).scalar_first()
+    if not config:
+        raise HTTPException(status_code=400, detail=f"활성화된 {body.period} 페이백 설정이 없습니다")
+
+    # Determine time range
+    now = datetime.now(timezone.utc)
+    if body.period == "daily":
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif body.period == "weekly":
+        start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    else:
+        start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # Check duplicate: already paid this period?
+    dup_stmt = select(MoneyLog).where(
+        and_(
+            MoneyLog.user_id == body.user_id,
+            MoneyLog.type == "payback_reward",
+            MoneyLog.created_at >= start,
+        )
+    )
+    if (await session.execute(dup_stmt)).scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="이미 이번 기간에 페이백이 지급되었습니다")
+
+    # Calculate net loss from BetRecord within the period
+    bet_sum_stmt = select(
+        func.coalesce(func.sum(BetRecord.bet_amount), Decimal("0")),
+        func.coalesce(func.sum(BetRecord.win_amount), Decimal("0")),
+    ).where(
+        and_(
+            BetRecord.user_id == body.user_id,
+            BetRecord.bet_at >= start,
+        )
+    )
+    bet_row = (await session.execute(bet_sum_stmt)).one()
+    total_bet = bet_row[0]
+    total_win = bet_row[1]
+    net_loss = total_bet - total_win
+
+    # No loss = no payback
+    if net_loss <= 0:
+        return PaybackCalculateResponse(
+            user_id=body.user_id, period=body.period,
+            total_bet=total_bet, total_win=total_win, net_loss=Decimal("0"),
+            payback_percent=config.payback_percent, payback_amount=Decimal("0"),
+            reward_status="no_loss",
+        )
+
+    # Check minimum loss threshold
+    if net_loss < config.min_loss_amount:
+        return PaybackCalculateResponse(
+            user_id=body.user_id, period=body.period,
+            total_bet=total_bet, total_win=total_win, net_loss=net_loss,
+            payback_percent=config.payback_percent, payback_amount=Decimal("0"),
+            reward_status="none",
+        )
+
+    # Calculate payback amount with cap
+    payback_amount = net_loss * config.payback_percent / Decimal("100")
+    if config.max_payback_amount > 0:
+        payback_amount = min(payback_amount, config.max_payback_amount)
+    payback_amount = payback_amount.quantize(Decimal("0.01"))
+
+    # Grant via reward engine
+    reward_status = "none"
+    if payback_amount > 0:
+        result = await reward_engine.grant_reward(
+            session, body.user_id, payback_amount, config.payback_type,
+            "payback", f"{body.period} 페이백 ({config.payback_percent}%)",
+        )
+        reward_status = result.status
+
+    await session.commit()
+    return PaybackCalculateResponse(
+        user_id=body.user_id, period=body.period,
+        total_bet=total_bet, total_win=total_win, net_loss=net_loss,
+        payback_percent=config.payback_percent, payback_amount=payback_amount,
+        reward_status=reward_status,
+    )

@@ -10,12 +10,16 @@ from app.models.admin_user import AdminUser
 from app.models.message import Message
 from app.models.user import User
 from app.schemas.user_message import (
+    BulkMessageCreate,
+    BulkMessageResponse,
     MessageCreate,
     MessageListResponse,
     MessageResponse,
 )
+from app.services.message_service import send_to_filtered_users
 
 router = APIRouter(prefix="/users", tags=["user-message"])
+message_admin_router = APIRouter(prefix="/messages", tags=["message-admin"])
 
 
 async def _verify_user(session: AsyncSession, user_id: int) -> User:
@@ -169,4 +173,28 @@ async def mark_message_read(
         is_read=msg.is_read,
         read_at=msg.read_at,
         created_at=msg.created_at,
+    )
+
+
+# ─── Bulk Message (Admin → Multiple Users) ──────────────────────
+
+@message_admin_router.post("/bulk", response_model=BulkMessageResponse, status_code=201)
+async def bulk_send_messages(
+    body: BulkMessageCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.update")),
+):
+    if body.target != "all" and not body.target_value:
+        raise HTTPException(status_code=400, detail="target_value는 필수입니다")
+
+    sent_count = await send_to_filtered_users(
+        session, body.title, body.content,
+        target=body.target, target_value=body.target_value,
+    )
+    await session.commit()
+
+    return BulkMessageResponse(
+        sent_count=sent_count,
+        target=body.target,
+        target_value=body.target_value,
     )

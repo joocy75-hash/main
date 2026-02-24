@@ -8,7 +8,7 @@ then query CommissionLedger using the User tree.
 from datetime import date, datetime, time as time_type, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import PermissionChecker
@@ -52,6 +52,7 @@ async def _get_user_descendant_ids(session: AsyncSession, user_id: int) -> list[
 
 # ─── Dashboard Stats ────────────────────────────────────────────
 
+
 @router.get("/dashboard", response_model=PartnerDashboardStats)
 async def get_partner_dashboard(
     session: AsyncSession = Depends(get_session),
@@ -61,61 +62,52 @@ async def get_partner_dashboard(
     descendant_ids = await _get_user_descendant_ids(session, user_id)
     all_ids = [user_id] + descendant_ids
 
-    # Count sub-agents (excluding self)
     total_sub_agents = len(descendant_ids)
 
-    # Count unique bettors from commission ledger under this subtree
-    total_sub_users = (await session.execute(
-        select(func.count(func.distinct(CommissionLedger.user_id))).where(
-            CommissionLedger.recipient_user_id.in_(all_ids)
-        )
-    )).scalar() or 0
-
-    # Total bet amount from commission ledger (source_amount for rolling type)
-    total_bet_amount = (await session.execute(
-        select(func.coalesce(func.sum(CommissionLedger.source_amount), 0)).where(
-            CommissionLedger.recipient_user_id.in_(all_ids),
-            CommissionLedger.type == "rolling",
-        )
-    )).scalar() or 0
-
-    # Total commission earned (own only)
-    total_commission = (await session.execute(
-        select(func.coalesce(func.sum(CommissionLedger.commission_amount), 0)).where(
-            CommissionLedger.recipient_user_id == user_id,
-        )
-    )).scalar() or 0
-
-    # This month's data
     month_start = datetime.combine(date.today().replace(day=1), time_type.min, tzinfo=timezone.utc)
 
-    # Settlement.agent_id now stores recipient_user_id
-    month_settlement = (await session.execute(
-        select(func.coalesce(func.sum(Settlement.net_total), 0)).where(
-            Settlement.agent_id == user_id,
-            Settlement.created_at >= month_start,
-        )
-    )).scalar() or 0
+    # Single aggregation query for CommissionLedger stats
+    agg_stmt = select(
+        func.count(func.distinct(CommissionLedger.user_id)).label("sub_users"),
+        func.coalesce(func.sum(
+            case((CommissionLedger.type == "rolling", CommissionLedger.source_amount), else_=0)
+        ), 0).label("total_bet"),
+        func.coalesce(func.sum(
+            case((CommissionLedger.recipient_user_id == user_id, CommissionLedger.commission_amount), else_=0)
+        ), 0).label("total_comm"),
+        func.coalesce(func.sum(
+            case(
+                (
+                    (CommissionLedger.type == "rolling") & (CommissionLedger.created_at >= month_start),
+                    CommissionLedger.source_amount,
+                ),
+                else_=0,
+            )
+        ), 0).label("month_bet"),
+    ).where(CommissionLedger.recipient_user_id.in_(all_ids))
+    agg_row = (await session.execute(agg_stmt)).one()
 
-    month_bet_amount = (await session.execute(
-        select(func.coalesce(func.sum(CommissionLedger.source_amount), 0)).where(
-            CommissionLedger.recipient_user_id.in_(all_ids),
-            CommissionLedger.type == "rolling",
-            CommissionLedger.created_at >= month_start,
+    month_settlement = (
+        await session.execute(
+            select(func.coalesce(func.sum(Settlement.net_total), 0)).where(
+                Settlement.agent_id == user_id,
+                Settlement.created_at >= month_start,
+            )
         )
-    )).scalar() or 0
+    ).scalar() or 0
 
     return PartnerDashboardStats(
-        total_sub_users=total_sub_users,
+        total_sub_users=agg_row.sub_users,
         total_sub_agents=total_sub_agents,
-        total_bet_amount=float(total_bet_amount),
-        total_commission=float(total_commission),
+        total_bet_amount=float(agg_row.total_bet),
+        total_commission=float(agg_row.total_comm),
         month_settlement=float(month_settlement),
-        month_bet_amount=float(month_bet_amount),
+        month_bet_amount=float(agg_row.month_bet),
     )
 
 
 # ─── Tree ────────────────────────────────────────────────────────
+
 
 @router.get("/tree", response_model=list[PartnerTreeNode])
 async def get_partner_tree(
@@ -146,6 +138,7 @@ async def get_partner_tree(
 
 # ─── Users (unique users from commission ledger) ────────────────
 
+
 @router.get("/users", response_model=PartnerUserListResponse)
 async def get_partner_users(
     page: int = Query(1, ge=1),
@@ -160,25 +153,22 @@ async def get_partner_users(
     all_ids = [user_id] + descendant_ids
 
     # Get bettor IDs associated with this user subtree via commission ledger
-    user_ids_stmt = (
-        select(func.distinct(CommissionLedger.user_id)).where(
-            CommissionLedger.recipient_user_id.in_(all_ids)
-        )
+    user_ids_stmt = select(func.distinct(CommissionLedger.user_id)).where(
+        CommissionLedger.recipient_user_id.in_(all_ids)
     )
 
     base = select(User).where(User.id.in_(user_ids_stmt))
 
     if search:
-        base = base.where(User.username.ilike(f"%{search}%"))
+        safe_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        base = base.where(User.username.ilike(f"%{safe_search}%", escape="\\"))
     if status_filter:
         base = base.where(User.status == status_filter)
 
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    stmt = base.order_by(User.created_at.desc()).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = base.order_by(User.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
     result = await session.execute(stmt)
     users = result.scalars().all()
 
@@ -186,36 +176,39 @@ async def get_partner_users(
     fetched_user_ids = [u.id for u in users]
     stats_map: dict[int, tuple[float, float]] = {}
     if fetched_user_ids:
-        bet_stats = (await session.execute(
-            select(
-                GameRound.user_id,
-                func.coalesce(func.sum(GameRound.bet_amount), 0),
-                func.coalesce(func.sum(GameRound.win_amount), 0),
+        bet_stats = (
+            await session.execute(
+                select(
+                    GameRound.user_id,
+                    func.coalesce(func.sum(GameRound.bet_amount), 0),
+                    func.coalesce(func.sum(GameRound.win_amount), 0),
+                )
+                .where(GameRound.user_id.in_(fetched_user_ids))
+                .group_by(GameRound.user_id)
             )
-            .where(GameRound.user_id.in_(fetched_user_ids))
-            .group_by(GameRound.user_id)
-        )).all()
+        ).all()
         stats_map = {row[0]: (float(row[1]), float(row[2])) for row in bet_stats}
 
     items = []
     for u in users:
         bet_sum, win_sum = stats_map.get(u.id, (0.0, 0.0))
-        items.append(PartnerUserItem(
-            id=u.id,
-            username=u.username,
-            status=u.status,
-            balance=float(u.balance),
-            total_bet=bet_sum,
-            total_win=win_sum,
-            created_at=u.created_at,
-        ))
+        items.append(
+            PartnerUserItem(
+                id=u.id,
+                username=u.username,
+                status=u.status,
+                balance=float(u.balance),
+                total_bet=bet_sum,
+                total_win=win_sum,
+                created_at=u.created_at,
+            )
+        )
 
-    return PartnerUserListResponse(
-        items=items, total=total, page=page, page_size=page_size
-    )
+    return PartnerUserListResponse(items=items, total=total, page=page, page_size=page_size)
 
 
 # ─── Commissions ────────────────────────────────────────────────
+
 
 @router.get("/commissions", response_model=PartnerCommissionListResponse)
 async def get_partner_commissions(
@@ -229,9 +222,7 @@ async def get_partner_commissions(
 ) -> PartnerCommissionListResponse:
     user_id = await _resolve_user_id(session, current_user)
 
-    base = select(CommissionLedger).where(
-        CommissionLedger.recipient_user_id == user_id
-    )
+    base = select(CommissionLedger).where(CommissionLedger.recipient_user_id == user_id)
 
     if type_filter:
         base = base.where(CommissionLedger.type == type_filter)
@@ -244,9 +235,9 @@ async def get_partner_commissions(
     total = (await session.execute(count_stmt)).scalar() or 0
 
     # Total commission for filtered results
-    total_comm_stmt = select(
-        func.coalesce(func.sum(CommissionLedger.commission_amount), 0)
-    ).where(CommissionLedger.recipient_user_id == user_id)
+    total_comm_stmt = select(func.coalesce(func.sum(CommissionLedger.commission_amount), 0)).where(
+        CommissionLedger.recipient_user_id == user_id
+    )
     if type_filter:
         total_comm_stmt = total_comm_stmt.where(CommissionLedger.type == type_filter)
     if date_from:
@@ -259,9 +250,11 @@ async def get_partner_commissions(
         )
     total_commission = (await session.execute(total_comm_stmt)).scalar() or 0
 
-    stmt = base.order_by(CommissionLedger.created_at.desc()).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(CommissionLedger.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     result = await session.execute(stmt)
     ledgers = result.scalars().all()
 
@@ -290,6 +283,7 @@ async def get_partner_commissions(
 
 # ─── Settlements ────────────────────────────────────────────────
 
+
 @router.get("/settlements", response_model=PartnerSettlementListResponse)
 async def get_partner_settlements(
     page: int = Query(1, ge=1),
@@ -301,9 +295,7 @@ async def get_partner_settlements(
     # Settlement.agent_id now stores recipient_user_id
     user_id = await _resolve_user_id(session, current_user)
 
-    base = select(Settlement).where(
-        Settlement.agent_id == user_id
-    )
+    base = select(Settlement).where(Settlement.agent_id == user_id)
 
     if status_filter:
         base = base.where(Settlement.status == status_filter)
@@ -311,9 +303,9 @@ async def get_partner_settlements(
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    stmt = base.order_by(Settlement.created_at.desc()).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(Settlement.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    )
     result = await session.execute(stmt)
     settlements = result.scalars().all()
 
@@ -330,6 +322,4 @@ async def get_partner_settlements(
         for s in settlements
     ]
 
-    return PartnerSettlementListResponse(
-        items=items, total=total, page=page, page_size=page_size
-    )
+    return PartnerSettlementListResponse(items=items, total=total, page=page, page_size=page_size)

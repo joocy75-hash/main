@@ -1,11 +1,15 @@
 """Rate limiting middleware using Redis."""
 
+import logging
+
 import redis.asyncio as redis
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 # Rate limit configs per path pattern: (max_requests, window_seconds)
 RATE_LIMITS = {
@@ -63,5 +67,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             response.headers["X-RateLimit-Remaining"] = str(max(0, limit - current))
             return response
         except Exception:
-            # If Redis is down, allow the request through
+            logger.error("Redis rate limit unavailable", exc_info=True)
+            if path.startswith("/api/v1/auth/"):
+                return JSONResponse(
+                    status_code=503,
+                    content={"detail": "서비스 일시 불가"},
+                )
             return await call_next(request)

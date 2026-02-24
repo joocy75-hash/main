@@ -48,23 +48,28 @@ async def _batch_admin_usernames(session: AsyncSession, logs: list[AuditLog]) ->
     return {row[0]: row[1] for row in result.all()}
 
 
-def _parse_dates(start_date: str | None, end_date: str | None) -> tuple[datetime | None, datetime | None]:
+def _parse_dates(
+    start_date: str | None, end_date: str | None
+) -> tuple[datetime | None, datetime | None]:
     start = None
     end = None
     if start_date:
         start = datetime.combine(
             datetime.strptime(start_date, "%Y-%m-%d").date(),
-            datetime.min.time(), tzinfo=timezone.utc,
+            datetime.min.time(),
+            tzinfo=timezone.utc,
         )
     if end_date:
         end = datetime.combine(
             datetime.strptime(end_date, "%Y-%m-%d").date(),
-            datetime.max.time(), tzinfo=timezone.utc,
+            datetime.max.time(),
+            tzinfo=timezone.utc,
         )
     return start, end
 
 
 # ─── List Audit Logs ──────────────────────────────────────────────
+
 
 @router.get("/logs", response_model=AuditLogListResponse)
 async def list_audit_logs(
@@ -88,9 +93,10 @@ async def list_audit_logs(
     if admin_user_id:
         base = base.where(AuditLog.admin_user_id == admin_user_id)
     if admin_username:
+        safe_name = admin_username.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         admin_ids_subq = (
             select(AdminUser.id)
-            .where(AdminUser.username.ilike(f"%{admin_username}%"))
+            .where(AdminUser.username.ilike(f"%{safe_name}%", escape="\\"))
             .scalar_subquery()
         )
         base = base.where(AuditLog.admin_user_id.in_(admin_ids_subq))
@@ -104,9 +110,7 @@ async def list_audit_logs(
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    stmt = base.order_by(AuditLog.created_at.desc()).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = base.order_by(AuditLog.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
     result = await session.execute(stmt)
     logs = result.scalars().all()
 
@@ -116,6 +120,7 @@ async def list_audit_logs(
 
 
 # ─── Export Audit Logs (Excel) ── MUST be before {log_id} route ──
+
 
 @router.get("/logs/export")
 async def export_audit_logs(
@@ -137,9 +142,10 @@ async def export_audit_logs(
     if admin_user_id:
         base = base.where(AuditLog.admin_user_id == admin_user_id)
     if admin_username:
+        safe_name = admin_username.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         admin_ids_subq = (
             select(AdminUser.id)
-            .where(AdminUser.username.ilike(f"%{admin_username}%"))
+            .where(AdminUser.username.ilike(f"%{safe_name}%", escape="\\"))
             .scalar_subquery()
         )
         base = base.where(AuditLog.admin_user_id.in_(admin_ids_subq))
@@ -162,8 +168,18 @@ async def export_audit_logs(
     ws = wb.active
     ws.title = "Audit Logs"
 
-    headers = ["ID", "Admin User ID", "Username", "Action", "Module",
-               "Resource Type", "Resource ID", "IP Address", "Description", "Created At"]
+    headers = [
+        "ID",
+        "Admin User ID",
+        "Username",
+        "Action",
+        "Module",
+        "Resource Type",
+        "Resource ID",
+        "IP Address",
+        "Description",
+        "Created At",
+    ]
     for col, header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.font = Font(bold=True)
@@ -180,7 +196,11 @@ async def export_audit_logs(
         ws.cell(row=row_idx, column=7, value=log.resource_id)
         ws.cell(row=row_idx, column=8, value=log.ip_address)
         ws.cell(row=row_idx, column=9, value=log.description)
-        ws.cell(row=row_idx, column=10, value=log.created_at.strftime("%Y-%m-%d %H:%M:%S") if log.created_at else "")
+        ws.cell(
+            row=row_idx,
+            column=10,
+            value=log.created_at.strftime("%Y-%m-%d %H:%M:%S") if log.created_at else "",
+        )
 
     for col in ws.columns:
         max_len = max(len(str(c.value or "")) for c in col)
@@ -201,6 +221,7 @@ async def export_audit_logs(
 
 # ─── Get Audit Log Detail ────────────────────────────────────────
 
+
 @router.get("/logs/{log_id}", response_model=AuditLogResponse)
 async def get_audit_log(
     log_id: int,
@@ -208,6 +229,7 @@ async def get_audit_log(
     current_user: AdminUser = Depends(PermissionChecker("audit_log.view")),
 ):
     from fastapi import HTTPException
+
     log = await session.get(AuditLog, log_id)
     if not log:
         raise HTTPException(status_code=404, detail="Audit log not found")

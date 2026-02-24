@@ -1,6 +1,7 @@
 """Finance/Transaction management endpoints."""
 
 from datetime import datetime, time as time_type, timezone
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
@@ -9,8 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import PermissionChecker
 from app.database import get_session
 from app.models.admin_user import AdminUser
+from app.models.auto_approve_rule import AutoApproveRule
+from app.models.point_log import PointLog
 from app.models.transaction import Transaction
 from app.models.user import User
+from app.schemas.auto_approve import (
+    AutoApproveRuleCreate,
+    AutoApproveRuleListResponse,
+    AutoApproveRuleResponse,
+    AutoApproveRuleUpdate,
+)
 from app.schemas.transaction import (
     AdjustmentCreate,
     DepositCreate,
@@ -20,8 +29,11 @@ from app.schemas.transaction import (
     TransactionSummary,
     WithdrawalCreate,
 )
+from app.schemas.user import PointAdjustmentCreate
 from app.services import notification_service
+from app.services.message_service import send_system_message
 from app.utils.events import publish_event
+from app.services.auto_approve_service import check_auto_approve
 from app.services.transaction_service import (
     approve_transaction,
     create_adjustment,
@@ -30,7 +42,18 @@ from app.services.transaction_service import (
     reject_transaction,
 )
 
+SYSTEM_ADMIN_USERNAME = "system"
+
 router = APIRouter(prefix="/finance", tags=["finance"])
+
+
+async def _get_system_admin_id(session: AsyncSession) -> int | None:
+    """Fetch the system admin user ID for auto-approve audit trail."""
+    result = await session.execute(
+        select(AdminUser).where(AdminUser.username == SYSTEM_ADMIN_USERNAME).limit(1)
+    )
+    system_admin = result.scalar_one_or_none()
+    return system_admin.id if system_admin else None
 
 
 async def _build_response(session: AsyncSession, tx: Transaction) -> TransactionResponse:
@@ -218,16 +241,30 @@ async def request_deposit(
             coin_type=body.coin_type, network=body.network,
             tx_hash=body.tx_hash, wallet_address=body.wallet_address,
         )
+        user = await session.get(User, body.user_id)
+        coin = body.coin_type or "USDT"
+
+        # Auto-approve check before first commit
+        auto_approved = False
+        if tx.status == "pending" and await check_auto_approve(session, "deposit", body.user_id, body.amount):
+            system_admin_id = await _get_system_admin_id(session)
+            tx = await approve_transaction(session, tx.id, system_admin_id)
+            tx.memo = (tx.memo or "") + " [시스템 자동승인]"
+            notification_service.notify_transaction_approved("deposit", user.username, tx.amount, coin)
+            await send_system_message(session, tx.user_id, "deposit_approved", amount=tx.amount, coin_type=coin)
+            auto_approved = True
+
         await session.commit()
         await session.refresh(tx)
         resp = await _build_response(session, tx)
-        user = await session.get(User, body.user_id)
-        coin = body.coin_type or "USDT"
+
         await publish_event("new_deposit", {
             "user_id": body.user_id, "amount": str(body.amount), "username": user.username,
         })
         notification_service.notify_deposit_request(user.username, body.amount, coin)
-        notification_service.notify_large_transaction("deposit", user.username, body.amount, coin)
+        if not auto_approved:
+            notification_service.notify_large_transaction("deposit", user.username, body.amount, coin)
+
         return resp
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -247,16 +284,30 @@ async def request_withdrawal(
             coin_type=body.coin_type, network=body.network,
             wallet_address=body.wallet_address,
         )
+        user = await session.get(User, body.user_id)
+        coin = body.coin_type or "USDT"
+
+        # Auto-approve check before first commit
+        auto_approved = False
+        if tx.status == "pending" and await check_auto_approve(session, "withdrawal", body.user_id, body.amount):
+            system_admin_id = await _get_system_admin_id(session)
+            tx = await approve_transaction(session, tx.id, system_admin_id)
+            tx.memo = (tx.memo or "") + " [시스템 자동승인]"
+            notification_service.notify_transaction_approved("withdrawal", user.username, tx.amount, coin)
+            await send_system_message(session, tx.user_id, "withdrawal_approved", amount=tx.amount, coin_type=coin)
+            auto_approved = True
+
         await session.commit()
         await session.refresh(tx)
         resp = await _build_response(session, tx)
-        user = await session.get(User, body.user_id)
-        coin = body.coin_type or "USDT"
+
         await publish_event("new_withdrawal", {
             "user_id": body.user_id, "amount": str(body.amount), "username": user.username,
         })
         notification_service.notify_withdrawal_request(user.username, body.amount, coin)
-        notification_service.notify_large_transaction("withdrawal", user.username, body.amount, coin)
+        if not auto_approved:
+            notification_service.notify_large_transaction("withdrawal", user.username, body.amount, coin)
+
         return resp
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -300,6 +351,13 @@ async def approve_tx(
             "tx_id": tx.id, "user_id": tx.user_id, "amount": str(tx.amount), "type": tx.type,
         })
         notification_service.notify_transaction_approved(tx.type, user.username, tx.amount, tx.coin_type or "USDT")
+        # Send in-app message to user
+        msg_template = "deposit_approved" if tx.type == "deposit" else "withdrawal_approved"
+        await send_system_message(
+            session, tx.user_id, msg_template,
+            amount=tx.amount, coin_type=tx.coin_type or "USDT",
+        )
+        await session.commit()
         return resp
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -321,6 +379,163 @@ async def reject_tx(
         resp = await _build_response(session, tx)
         user = await session.get(User, tx.user_id)
         notification_service.notify_transaction_rejected(tx.type, user.username, tx.amount, body.memo or "")
+        # Send in-app message to user
+        msg_template = "deposit_rejected" if tx.type == "deposit" else "withdrawal_rejected"
+        await send_system_message(
+            session, tx.user_id, msg_template, reason=body.memo,
+        )
+        await session.commit()
         return resp
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# ─── Point Adjustment ──────────────────────────────────────────────
+
+@router.post("/point-adjustment", status_code=201)
+async def point_adjustment(
+    body: PointAdjustmentCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.balance")),
+):
+    # Lock user row for concurrent safety
+    user_stmt = select(User).where(User.id == body.user_id).with_for_update()
+    user = (await session.execute(user_stmt)).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    balance_before = user.points
+
+    if body.action == "credit":
+        user.points += body.amount
+    elif body.action == "debit":
+        if user.points < body.amount:
+            raise HTTPException(status_code=400, detail=f"포인트 부족: {user.points} < {body.amount}")
+        user.points -= body.amount
+
+    log = PointLog(
+        user_id=user.id,
+        type="admin_adjustment",
+        amount=body.amount if body.action == "credit" else -body.amount,
+        balance_before=balance_before,
+        balance_after=user.points,
+        description=body.memo,
+        reference_type="admin",
+        reference_id=str(current_user.id),
+    )
+    session.add(log)
+
+    template_key = "point_credit" if body.action == "credit" else "point_debit"
+    await send_system_message(
+        session, user.id, template_key,
+        amount=body.amount, memo=body.memo or "",
+    )
+
+    user.updated_at = datetime.now(timezone.utc)
+    session.add(user)
+    await session.commit()
+
+    return {
+        "user_id": user.id,
+        "action": body.action,
+        "amount": str(body.amount),
+        "balance_before": str(balance_before),
+        "balance_after": str(user.points),
+    }
+
+
+# ─── Auto-Approve Rules ──────────────────────────────────────────
+
+@router.get("/auto-approve-rules", response_model=AutoApproveRuleListResponse)
+async def list_auto_approve_rules(
+    type_filter: str | None = Query(None, alias="type"),
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("transaction.view")),
+):
+    base = select(AutoApproveRule)
+    if type_filter:
+        base = base.where(AutoApproveRule.type == type_filter)
+
+    count_stmt = select(func.count()).select_from(base.subquery())
+    total = (await session.execute(count_stmt)).scalar() or 0
+
+    stmt = base.order_by(AutoApproveRule.created_at.desc())
+    result = await session.execute(stmt)
+    rules = result.scalars().all()
+
+    return AutoApproveRuleListResponse(
+        items=[AutoApproveRuleResponse.model_validate(r, from_attributes=True) for r in rules],
+        total=total,
+    )
+
+
+@router.post("/auto-approve-rules", response_model=AutoApproveRuleResponse, status_code=201)
+async def create_auto_approve_rule(
+    body: AutoApproveRuleCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("transaction.approve")),
+):
+    rule = AutoApproveRule(
+        type=body.type,
+        condition_type=body.condition_type,
+        condition_value=body.condition_value,
+        max_amount=body.max_amount,
+        is_active=body.is_active,
+        created_by=current_user.id,
+    )
+    session.add(rule)
+    await session.commit()
+    await session.refresh(rule)
+    return AutoApproveRuleResponse.model_validate(rule, from_attributes=True)
+
+
+@router.put("/auto-approve-rules/{rule_id}", response_model=AutoApproveRuleResponse)
+async def update_auto_approve_rule(
+    rule_id: int,
+    body: AutoApproveRuleUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("transaction.approve")),
+):
+    rule = await session.get(AutoApproveRule, rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="Rule not found")
+
+    update_data = body.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(rule, field, value)
+    rule.updated_at = datetime.now(timezone.utc)
+
+    session.add(rule)
+    await session.commit()
+    await session.refresh(rule)
+    return AutoApproveRuleResponse.model_validate(rule, from_attributes=True)
+
+
+@router.delete("/auto-approve-rules/{rule_id}", status_code=204)
+async def delete_auto_approve_rule(
+    rule_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("transaction.approve")),
+):
+    rule = await session.get(AutoApproveRule, rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    await session.delete(rule)
+    await session.commit()
+
+
+@router.post("/auto-approve-rules/{rule_id}/toggle", response_model=AutoApproveRuleResponse)
+async def toggle_auto_approve_rule(
+    rule_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("transaction.approve")),
+):
+    rule = await session.get(AutoApproveRule, rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    rule.is_active = not rule.is_active
+    rule.updated_at = datetime.now(timezone.utc)
+    session.add(rule)
+    await session.commit()
+    await session.refresh(rule)
+    return AutoApproveRuleResponse.model_validate(rule, from_attributes=True)

@@ -9,36 +9,32 @@ export type VipLevel = {
   id: number;
   level: number;
   name: string;
-  color: string;
-  min_deposit: number;
-  min_betting: number;
+  color: string | null;
+  icon: string | null;
+  min_total_deposit: number;
+  min_total_bet: number;
   rolling_bonus_rate: number;
   losing_bonus_rate: number;
-  withdrawal_limit: number;
-  daily_withdrawal_count: number;
-  benefits_description: string | null;
+  deposit_limit_daily: number;
+  withdrawal_limit_daily: number;
+  withdrawal_limit_monthly: number;
+  max_single_bet: number;
+  benefits: Record<string, unknown>;
+  sort_order: number;
   user_count: number;
-  active: boolean;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
-};
-
-type VipLevelListResponse = {
-  items: VipLevel[];
-  total: number;
 };
 
 export type VipLevelUser = {
   id: number;
   username: string;
-  real_name: string | null;
-  level: number;
+  nickname: string | null;
   balance: number;
   total_deposit: number;
   total_bet: number;
   status: string;
-  last_login_at: string | null;
-  created_at: string;
 };
 
 type VipLevelUserListResponse = {
@@ -56,7 +52,7 @@ export type UserLevelHistory = {
   reason: string;
   changed_by: number | null;
   changed_by_username: string | null;
-  created_at: string;
+  changed_at: string;
 };
 
 type UserLevelHistoryResponse = {
@@ -65,16 +61,15 @@ type UserLevelHistoryResponse = {
 };
 
 type AutoCheckResult = {
-  upgraded: number;
-  downgraded: number;
-  unchanged: number;
-  details: { user_id: number; username: string; from_level: number; to_level: number }[];
+  total_checked: number;
+  total_upgraded: number;
+  upgrades: { user_id: number; username: string; from_level: number; to_level: number; level_name: string }[];
 };
 
 // ─── VIP Level Hooks ─────────────────────────────────────────────
 
 export function useVipLevels() {
-  const [data, setData] = useState<VipLevelListResponse | null>(null);
+  const [items, setItems] = useState<VipLevel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,8 +77,8 @@ export function useVipLevels() {
     setLoading(true);
     setError(null);
     try {
-      const result = await apiClient.get<VipLevelListResponse>('/api/v1/vip/levels');
-      setData(result);
+      const result = await apiClient.get<VipLevel[]>('/api/v1/vip/levels');
+      setItems(Array.isArray(result) ? result : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load VIP levels');
     } finally {
@@ -93,7 +88,7 @@ export function useVipLevels() {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  return { data, loading, error, refetch: fetch };
+  return { items, loading, error, refetch: fetch };
 }
 
 export function useVipLevel(id: number | null) {

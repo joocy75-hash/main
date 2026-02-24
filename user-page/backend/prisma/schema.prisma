@@ -1,0 +1,550 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== ENUMS ==========
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum CommissionType {
+  ROLLING
+  LOSING
+}
+
+enum CoinType {
+  USDT
+  TRX
+  ETH
+  BTC
+  BNB
+}
+
+enum NetworkType {
+  TRC20
+  ERC20
+  BEP20
+  BTC
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum GameCategory {
+  casino
+  slot
+  holdem
+  sports
+  shooting
+  coin
+  mini_game
+}
+
+enum RewardType {
+  point
+  cash
+  bonus
+}
+
+enum MissionType {
+  daily
+  weekly
+}
+
+enum MissionStatus {
+  active
+  completed
+  claimed
+}
+
+enum MoneyLogType {
+  deposit
+  withdrawal
+  bet
+  win
+  bonus
+  admin_adjustment
+  promotion
+  commission
+  promotion_revoke
+  commission_reversal
+  payback
+  point_conversion
+}
+
+enum PointLogType {
+  admin_adjustment
+  attendance
+  mission
+  spin
+  rolling
+  losing
+  conversion
+  event
+}
+
+enum MessageType {
+  system
+  admin
+  reward
+  transaction
+  referral
+}
+
+enum InquiryStatus {
+  pending
+  answered
+  closed
+}
+
+// ========== MODELS ==========
+
+model User {
+  id              Int            @id @default(autoincrement())
+  username        String         @unique @db.VarChar(20)
+  nickname        String         @db.VarChar(20)
+  passwordHash    String         @map("password_hash")
+  phone           String?        @db.VarChar(15)
+  status          UserStatus     @default(ACTIVE)
+  balance         Decimal        @default(0) @db.Decimal(18, 2)
+  points          Decimal        @default(0) @db.Decimal(18, 2)
+  bonusBalance    Decimal        @default(0) @map("bonus_balance") @db.Decimal(18, 2)
+  referrerCode    String?        @map("referrer_code") @db.VarChar(20)
+  myReferralCode  String         @unique @map("my_referral_code") @db.VarChar(20)
+  vipLevel        Int            @default(1) @map("vip_level")
+  commissionType  CommissionType @default(ROLLING) @map("commission_type")
+  losingRate      Decimal        @default(0) @map("losing_rate") @db.Decimal(5, 2)
+  commissionEnabled Boolean      @default(true) @map("commission_enabled")
+  depositAddress  String?        @map("deposit_address")
+  depositNetwork  String?        @map("deposit_network") @db.VarChar(10)
+  lastLoginAt     DateTime?      @map("last_login_at")
+  lastLoginIp     String?        @map("last_login_ip") @db.VarChar(45)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  referrer          User?              @relation("UserReferral", fields: [referrerId], references: [id])
+  referrerId        Int?               @map("referrer_id")
+  referrals         User[]             @relation("UserReferral")
+  walletAddresses   WalletAddress[]
+  deposits          Deposit[]
+  withdrawals       Withdrawal[]
+  betRecords        BetRecord[]
+  moneyLogs         MoneyLog[]
+  pointLogs         PointLog[]
+  messages          Message[]
+  inquiries         Inquiry[]
+  attendanceLogs    AttendanceLog[]
+  missionProgress   MissionProgress[]
+  spinLogs          SpinLog[]
+  gameRollingRates  GameRollingRate[]
+  loginHistory      LoginHistory[]
+  commissionRecords CommissionRecord[]
+  refreshTokens     RefreshToken[]
+
+  @@map("users")
+}
+
+model LoginHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  ip        String   @db.VarChar(45)
+  userAgent String?  @map("user_agent")
+  device    String?  @db.VarChar(50)
+  os        String?  @db.VarChar(50)
+  browser   String?  @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("login_history")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+}
+
+// ========== WALLET ==========
+
+model WalletAddress {
+  id       Int         @id @default(autoincrement())
+  userId   Int         @map("user_id")
+  coinType CoinType    @map("coin_type")
+  network  NetworkType
+  address  String      @db.VarChar(100)
+  label    String?     @db.VarChar(50)
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("wallet_addresses")
+}
+
+model Deposit {
+  id             Int               @id @default(autoincrement())
+  userId         Int               @map("user_id")
+  coinType       CoinType          @map("coin_type")
+  network        NetworkType
+  amount         Decimal           @db.Decimal(18, 2)
+  depositAddress String?           @map("deposit_address")
+  txHash         String?           @map("tx_hash") @db.VarChar(100)
+  status         TransactionStatus @default(PENDING)
+  processedAt    DateTime?         @map("processed_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("deposits")
+}
+
+model Withdrawal {
+  id          Int               @id @default(autoincrement())
+  userId      Int               @map("user_id")
+  coinType    CoinType          @map("coin_type")
+  network     NetworkType
+  amount      Decimal           @db.Decimal(18, 2)
+  fee         Decimal           @default(0) @db.Decimal(18, 2)
+  address     String            @db.VarChar(100)
+  txHash      String?           @map("tx_hash") @db.VarChar(100)
+  status      TransactionStatus @default(PENDING)
+  processedAt DateTime?         @map("processed_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("withdrawals")
+}
+
+// ========== GAMES ==========
+
+model GameCategoryConfig {
+  id       Int          @id @default(autoincrement())
+  code     GameCategory @unique
+  name     String       @db.VarChar(50)
+  nameKo   String       @map("name_ko") @db.VarChar(50)
+  icon     String?      @db.VarChar(10)
+  sortOrder Int         @default(0) @map("sort_order")
+  isActive Boolean      @default(true) @map("is_active")
+
+  @@map("game_categories")
+}
+
+model GameProvider {
+  id        Int          @id @default(autoincrement())
+  code      String       @unique @db.VarChar(50)
+  name      String       @db.VarChar(100)
+  logo      String?
+  category  GameCategory
+  gameCount Int          @default(0) @map("game_count")
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  games Game[]
+
+  @@map("game_providers")
+}
+
+model Game {
+  id           Int          @id @default(autoincrement())
+  externalId   String       @unique @map("external_id") @db.VarChar(100)
+  name         String       @db.VarChar(200)
+  providerId   Int          @map("provider_id")
+  category     GameCategory
+  thumbnail    String?
+  sortOrder    Int          @default(0) @map("sort_order")
+  isActive     Boolean      @default(true) @map("is_active")
+  launchCount  Int          @default(0) @map("launch_count")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  provider   GameProvider @relation(fields: [providerId], references: [id])
+  betRecords BetRecord[]
+
+  @@map("games")
+}
+
+model BetRecord {
+  id         Int          @id @default(autoincrement())
+  userId     Int          @map("user_id")
+  gameId     Int          @map("game_id")
+  category   GameCategory
+  betAmount  Decimal      @map("bet_amount") @db.Decimal(18, 2)
+  winAmount  Decimal      @map("win_amount") @db.Decimal(18, 2)
+  outcome    String       @db.VarChar(10) // win, lose, draw, push
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+  game Game @relation(fields: [gameId], references: [id])
+
+  @@map("bet_records")
+}
+
+model GameRollingRate {
+  id       Int          @id @default(autoincrement())
+  userId   Int          @map("user_id")
+  category GameCategory
+  rate     Decimal      @db.Decimal(5, 2)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, category])
+  @@map("game_rolling_rates")
+}
+
+// ========== FINANCE ==========
+
+model MoneyLog {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @map("user_id")
+  type        MoneyLogType
+  amount      Decimal      @db.Decimal(18, 2)
+  balanceAfter Decimal     @map("balance_after") @db.Decimal(18, 2)
+  description String?      @db.VarChar(200)
+  referenceId String?      @map("reference_id") @db.VarChar(100)
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("money_logs")
+}
+
+model PointLog {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @map("user_id")
+  type        PointLogType
+  amount      Decimal      @db.Decimal(18, 2)
+  pointsAfter Decimal      @map("points_after") @db.Decimal(18, 2)
+  description String?      @db.VarChar(200)
+  referenceId String?      @map("reference_id") @db.VarChar(100)
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("point_logs")
+}
+
+model CommissionRecord {
+  id           Int            @id @default(autoincrement())
+  userId       Int            @map("user_id")
+  fromUserId   Int            @map("from_user_id")
+  type         CommissionType
+  category     GameCategory
+  baseAmount   Decimal        @map("base_amount") @db.Decimal(18, 2)
+  rate         Decimal        @db.Decimal(5, 2)
+  amount       Decimal        @db.Decimal(18, 2)
+  level        Int            @default(1)
+  referenceId  String         @map("reference_id") @db.VarChar(100)
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([referenceId, userId, type])
+  @@map("commission_records")
+}
+
+// ========== EVENTS ==========
+
+model AttendanceConfig {
+  id         Int        @id @default(autoincrement())
+  day        Int        @unique
+  rewardType RewardType @map("reward_type")
+  amount     Decimal    @db.Decimal(18, 2)
+  isBonus    Boolean    @default(false) @map("is_bonus")
+
+  @@map("attendance_configs")
+}
+
+model AttendanceLog {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  checkInDate  DateTime @map("check_in_date") @db.Date
+  dayNumber    Int      @map("day_number")
+  rewardAmount Decimal  @map("reward_amount") @db.Decimal(18, 2)
+  rewardType   RewardType @map("reward_type")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, checkInDate])
+  @@map("attendance_logs")
+}
+
+model MissionConfig {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(100)
+  description String      @db.VarChar(500)
+  type        MissionType
+  rewardType  RewardType  @map("reward_type")
+  rewardAmount Decimal    @map("reward_amount") @db.Decimal(18, 2)
+  targetValue Int         @map("target_value")
+  isActive    Boolean     @default(true) @map("is_active")
+  sortOrder   Int         @default(0) @map("sort_order")
+
+  progress MissionProgress[]
+
+  @@map("missions")
+}
+
+model MissionProgress {
+  id          Int           @id @default(autoincrement())
+  userId      Int           @map("user_id")
+  missionId   Int           @map("mission_id")
+  progress    Int           @default(0)
+  status      MissionStatus @default(active)
+  completedAt DateTime?     @map("completed_at")
+  claimedAt   DateTime?     @map("claimed_at")
+  resetDate   DateTime      @map("reset_date") @db.Date
+
+  user    User          @relation(fields: [userId], references: [id])
+  mission MissionConfig @relation(fields: [missionId], references: [id])
+
+  @@unique([userId, missionId, resetDate])
+  @@map("mission_progress")
+}
+
+model SpinConfig {
+  id         Int        @id @default(autoincrement())
+  prizeName  String     @map("prize_name") @db.VarChar(100)
+  rewardType RewardType @map("reward_type")
+  amount     Decimal    @db.Decimal(18, 2)
+  weight     Int        @default(1)
+  sortOrder  Int        @default(0) @map("sort_order")
+
+  @@map("spin_configs")
+}
+
+model SpinLog {
+  id         Int        @id @default(autoincrement())
+  userId     Int        @map("user_id")
+  spinDate   DateTime   @map("spin_date") @db.Date
+  prizeName  String     @map("prize_name") @db.VarChar(100)
+  amount     Decimal    @db.Decimal(18, 2)
+  rewardType RewardType @map("reward_type")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("spin_logs")
+}
+
+model PaybackConfig {
+  id        Int     @id @default(autoincrement())
+  period    String  @db.VarChar(10) // daily, weekly
+  rate      Decimal @db.Decimal(5, 2)
+  maxAmount Decimal @map("max_amount") @db.Decimal(18, 2)
+  isActive  Boolean @default(true) @map("is_active")
+
+  @@map("payback_configs")
+}
+
+model PromotionConfig {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(200)
+  description String?
+  bannerUrl   String?  @map("banner_url")
+  category    String   @db.VarChar(50)
+  bonusRate   Decimal? @map("bonus_rate") @db.Decimal(5, 2)
+  maxBonus    Decimal? @map("max_bonus") @db.Decimal(18, 2)
+  minDeposit  Decimal? @map("min_deposit") @db.Decimal(18, 2)
+  wagering    Int?
+  startDate   DateTime @map("start_date")
+  endDate     DateTime? @map("end_date")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  userPromotions UserPromotion[]
+
+  @@map("promotions")
+}
+
+model UserPromotion {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  promotionId  Int      @map("promotion_id")
+  bonusAmount  Decimal  @map("bonus_amount") @db.Decimal(18, 2)
+  status       String   @default("active") @db.VarChar(20) // active, completed, revoked
+  claimedAt    DateTime @default(now()) @map("claimed_at")
+
+  promotion PromotionConfig @relation(fields: [promotionId], references: [id])
+
+  @@map("user_promotions")
+}
+
+// ========== COMMUNICATION ==========
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  userId    Int         @map("user_id")
+  type      MessageType @default(system)
+  title     String      @db.VarChar(200)
+  content   String
+  isRead    Boolean     @default(false) @map("is_read")
+  readAt    DateTime?   @map("read_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("messages")
+}
+
+model Inquiry {
+  id        Int           @id @default(autoincrement())
+  userId    Int           @map("user_id")
+  title     String        @db.VarChar(200)
+  content   String
+  status    InquiryStatus @default(pending)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  user    User           @relation(fields: [userId], references: [id])
+  replies InquiryReply[]
+
+  @@map("inquiries")
+}
+
+model InquiryReply {
+  id        Int      @id @default(autoincrement())
+  inquiryId Int      @map("inquiry_id")
+  content   String
+  isAdmin   Boolean  @default(false) @map("is_admin")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  inquiry Inquiry @relation(fields: [inquiryId], references: [id])
+
+  @@map("inquiry_replies")
+}
+
+// ========== VIP ==========
+
+model VipLevel {
+  id          Int     @id @default(autoincrement())
+  level       Int     @unique
+  name        String  @db.VarChar(50)
+  nameKo      String  @map("name_ko") @db.VarChar(50)
+  requiredBet Decimal @map("required_bet") @db.Decimal(18, 2)
+  cashbackRate Decimal @map("cashback_rate") @db.Decimal(5, 2)
+  benefits    String? // JSON
+
+  @@map("vip_levels")
+}

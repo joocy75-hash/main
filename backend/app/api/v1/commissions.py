@@ -10,6 +10,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pydantic import BaseModel
+
 from app.api.deps import PermissionChecker
 from app.config import settings
 from app.database import get_session
@@ -19,6 +21,7 @@ from app.models.commission import (
     CommissionLedger,
     CommissionPolicy,
 )
+from app.models.point_log import PointLog
 from app.models.user import User
 from app.schemas.commission import (
     BetWebhook,
@@ -44,6 +47,7 @@ router = APIRouter(prefix="/commissions", tags=["commissions"])
 
 # ─── Policy CRUD ──────────────────────────────────────────────────
 
+
 @router.get("/policies", response_model=CommissionPolicyListResponse)
 async def list_policies(
     page: int = Query(1, ge=1),
@@ -65,9 +69,11 @@ async def list_policies(
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    stmt = base.order_by(CommissionPolicy.type, CommissionPolicy.priority.desc()).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(CommissionPolicy.type, CommissionPolicy.priority.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     result = await session.execute(stmt)
     policies = result.scalars().all()
 
@@ -79,7 +85,9 @@ async def list_policies(
     )
 
 
-@router.post("/policies", response_model=CommissionPolicyResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/policies", response_model=CommissionPolicyResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_policy(
     body: CommissionPolicyCreate,
     session: AsyncSession = Depends(get_session),
@@ -145,9 +153,9 @@ async def delete_policy(
         raise HTTPException(status_code=404, detail="Policy not found")
 
     # Check if ledger entries exist
-    ledger_count = (await session.execute(
-        select(func.count()).where(CommissionLedger.policy_id == policy_id)
-    )).scalar() or 0
+    ledger_count = (
+        await session.execute(select(func.count()).where(CommissionLedger.policy_id == policy_id))
+    ).scalar() or 0
 
     if ledger_count > 0:
         # Soft delete (deactivate) if ledger entries exist
@@ -161,6 +169,7 @@ async def delete_policy(
 
 
 # ─── Agent Override CRUD ──────────────────────────────────────────
+
 
 @router.get("/overrides", response_model=list[OverrideResponse])
 async def list_overrides(
@@ -303,7 +312,10 @@ async def delete_override(
 
 # ─── Commission Ledger ────────────────────────────────────────────
 
-def _build_ledger_response(ledger: CommissionLedger, recipient_username: str | None, user_username: str | None) -> LedgerResponse:
+
+def _build_ledger_response(
+    ledger: CommissionLedger, recipient_username: str | None, user_username: str | None
+) -> LedgerResponse:
     return LedgerResponse(
         id=ledger.id,
         uuid=str(ledger.uuid),
@@ -355,14 +367,20 @@ async def list_ledger(
     if game_category:
         base = base.where(CommissionLedger.game_category == game_category)
     if date_from:
-        base = base.where(CommissionLedger.created_at >= datetime.fromisoformat(f"{date_from}T00:00:00"))
+        base = base.where(
+            CommissionLedger.created_at >= datetime.fromisoformat(f"{date_from}T00:00:00")
+        )
     if date_to:
-        base = base.where(CommissionLedger.created_at <= datetime.fromisoformat(f"{date_to}T23:59:59"))
+        base = base.where(
+            CommissionLedger.created_at <= datetime.fromisoformat(f"{date_to}T23:59:59")
+        )
 
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await session.execute(count_stmt)).scalar() or 0
 
-    sum_stmt = select(func.coalesce(func.sum(CommissionLedger.commission_amount), 0)).select_from(base.subquery())
+    sum_stmt = select(func.coalesce(func.sum(CommissionLedger.commission_amount), 0)).select_from(
+        base.subquery()
+    )
     total_commission = (await session.execute(sum_stmt)).scalar() or Decimal("0")
 
     # Alias for recipient and bettor user joins
@@ -370,7 +388,9 @@ async def list_ledger(
     BettorUser = User.__table__.alias("bettor_user")
 
     stmt = (
-        base.join(RecipientUser, RecipientUser.c.id == CommissionLedger.recipient_user_id, isouter=True)
+        base.join(
+            RecipientUser, RecipientUser.c.id == CommissionLedger.recipient_user_id, isouter=True
+        )
         .join(BettorUser, BettorUser.c.id == CommissionLedger.user_id, isouter=True)
         .add_columns(
             RecipientUser.c.username.label("recipient_username"),
@@ -417,9 +437,13 @@ async def ledger_summary(
     if game_category:
         base = base.where(CommissionLedger.game_category == game_category)
     if date_from:
-        base = base.where(CommissionLedger.created_at >= datetime.fromisoformat(f"{date_from}T00:00:00"))
+        base = base.where(
+            CommissionLedger.created_at >= datetime.fromisoformat(f"{date_from}T00:00:00")
+        )
     if date_to:
-        base = base.where(CommissionLedger.created_at <= datetime.fromisoformat(f"{date_to}T23:59:59"))
+        base = base.where(
+            CommissionLedger.created_at <= datetime.fromisoformat(f"{date_to}T23:59:59")
+        )
 
     stmt = base.group_by(CommissionLedger.type)
     result = await session.execute(stmt)
@@ -428,6 +452,91 @@ async def ledger_summary(
         LedgerSummary(type=row[0], total_amount=row[1] or Decimal("0"), count=row[2])
         for row in result.all()
     ]
+
+
+# ─── Commission Reversal ─────────────────────────────────────────
+
+
+class ReversalRequest(BaseModel):
+    reason: str | None = None
+
+
+@router.post("/ledger/{ledger_id}/reverse", response_model=LedgerResponse)
+async def reverse_commission(
+    ledger_id: int,
+    body: ReversalRequest = ReversalRequest(),
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("commission.update")),
+):
+    """Reverse a settled commission entry (debit user points, create reversal record).
+
+    Commission accumulates in User.points (not balance), so reversal must also target points.
+    """
+    from app.services.message_service import send_system_message
+
+    # Lock original ledger entry
+    stmt = select(CommissionLedger).where(CommissionLedger.id == ledger_id).with_for_update()
+    result = await session.execute(stmt)
+    ledger = result.scalar_one_or_none()
+    if not ledger:
+        raise HTTPException(status_code=404, detail="Ledger entry not found")
+
+    if ledger.status == "cancelled":
+        raise HTTPException(status_code=400, detail="이미 환수된 커미션입니다")
+    if ledger.status not in ("pending", "settled"):
+        raise HTTPException(status_code=400, detail=f"환수 불가능한 상태: {ledger.status}")
+
+    # Lock user for points update
+    user_stmt = select(User).where(User.id == ledger.recipient_user_id).with_for_update()
+    user = (await session.execute(user_stmt)).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Recipient user not found")
+
+    points_before = user.points
+    reversal_amount = ledger.commission_amount
+
+    if user.points < reversal_amount:
+        raise HTTPException(
+            status_code=400, detail=f"포인트 부족: {user.points} < {reversal_amount}"
+        )
+
+    user.points -= reversal_amount
+    user.updated_at = datetime.now(timezone.utc)
+
+    # Create PointLog for the reversal (commission lives in points, not balance)
+    point_log = PointLog(
+        user_id=user.id,
+        type="commission_reversal",
+        amount=-reversal_amount,
+        balance_before=points_before,
+        balance_after=user.points,
+        description=f"커미션 환수: {body.reason or '관리자 정정'}",
+        reference_type="commission_ledger",
+        reference_id=str(ledger.id),
+    )
+    session.add(point_log)
+
+    # Mark original entry as cancelled
+    ledger.status = "cancelled"
+    ledger.description = (ledger.description or "") + f" [환수: {body.reason or '관리자 정정'}]"
+    session.add(ledger)
+    session.add(user)
+
+    # Send notification
+    await send_system_message(
+        session,
+        user.id,
+        "reward_rejected",
+        label="커미션",
+        amount=reversal_amount,
+        unit="P",
+        reason=body.reason or "관리자 정정",
+    )
+
+    await session.commit()
+    await session.refresh(ledger)
+
+    return _build_ledger_response(ledger, user.username, None)
 
 
 # ─── Webhooks (External Game Events) ─────────────────────────────
@@ -468,9 +577,7 @@ async def _verify_webhook_signature(request: Request) -> None:
 
     raw_body = await request.body()
     message = f"{timestamp_str}.".encode() + raw_body
-    expected = hmac.new(
-        secret.encode(), message, hashlib.sha256
-    ).hexdigest()
+    expected = hmac.new(secret.encode(), message, hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, signature):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -498,12 +605,14 @@ async def receive_bet_webhook(
 
     # Check duplicate round_id
     existing = await session.execute(
-        select(CommissionLedger).where(
+        select(CommissionLedger)
+        .where(
             and_(
                 CommissionLedger.reference_id == body.round_id,
                 CommissionLedger.reference_type == "bet",
             )
-        ).limit(1)
+        )
+        .limit(1)
     )
     if existing.scalar_one_or_none():
         return {"detail": "Already processed", "entries": 0}
@@ -546,12 +655,14 @@ async def receive_round_result_webhook(
 
     # Check duplicate
     existing = await session.execute(
-        select(CommissionLedger).where(
+        select(CommissionLedger)
+        .where(
             and_(
                 CommissionLedger.reference_id == body.round_id,
                 CommissionLedger.reference_type == "round_result",
             )
-        ).limit(1)
+        )
+        .limit(1)
     )
     if existing.scalar_one_or_none():
         return {"detail": "Already processed", "entries": 0}

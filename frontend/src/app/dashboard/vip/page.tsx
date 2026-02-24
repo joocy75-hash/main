@@ -57,35 +57,37 @@ type VipFormData = {
   level: string;
   name: string;
   color: string;
-  min_deposit: string;
-  min_betting: string;
+  min_total_deposit: string;
+  min_total_bet: string;
   rolling_bonus_rate: string;
   losing_bonus_rate: string;
-  withdrawal_limit: string;
-  daily_withdrawal_count: string;
-  benefits_description: string;
-  active: boolean;
+  deposit_limit_daily: string;
+  withdrawal_limit_daily: string;
+  withdrawal_limit_monthly: string;
+  max_single_bet: string;
+  is_active: boolean;
 };
 
 const defaultForm: VipFormData = {
   level: '0',
   name: '',
   color: '#3B82F6',
-  min_deposit: '0',
-  min_betting: '0',
+  min_total_deposit: '0',
+  min_total_bet: '0',
   rolling_bonus_rate: '0',
   losing_bonus_rate: '0',
-  withdrawal_limit: '0',
-  daily_withdrawal_count: '0',
-  benefits_description: '',
-  active: true,
+  deposit_limit_daily: '0',
+  withdrawal_limit_daily: '0',
+  withdrawal_limit_monthly: '0',
+  max_single_bet: '0',
+  is_active: true,
 };
 
 // ─── Main Page ───────────────────────────────────────────────────
 
 export default function VipPage() {
   const toast = useToast();
-  const { data, loading, error, refetch } = useVipLevels();
+  const { items: vipLevels, loading, error, refetch } = useVipLevels();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VipLevel | null>(null);
@@ -97,7 +99,8 @@ export default function VipPage() {
 
   const [autoCheckLoading, setAutoCheckLoading] = useState(false);
   const [autoCheckResult, setAutoCheckResult] = useState<{
-    upgraded: number; downgraded: number; unchanged: number;
+    total_checked: number; total_upgraded: number;
+    upgrades: { user_id: number; username: string; from_level: number; to_level: number; level_name: string }[];
   } | null>(null);
   const [autoCheckResultOpen, setAutoCheckResultOpen] = useState(false);
 
@@ -111,7 +114,7 @@ export default function VipPage() {
     20
   );
 
-  const totalUsers = data?.items.reduce((sum, l) => sum + l.user_count, 0) ?? 0;
+  const totalUsers = vipLevels.reduce((sum, l) => sum + l.user_count, 0);
 
   const openCreate = () => {
     setEditingItem(null);
@@ -125,14 +128,15 @@ export default function VipPage() {
       level: String(item.level),
       name: item.name,
       color: item.color || '#3B82F6',
-      min_deposit: String(item.min_deposit),
-      min_betting: String(item.min_betting),
+      min_total_deposit: String(item.min_total_deposit),
+      min_total_bet: String(item.min_total_bet),
       rolling_bonus_rate: String(item.rolling_bonus_rate),
       losing_bonus_rate: String(item.losing_bonus_rate),
-      withdrawal_limit: String(item.withdrawal_limit),
-      daily_withdrawal_count: String(item.daily_withdrawal_count),
-      benefits_description: item.benefits_description || '',
-      active: item.active,
+      deposit_limit_daily: String(item.deposit_limit_daily),
+      withdrawal_limit_daily: String(item.withdrawal_limit_daily),
+      withdrawal_limit_monthly: String(item.withdrawal_limit_monthly),
+      max_single_bet: String(item.max_single_bet),
+      is_active: item.is_active,
     });
     setDialogOpen(true);
   };
@@ -144,14 +148,15 @@ export default function VipPage() {
         level: Number(form.level),
         name: form.name,
         color: form.color,
-        min_deposit: Number(form.min_deposit),
-        min_betting: Number(form.min_betting),
+        min_total_deposit: Number(form.min_total_deposit),
+        min_total_bet: Number(form.min_total_bet),
         rolling_bonus_rate: Number(form.rolling_bonus_rate),
         losing_bonus_rate: Number(form.losing_bonus_rate),
-        withdrawal_limit: Number(form.withdrawal_limit),
-        daily_withdrawal_count: Number(form.daily_withdrawal_count),
-        benefits_description: form.benefits_description || null,
-        active: form.active,
+        deposit_limit_daily: Number(form.deposit_limit_daily),
+        withdrawal_limit_daily: Number(form.withdrawal_limit_daily),
+        withdrawal_limit_monthly: Number(form.withdrawal_limit_monthly),
+        max_single_bet: Number(form.max_single_bet),
+        is_active: form.is_active,
       };
       if (editingItem) {
         await updateVipLevel(editingItem.id, body);
@@ -232,16 +237,16 @@ export default function VipPage() {
           {autoCheckResult && (
             <div className="space-y-3 py-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm">승급</span>
-                <Badge className="bg-blue-100 text-blue-800" variant="secondary">{autoCheckResult.upgraded}명</Badge>
+                <span className="text-sm">총 검사</span>
+                <Badge className="bg-gray-100 text-gray-800" variant="secondary">{autoCheckResult.total_checked}명</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">강등</span>
-                <Badge className="bg-red-100 text-red-800" variant="secondary">{autoCheckResult.downgraded}명</Badge>
+                <span className="text-sm">승급</span>
+                <Badge className="bg-blue-100 text-blue-800" variant="secondary">{autoCheckResult.total_upgraded}명</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">변동 없음</span>
-                <Badge className="bg-gray-100 text-gray-800" variant="secondary">{autoCheckResult.unchanged}명</Badge>
+                <Badge className="bg-gray-100 text-gray-800" variant="secondary">{autoCheckResult.total_checked - autoCheckResult.total_upgraded}명</Badge>
               </div>
             </div>
           )}
@@ -297,11 +302,11 @@ export default function VipPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>최소 입금액</Label>
-                <Input type="number" value={form.min_deposit} onChange={(e) => setForm({ ...form, min_deposit: e.target.value })} />
+                <Input type="number" value={form.min_total_deposit} onChange={(e) => setForm({ ...form, min_total_deposit: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label>최소 베팅액</Label>
-                <Input type="number" value={form.min_betting} onChange={(e) => setForm({ ...form, min_betting: e.target.value })} />
+                <Input type="number" value={form.min_total_bet} onChange={(e) => setForm({ ...form, min_total_bet: e.target.value })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -316,27 +321,29 @@ export default function VipPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>출금 한도</Label>
-                <Input type="number" value={form.withdrawal_limit} onChange={(e) => setForm({ ...form, withdrawal_limit: e.target.value })} />
+                <Label>입금 한도 (일일)</Label>
+                <Input type="number" value={form.deposit_limit_daily} onChange={(e) => setForm({ ...form, deposit_limit_daily: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label>일일 출금 횟수</Label>
-                <Input type="number" value={form.daily_withdrawal_count} onChange={(e) => setForm({ ...form, daily_withdrawal_count: e.target.value })} />
+                <Label>출금 한도 (일일)</Label>
+                <Input type="number" value={form.withdrawal_limit_daily} onChange={(e) => setForm({ ...form, withdrawal_limit_daily: e.target.value })} />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>혜택 설명</Label>
-              <Input
-                value={form.benefits_description}
-                onChange={(e) => setForm({ ...form, benefits_description: e.target.value })}
-                placeholder="혜택 내용 (선택사항)"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>출금 한도 (월간)</Label>
+                <Input type="number" value={form.withdrawal_limit_monthly} onChange={(e) => setForm({ ...form, withdrawal_limit_monthly: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>최대 단일 베팅</Label>
+                <Input type="number" value={form.max_single_bet} onChange={(e) => setForm({ ...form, max_single_bet: e.target.value })} />
+              </div>
             </div>
             <div className="space-y-2">
               <Label>상태</Label>
               <select
-                value={form.active ? 'true' : 'false'}
-                onChange={(e) => setForm({ ...form, active: e.target.value === 'true' })}
+                value={form.is_active ? 'true' : 'false'}
+                onChange={(e) => setForm({ ...form, is_active: e.target.value === 'true' })}
                 className="w-full border rounded-md px-3 py-2 text-sm bg-background"
               >
                 <option value="true">활성</option>
@@ -362,7 +369,7 @@ export default function VipPage() {
                 <span className="flex items-center gap-2">
                   <span
                     className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: selectedLevel.color }}
+                    style={{ backgroundColor: selectedLevel.color ?? undefined }}
                   />
                   {selectedLevel.name} 회원 목록
                 </span>
@@ -392,19 +399,18 @@ export default function VipPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>아이디</TableHead>
-                        <TableHead>이름</TableHead>
+                        <TableHead>닉네임</TableHead>
                         <TableHead className="text-right">잔액</TableHead>
                         <TableHead className="text-right">총 입금</TableHead>
                         <TableHead className="text-right">총 베팅</TableHead>
                         <TableHead>상태</TableHead>
-                        <TableHead>최근 접속</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {usersData.items.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell className="font-medium">{user.username}</TableCell>
-                          <TableCell className="text-muted-foreground">{user.real_name || '-'}</TableCell>
+                          <TableCell className="text-muted-foreground">{user.nickname || '-'}</TableCell>
                           <TableCell className="text-right font-mono">{fmt(user.balance)}</TableCell>
                           <TableCell className="text-right font-mono">{fmt(user.total_deposit)}</TableCell>
                           <TableCell className="text-right font-mono">{fmt(user.total_bet)}</TableCell>
@@ -415,11 +421,6 @@ export default function VipPage() {
                             >
                               {user.status === 'active' ? '정상' : user.status}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {user.last_login_at
-                              ? new Date(user.last_login_at).toLocaleDateString('ko-KR')
-                              : '-'}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -470,7 +471,7 @@ export default function VipPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">총 등급 수</p>
-              <p className="text-xl font-bold">{data?.total ?? 0}개</p>
+              <p className="text-xl font-bold">{vipLevels.length}개</p>
             </div>
           </CardContent>
         </Card>
@@ -482,9 +483,9 @@ export default function VipPage() {
             <div>
               <p className="text-sm text-muted-foreground">전체 회원 분포</p>
               <p className="text-xl font-bold">{fmt(totalUsers)}명</p>
-              {data?.items && data.items.length > 0 && (
+              {vipLevels.length > 0 && (
                 <div className="flex gap-1 mt-1 flex-wrap">
-                  {data.items.map((level) => (
+                  {vipLevels.map((level) => (
                     <span key={level.id} className="text-xs text-muted-foreground">
                       {level.name}: {level.user_count}명
                     </span>
@@ -510,7 +511,7 @@ export default function VipPage() {
           <p className="text-sm text-muted-foreground mt-1">{error}</p>
           <Button variant="outline" className="mt-4" onClick={refetch}>다시 시도</Button>
         </div>
-      ) : !data?.items.length ? (
+      ) : !vipLevels.length ? (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
           <Star className="h-12 w-12 mb-4" />
           <p className="text-lg font-medium">등록된 VIP 등급이 없습니다</p>
@@ -534,7 +535,7 @@ export default function VipPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.items.map((level) => (
+              {vipLevels.map((level) => (
                 <TableRow
                   key={level.id}
                   className="cursor-pointer hover:bg-muted/50"
@@ -544,7 +545,7 @@ export default function VipPage() {
                     <div className="flex items-center gap-2">
                       <span
                         className="inline-block w-3 h-3 rounded-full"
-                        style={{ backgroundColor: level.color }}
+                        style={{ backgroundColor: level.color ?? undefined }}
                       />
                       <Badge className={getLevelBadgeColor(level.level)} variant="secondary">
                         Lv.{level.level}
@@ -552,11 +553,11 @@ export default function VipPage() {
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{level.name}</TableCell>
-                  <TableCell className="text-right font-mono">{fmt(level.min_deposit)}</TableCell>
-                  <TableCell className="text-right font-mono">{fmt(level.min_betting)}</TableCell>
+                  <TableCell className="text-right font-mono">{fmt(level.min_total_deposit)}</TableCell>
+                  <TableCell className="text-right font-mono">{fmt(level.min_total_bet)}</TableCell>
                   <TableCell className="text-right font-mono">{level.rolling_bonus_rate}%</TableCell>
                   <TableCell className="text-right font-mono">{level.losing_bonus_rate}%</TableCell>
-                  <TableCell className="text-right font-mono">{fmt(level.withdrawal_limit)}</TableCell>
+                  <TableCell className="text-right font-mono">{fmt(level.withdrawal_limit_daily)}</TableCell>
                   <TableCell className="text-right">
                     <Badge className="bg-gray-100 text-gray-800" variant="secondary">
                       {level.user_count}명
@@ -564,10 +565,10 @@ export default function VipPage() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      className={level.active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={level.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
                       variant="secondary"
                     >
-                      {level.active ? '활성' : '비활성'}
+                      {level.is_active ? '활성' : '비활성'}
                     </Badge>
                   </TableCell>
                   <TableCell>

@@ -71,25 +71,25 @@ const MAIN_TABS = [
 type TxFormData = {
   scope_type: string;
   scope_id: string;
-  type: string;
+  tx_type: string;
   min_amount: string;
   max_amount: string;
   daily_limit: string;
-  daily_count_limit: string;
+  daily_count: string;
   monthly_limit: string;
-  active: boolean;
+  is_active: boolean;
 };
 
 const defaultTxForm: TxFormData = {
   scope_type: 'global',
   scope_id: '',
-  type: 'deposit',
+  tx_type: 'deposit',
   min_amount: '0',
   max_amount: '0',
   daily_limit: '0',
-  daily_count_limit: '0',
+  daily_count: '0',
   monthly_limit: '0',
-  active: true,
+  is_active: true,
 };
 
 // ─── Betting Limit Form ──────────────────────────────────────────
@@ -100,8 +100,8 @@ type BetFormData = {
   game_category: string;
   min_bet: string;
   max_bet: string;
-  daily_loss_limit: string;
-  active: boolean;
+  max_daily_loss: string;
+  is_active: boolean;
 };
 
 const defaultBetForm: BetFormData = {
@@ -110,8 +110,8 @@ const defaultBetForm: BetFormData = {
   game_category: 'casino',
   min_bet: '0',
   max_bet: '0',
-  daily_loss_limit: '0',
-  active: true,
+  max_daily_loss: '0',
+  is_active: true,
 };
 
 // ─── Main Page ───────────────────────────────────────────────────
@@ -172,13 +172,13 @@ const TransactionLimitsTab = () => {
     setForm({
       scope_type: item.scope_type,
       scope_id: item.scope_id ? String(item.scope_id) : '',
-      type: item.type,
+      tx_type: item.tx_type,
       min_amount: String(item.min_amount),
       max_amount: String(item.max_amount),
       daily_limit: String(item.daily_limit),
-      daily_count_limit: String(item.daily_count_limit),
+      daily_count: String(item.daily_count),
       monthly_limit: String(item.monthly_limit),
-      active: item.active,
+      is_active: item.is_active,
     });
     setDialogOpen(true);
   };
@@ -188,14 +188,14 @@ const TransactionLimitsTab = () => {
     try {
       const body = {
         scope_type: form.scope_type,
-        scope_id: form.scope_id ? Number(form.scope_id) : null,
-        type: form.type,
+        scope_id: form.scope_id ? Number(form.scope_id) : 0,
+        tx_type: form.tx_type,
         min_amount: Number(form.min_amount),
         max_amount: Number(form.max_amount),
         daily_limit: Number(form.daily_limit),
-        daily_count_limit: Number(form.daily_count_limit),
+        daily_count: Number(form.daily_count),
         monthly_limit: Number(form.monthly_limit),
-        active: form.active,
+        is_active: form.is_active,
       };
       if (editingItem) {
         await updateTransactionLimit(editingItem.id, body);
@@ -280,8 +280,8 @@ const TransactionLimitsTab = () => {
               <div className="space-y-2">
                 <Label>유형</Label>
                 <select
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                  value={form.tx_type}
+                  onChange={(e) => setForm({ ...form, tx_type: e.target.value })}
                   className="w-full border rounded-md px-3 py-2 text-sm bg-background"
                 >
                   <option value="deposit">입금</option>
@@ -291,8 +291,8 @@ const TransactionLimitsTab = () => {
               <div className="space-y-2">
                 <Label>상태</Label>
                 <select
-                  value={form.active ? 'true' : 'false'}
-                  onChange={(e) => setForm({ ...form, active: e.target.value === 'true' })}
+                  value={form.is_active ? 'true' : 'false'}
+                  onChange={(e) => setForm({ ...form, is_active: e.target.value === 'true' })}
                   className="w-full border rounded-md px-3 py-2 text-sm bg-background"
                 >
                   <option value="true">활성</option>
@@ -317,7 +317,7 @@ const TransactionLimitsTab = () => {
               </div>
               <div className="space-y-2">
                 <Label>일일 횟수</Label>
-                <Input type="number" value={form.daily_count_limit} onChange={(e) => setForm({ ...form, daily_count_limit: e.target.value })} />
+                <Input type="number" value={form.daily_count} onChange={(e) => setForm({ ...form, daily_count: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label>월 한도</Label>
@@ -397,32 +397,29 @@ const TransactionLimitsTab = () => {
                     <Badge className="bg-gray-100 text-gray-800" variant="secondary">
                       {SCOPE_LABELS[item.scope_type] || item.scope_type}
                     </Badge>
-                    {item.scope_name && (
-                      <span className="ml-1 text-xs text-muted-foreground">({item.scope_name})</span>
-                    )}
-                    {item.scope_id && !item.scope_name && (
+                    {item.scope_id > 0 && (
                       <span className="ml-1 text-xs text-muted-foreground">#{item.scope_id}</span>
                     )}
                   </TableCell>
                   <TableCell>
                     <Badge
-                      className={item.type === 'deposit' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}
+                      className={item.tx_type === 'deposit' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}
                       variant="secondary"
                     >
-                      {TYPE_LABELS[item.type] || item.type}
+                      {TYPE_LABELS[item.tx_type] || item.tx_type}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.min_amount)}</TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.max_amount)}</TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.daily_limit)}</TableCell>
-                  <TableCell className="text-right font-mono">{item.daily_count_limit}</TableCell>
+                  <TableCell className="text-right font-mono">{item.daily_count}</TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.monthly_limit)}</TableCell>
                   <TableCell>
                     <Badge
-                      className={item.active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={item.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
                       variant="secondary"
                     >
-                      {item.active ? '활성' : '비활성'}
+                      {item.is_active ? '활성' : '비활성'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -480,8 +477,8 @@ const BettingLimitsTab = () => {
       game_category: item.game_category,
       min_bet: String(item.min_bet),
       max_bet: String(item.max_bet),
-      daily_loss_limit: String(item.daily_loss_limit),
-      active: item.active,
+      max_daily_loss: String(item.max_daily_loss),
+      is_active: item.is_active,
     });
     setDialogOpen(true);
   };
@@ -491,12 +488,12 @@ const BettingLimitsTab = () => {
     try {
       const body = {
         scope_type: form.scope_type,
-        scope_id: form.scope_id ? Number(form.scope_id) : null,
+        scope_id: form.scope_id ? Number(form.scope_id) : 0,
         game_category: form.game_category,
         min_bet: Number(form.min_bet),
         max_bet: Number(form.max_bet),
-        daily_loss_limit: Number(form.daily_loss_limit),
-        active: form.active,
+        max_daily_loss: Number(form.max_daily_loss),
+        is_active: form.is_active,
       };
       if (editingItem) {
         await updateBettingLimit(editingItem.id, body);
@@ -593,8 +590,8 @@ const BettingLimitsTab = () => {
               <div className="space-y-2">
                 <Label>상태</Label>
                 <select
-                  value={form.active ? 'true' : 'false'}
-                  onChange={(e) => setForm({ ...form, active: e.target.value === 'true' })}
+                  value={form.is_active ? 'true' : 'false'}
+                  onChange={(e) => setForm({ ...form, is_active: e.target.value === 'true' })}
                   className="w-full border rounded-md px-3 py-2 text-sm bg-background"
                 >
                   <option value="true">활성</option>
@@ -613,7 +610,7 @@ const BettingLimitsTab = () => {
               </div>
               <div className="space-y-2">
                 <Label>일일 손실 한도</Label>
-                <Input type="number" value={form.daily_loss_limit} onChange={(e) => setForm({ ...form, daily_loss_limit: e.target.value })} />
+                <Input type="number" value={form.max_daily_loss} onChange={(e) => setForm({ ...form, max_daily_loss: e.target.value })} />
               </div>
             </div>
           </div>
@@ -699,10 +696,7 @@ const BettingLimitsTab = () => {
                     <Badge className="bg-gray-100 text-gray-800" variant="secondary">
                       {SCOPE_LABELS[item.scope_type] || item.scope_type}
                     </Badge>
-                    {item.scope_name && (
-                      <span className="ml-1 text-xs text-muted-foreground">({item.scope_name})</span>
-                    )}
-                    {item.scope_id && !item.scope_name && (
+                    {item.scope_id > 0 && (
                       <span className="ml-1 text-xs text-muted-foreground">#{item.scope_id}</span>
                     )}
                   </TableCell>
@@ -713,13 +707,13 @@ const BettingLimitsTab = () => {
                   </TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.min_bet)}</TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.max_bet)}</TableCell>
-                  <TableCell className="text-right font-mono">{fmt(item.daily_loss_limit)}</TableCell>
+                  <TableCell className="text-right font-mono">{fmt(item.max_daily_loss)}</TableCell>
                   <TableCell>
                     <Badge
-                      className={item.active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={item.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
                       variant="secondary"
                     >
-                      {item.active ? '활성' : '비활성'}
+                      {item.is_active ? '활성' : '비활성'}
                     </Badge>
                   </TableCell>
                   <TableCell>

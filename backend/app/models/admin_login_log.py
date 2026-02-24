@@ -1,7 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, Text
 from sqlmodel import Field, SQLModel
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class AdminLoginLog(SQLModel, table=True):
@@ -14,4 +18,4 @@ class AdminLoginLog(SQLModel, table=True):
     device: str | None = Field(default=None, max_length=50)
     os: str | None = Field(default=None, max_length=50)
     browser: str | None = Field(default=None, max_length=50)
-    logged_in_at: datetime = Field(default_factory=datetime.utcnow)
+    logged_in_at: datetime = Field(default_factory=_utc_now)

@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     TELEGRAM_CHAT_ID: str = ""
     WEBHOOK_SECRET: str = ""
 
+    # RapidAPI
+    RAPIDAPI_KEY: str = ""
+    RAPIDAPI_ODDS_QUOTA: int = 500
+    RAPIDAPI_SPORT_QUOTA: int = 50
+    RAPIDAPI_CASINO_QUOTA: int = 299
+    RAPIDAPI_STREAM_QUOTA: int = 99
+
     # DB connection pool
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20

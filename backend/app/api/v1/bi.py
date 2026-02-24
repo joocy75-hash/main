@@ -34,8 +34,8 @@ ZERO = Decimal("0")
 
 
 def _period_range(period: str) -> tuple[datetime, datetime]:
-    """Return (start, end) datetime pair for named period."""
-    today = date.today()
+    """Return (start, end) naive-UTC datetime pair for named period."""
+    today = datetime.now(timezone.utc).date()
     if period == "today":
         start = today
         end = today + timedelta(days=1)
@@ -57,8 +57,8 @@ def _period_range(period: str) -> tuple[datetime, datetime]:
 
     from datetime import time as time_type
     return (
-        datetime.combine(start, time_type.min, tzinfo=timezone.utc),
-        datetime.combine(end, time_type.min, tzinfo=timezone.utc),
+        datetime.combine(start, time_type.min),
+        datetime.combine(end, time_type.min),
     )
 
 
@@ -125,7 +125,7 @@ async def revenue_trend(
     session: AsyncSession = Depends(get_session),
     current_user: AdminUser = Depends(PermissionChecker("report.view")),
 ):
-    start = datetime.combine(date.today() - timedelta(days=days - 1), datetime.min.time(), tzinfo=timezone.utc)
+    start = datetime.combine(datetime.now(timezone.utc).date() - timedelta(days=days - 1), datetime.min.time())
 
     stmt = select(
         func.date(Transaction.created_at).label("day"),
@@ -207,20 +207,22 @@ async def user_cohort(
     session: AsyncSession = Depends(get_session),
     current_user: AdminUser = Depends(PermissionChecker("report.view")),
 ):
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     items: list[CohortItem] = []
+
+    def _advance_month(d: date, offset: int) -> date:
+        m = d.month - 1 + offset
+        y = d.year + m // 12
+        m = m % 12 + 1
+        return d.replace(year=y, month=m, day=1)
 
     for i in range(months - 1, -1, -1):
         ref = today.replace(day=1)
         for _ in range(i):
             ref = (ref - timedelta(days=1)).replace(day=1)
 
-        month_start = datetime.combine(ref, datetime.min.time(), tzinfo=timezone.utc)
-        if ref.month == 12:
-            next_month = ref.replace(year=ref.year + 1, month=1, day=1)
-        else:
-            next_month = ref.replace(month=ref.month + 1, day=1)
-        month_end = datetime.combine(next_month, datetime.min.time(), tzinfo=timezone.utc)
+        month_start = datetime.combine(ref, datetime.min.time())
+        month_end = datetime.combine(_advance_month(ref, 1), datetime.min.time())
 
         reg_stmt = select(User.id).where(
             User.created_at >= month_start, User.created_at < month_end
@@ -237,34 +239,46 @@ async def user_cohort(
             ))
             continue
 
+        # Build date boundaries for 4 offset months
+        boundaries: list[tuple[datetime, datetime]] = []
+        for m_offset in range(4):
+            c_ref = _advance_month(ref, m_offset)
+            c_start = datetime.combine(c_ref, datetime.min.time())
+            c_end = datetime.combine(_advance_month(c_ref, 1), datetime.min.time())
+            boundaries.append((c_start, c_end))
+
+        # Earliest start that is still <= today
+        today_dt = datetime.combine(today, datetime.min.time())
+        earliest = boundaries[0][0]
+        latest = boundaries[-1][1]
+        if latest > today_dt:
+            latest = today_dt + timedelta(days=1)
+
+        # Single query: group by month bucket to get active users per offset
+        month_label = func.extract("year", BetRecord.bet_at) * 100 + func.extract("month", BetRecord.bet_at)
+        active_stmt = (
+            select(
+                month_label.label("ym"),
+                func.count(func.distinct(BetRecord.user_id)).label("cnt"),
+            )
+            .where(
+                BetRecord.user_id.in_(registered_ids),
+                BetRecord.bet_at >= earliest,
+                BetRecord.bet_at < latest,
+            )
+            .group_by(month_label)
+        )
+        active_result = await session.execute(active_stmt)
+        active_map = {int(r.ym): r.cnt for r in active_result.all()}
+
         pcts = []
         for m_offset in range(4):
-            check_ref = ref
-            for _ in range(m_offset):
-                if check_ref.month == 12:
-                    check_ref = check_ref.replace(year=check_ref.year + 1, month=1)
-                else:
-                    check_ref = check_ref.replace(month=check_ref.month + 1)
-            c_start = datetime.combine(check_ref, datetime.min.time(), tzinfo=timezone.utc)
-            if check_ref.month == 12:
-                c_next = check_ref.replace(year=check_ref.year + 1, month=1, day=1)
-            else:
-                c_next = check_ref.replace(month=check_ref.month + 1, day=1)
-            c_end = datetime.combine(c_next, datetime.min.time(), tzinfo=timezone.utc)
-
-            if c_start > datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc):
+            c_start, c_end = boundaries[m_offset]
+            if c_start > today_dt:
                 pcts.append(0.0)
                 continue
-
-            active_stmt = (
-                select(func.count(func.distinct(BetRecord.user_id)))
-                .where(
-                    BetRecord.user_id.in_(registered_ids),
-                    BetRecord.bet_at >= c_start,
-                    BetRecord.bet_at < c_end,
-                )
-            )
-            active_count = (await session.execute(active_stmt)).scalar() or 0
+            ym_key = c_start.year * 100 + c_start.month
+            active_count = active_map.get(ym_key, 0)
             pcts.append(round(active_count / reg_count * 100, 2))
 
         items.append(CohortItem(
@@ -293,14 +307,14 @@ async def game_performance(
         base_filters.append(
             BetRecord.bet_at >= datetime.combine(
                 datetime.strptime(start_date, "%Y-%m-%d").date(),
-                datetime.min.time(), tzinfo=timezone.utc,
+                datetime.min.time(),
             )
         )
     if end_date:
         base_filters.append(
             BetRecord.bet_at <= datetime.combine(
                 datetime.strptime(end_date, "%Y-%m-%d").date(),
-                datetime.max.time(), tzinfo=timezone.utc,
+                datetime.max.time(),
             )
         )
 
@@ -361,14 +375,14 @@ async def agent_performance(
         comm_filters.append(
             CommissionLedger.created_at >= datetime.combine(
                 datetime.strptime(start_date, "%Y-%m-%d").date(),
-                datetime.min.time(), tzinfo=timezone.utc,
+                datetime.min.time(),
             )
         )
     if end_date:
         comm_filters.append(
             CommissionLedger.created_at <= datetime.combine(
                 datetime.strptime(end_date, "%Y-%m-%d").date(),
-                datetime.max.time(), tzinfo=timezone.utc,
+                datetime.max.time(),
             )
         )
 
@@ -411,8 +425,9 @@ async def executive_overview(
     session: AsyncSession = Depends(get_session),
     current_user: AdminUser = Depends(PermissionChecker("report.view")),
 ):
-    today_start = datetime.combine(date.today(), datetime.min.time(), tzinfo=timezone.utc)
-    today_end = datetime.combine(date.today() + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
+    today = datetime.now(timezone.utc).date()
+    today_start = datetime.combine(today, datetime.min.time())
+    today_end = datetime.combine(today + timedelta(days=1), datetime.min.time())
 
     # Total users
     total_users = (await session.execute(

@@ -392,8 +392,24 @@ export async function setUserPassword(userId: number, newPassword: string) {
   return apiClient.post(`/api/v1/users/${userId}/set-password`, { new_password: newPassword });
 }
 
+export async function activateUser(userId: number) {
+  return apiClient.post(`/api/v1/users/${userId}/activate`);
+}
+
 export async function suspendUser(userId: number, reason?: string) {
   return apiClient.post(`/api/v1/users/${userId}/suspend`, { reason });
+}
+
+export async function banUser(userId: number, reason?: string) {
+  return apiClient.post(`/api/v1/users/${userId}/ban`, { reason });
+}
+
+export async function forceLogoutUser(userId: number) {
+  return apiClient.post(`/api/v1/users/${userId}/force-logout`);
+}
+
+export async function pointAdjustment(userId: number, action: 'credit' | 'debit', amount: number, memo?: string) {
+  return apiClient.post('/api/v1/finance/point-adjustment', { user_id: userId, action, amount, memo });
 }
 
 export async function updateBettingPermission(userId: number, gameCategory: string, isAllowed: boolean) {

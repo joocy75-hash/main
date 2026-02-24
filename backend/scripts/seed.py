@@ -136,6 +136,21 @@ def seed():
         session.flush()
         print(f"  SuperAdmin: id={admin.id}, username=superadmin")
 
+        # 5-b. Create system admin for auto-approve audit trail
+        system_admin = AdminUser(
+            username="system",
+            email="system@internal.local",
+            password_hash="$nologin$",
+            role="system",
+            parent_id=None,
+            depth=0,
+            agent_code="SYSTEM",
+            status="active",
+        )
+        session.add(system_admin)
+        session.flush()
+        print(f"  SystemAdmin: id={system_admin.id}, username=system")
+
         # 6. Assign super_admin role
         session.add(AdminUserRole(admin_user_id=admin.id, role_id=role_map["super_admin"]))
 

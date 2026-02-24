@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field as PydanticField
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,7 @@ from app.database import get_session
 from app.models.admin_user import AdminUser, AdminUserTree
 from app.models.user import User, UserTree
 from app.models.user_betting_permission import UserBettingPermission
+from app.models.user_memo import UserMemo
 from app.models.user_game_rolling_rate import UserGameRollingRate
 from app.models.user_null_betting_config import UserNullBettingConfig
 from app.models.user_wallet_address import UserWalletAddress
@@ -26,6 +28,7 @@ from app.schemas.user import (
     NullBettingConfigResponse,
     NullBettingConfigUpdate,
     PasswordSet,
+    StatusChangeRequest,
     UserCreate,
     UserDetailResponse,
     UserListResponse,
@@ -40,6 +43,7 @@ from app.schemas.user import (
     WalletAddressUpdate,
 )
 from app.services import notification_service
+from app.services.message_service import send_system_message
 from app.services.promotion_service import cascade_promotion_check
 from app.services.user_tree_service import (
     get_ancestors,
@@ -307,7 +311,7 @@ async def bulk_update_status(
         missing_ids = [uid for uid in body.user_ids if uid not in found_ids]
         raise HTTPException(status_code=404, detail=f"Users not found: {missing_ids}")
 
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(timezone.utc)
     updated_count = 0
     for user in users:
         if user.status != body.status:
@@ -334,27 +338,25 @@ async def create_user(
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already exists")
 
-    referrer = None
-    referrer_id = None
-    depth = 0
-    if body.referrer_code:
-        ref_result = await session.execute(
-            select(User).where(User.username == body.referrer_code)
-        )
-        referrer = ref_result.scalar_one_or_none()
-        if not referrer:
-            raise HTTPException(status_code=400, detail="Referrer not found")
-        referrer_id = referrer.id
-        depth = referrer.depth + 1
+    # Referrer code is mandatory
+    ref_result = await session.execute(
+        select(User).where(User.username == body.referrer_code)
+    )
+    referrer = ref_result.scalar_one_or_none()
+    if not referrer:
+        raise HTTPException(status_code=400, detail="유효하지 않은 추천코드입니다")
 
+    temp_pw = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
     user = User(
         username=body.username,
         real_name=body.real_name,
         phone=body.phone,
         email=body.email,
-        referrer_id=referrer_id,
-        depth=depth,
+        password_hash=hash_password(temp_pw),
+        referrer_id=referrer.id,
+        depth=referrer.depth + 1,
         rank="agency",
+        status="active",
         level=body.level,
         memo=body.memo,
     )
@@ -362,10 +364,15 @@ async def create_user(
     await session.flush()
 
     # Insert into closure table
-    await insert_node(session, user.id, referrer_id)
+    await insert_node(session, user.id, referrer.id)
 
     # Auto-promote ancestors
     await cascade_promotion_check(session, user.id)
+
+    # Notify referrer via message
+    await send_system_message(
+        session, referrer.id, "new_referral", username=body.username,
+    )
 
     await session.commit()
     await session.refresh(user)
@@ -423,7 +430,7 @@ async def update_user(
 
     for field, value in update_data.items():
         setattr(user, field, value)
-    user.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    user.updated_at = datetime.now(timezone.utc)
 
     session.add(user)
     await session.commit()
@@ -442,7 +449,7 @@ async def delete_user(
     await _verify_user_access(session, current_user, user_id)
     user = await _get_user_or_404(session, user_id)
     user.status = "banned"
-    user.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    user.updated_at = datetime.now(timezone.utc)
     session.add(user)
     await session.commit()
 
@@ -626,7 +633,7 @@ async def update_wallet_address(
 
     for field, value in update_data.items():
         setattr(wallet, field, value)
-    wallet.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    wallet.updated_at = datetime.now(timezone.utc)
     session.add(wallet)
     await session.commit()
     await session.refresh(wallet)
@@ -676,7 +683,7 @@ async def update_betting_permissions(
         existing = (await session.execute(stmt)).scalar_one_or_none()
         if existing:
             existing.is_allowed = item.is_allowed
-            existing.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            existing.updated_at = datetime.now(timezone.utc)
             session.add(existing)
         else:
             bp = UserBettingPermission(
@@ -718,7 +725,7 @@ async def update_null_betting(
         if existing:
             existing.every_n_bets = item.every_n_bets
             existing.inherit_to_children = item.inherit_to_children
-            existing.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            existing.updated_at = datetime.now(timezone.utc)
             session.add(existing)
         else:
             nbc = UserNullBettingConfig(
@@ -799,7 +806,7 @@ async def update_rolling_rates(
         existing = (await session.execute(stmt)).scalar_one_or_none()
         if existing:
             existing.rolling_rate = item.rolling_rate
-            existing.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            existing.updated_at = datetime.now(timezone.utc)
             session.add(existing)
         else:
             grr = UserGameRollingRate(
@@ -835,12 +842,17 @@ async def reset_password(
     await _verify_user_access(session, current_user, user_id)
     user = await _get_user_or_404(session, user_id)
     chars = string.ascii_letters + string.digits
-    temp_password = ''.join(secrets.choice(chars) for _ in range(8))
+    temp_password = ''.join(secrets.choice(chars) for _ in range(12))
     user.password_hash = hash_password(temp_password)
-    user.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    user.updated_at = datetime.now(timezone.utc)
     session.add(user)
+
+    await send_system_message(
+        session, user.id, "password_reset", password=temp_password,
+    )
+
     await session.commit()
-    return {"temporary_password": temp_password}
+    return {"detail": "임시 비밀번호가 회원에게 쪽지로 발송되었습니다"}
 
 
 @router.post("/{user_id}/set-password", status_code=status.HTTP_204_NO_CONTENT)
@@ -853,27 +865,97 @@ async def set_password(
     await _verify_user_access(session, current_user, user_id)
     user = await _get_user_or_404(session, user_id)
     user.password_hash = hash_password(body.new_password)
-    user.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    user.updated_at = datetime.now(timezone.utc)
     session.add(user)
     await session.commit()
 
 
-# ─── Suspend ──────────────────────────────────────────────────────
+# ─── Status Change (Activate / Suspend / Ban) ───────────────────
 
-@router.post("/{user_id}/suspend", response_model=UserResponse)
-async def suspend_user(
+@router.post("/{user_id}/activate", response_model=UserResponse)
+async def activate_user(
     user_id: int,
     session: AsyncSession = Depends(get_session),
     current_user: AdminUser = Depends(PermissionChecker("users.update")),
 ):
     await _verify_user_access(session, current_user, user_id)
     user = await _get_user_or_404(session, user_id)
-    user.status = "suspended"
-    user.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    if user.status == "active":
+        raise HTTPException(status_code=400, detail="이미 활성 상태입니다")
+    user.status = "active"
+    user.updated_at = datetime.now(timezone.utc)
     session.add(user)
+
+    await send_system_message(session, user.id, "status_active")
+
     await session.commit()
     await session.refresh(user)
     return await _build_response(session, user)
+
+
+@router.post("/{user_id}/suspend", response_model=UserResponse)
+async def suspend_user(
+    user_id: int,
+    body: StatusChangeRequest = StatusChangeRequest(),
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.update")),
+):
+    await _verify_user_access(session, current_user, user_id)
+    user = await _get_user_or_404(session, user_id)
+    if user.status == "suspended":
+        raise HTTPException(status_code=400, detail="이미 정지 상태입니다")
+    user.status = "suspended"
+    user.updated_at = datetime.now(timezone.utc)
+    session.add(user)
+
+    await send_system_message(session, user.id, "status_suspended", reason=body.reason)
+
+    await session.commit()
+    await session.refresh(user)
+    return await _build_response(session, user)
+
+
+@router.post("/{user_id}/ban", response_model=UserResponse)
+async def ban_user(
+    user_id: int,
+    body: StatusChangeRequest = StatusChangeRequest(),
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.update")),
+):
+    await _verify_user_access(session, current_user, user_id)
+    user = await _get_user_or_404(session, user_id)
+    if user.status == "banned":
+        raise HTTPException(status_code=400, detail="이미 차단 상태입니다")
+    user.status = "banned"
+    user.updated_at = datetime.now(timezone.utc)
+    session.add(user)
+
+    await send_system_message(session, user.id, "status_banned", reason=body.reason)
+
+    await session.commit()
+    await session.refresh(user)
+    return await _build_response(session, user)
+
+
+# ─── Force Logout ────────────────────────────────────────────────
+
+@router.post("/{user_id}/force-logout")
+async def force_logout_user(
+    user_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.update")),
+):
+    await _verify_user_access(session, current_user, user_id)
+    user = await _get_user_or_404(session, user_id)
+    now = datetime.now(timezone.utc)
+    user.force_logout_at = now
+    user.updated_at = now
+    session.add(user)
+
+    await send_system_message(session, user.id, "force_logout")
+
+    await session.commit()
+    return {"detail": "강제 로그아웃 처리되었습니다"}
 
 
 # ─── Tree (subtree for visualization) ────────────────────────────
@@ -933,3 +1015,101 @@ async def get_user_ancestors(
     ancestor_users = [a["user"] for a in ancestor_data]
     items = await _build_response_batch(session, ancestor_users)
     return UserListResponse(items=items, total=len(items), page=1, page_size=len(items) or 1)
+
+
+# ─── User Memos ──────────────────────────────────────────────────
+
+@router.get("/{user_id}/memos")
+async def list_user_memos(
+    user_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.view")),
+):
+    await _get_user_or_404(session, user_id)
+    stmt = (
+        select(UserMemo, AdminUser.username)
+        .join(AdminUser, AdminUser.id == UserMemo.admin_user_id, isouter=True)
+        .where(UserMemo.user_id == user_id)
+        .order_by(UserMemo.created_at.desc())
+    )
+    result = await session.execute(stmt)
+    rows = result.all()
+    return [
+        {
+            "id": memo.id,
+            "content": memo.content,
+            "admin_user_id": memo.admin_user_id,
+            "admin_username": username,
+            "created_at": memo.created_at,
+        }
+        for memo, username in rows
+    ]
+
+
+class MemoCreate(BaseModel):
+    content: str = PydanticField(min_length=1, max_length=2000)
+
+
+@router.post("/{user_id}/memos", status_code=201)
+async def create_user_memo(
+    user_id: int,
+    body: MemoCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.update")),
+):
+    user = await _get_user_or_404(session, user_id)
+    content = body.content.strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="메모 내용을 입력하세요")
+
+    memo = UserMemo(
+        user_id=user_id,
+        content=content,
+        admin_user_id=current_user.id,
+    )
+    session.add(memo)
+
+    # Sync latest memo to User.memo field
+    user.memo = content
+    user.updated_at = datetime.now(timezone.utc)
+    session.add(user)
+
+    await session.commit()
+    await session.refresh(memo)
+
+    return {
+        "id": memo.id,
+        "content": memo.content,
+        "admin_user_id": memo.admin_user_id,
+        "admin_username": current_user.username,
+        "created_at": memo.created_at,
+    }
+
+
+@router.delete("/{user_id}/memos/{memo_id}", status_code=204)
+async def delete_user_memo(
+    user_id: int,
+    memo_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: AdminUser = Depends(PermissionChecker("users.update")),
+):
+    user = await _get_user_or_404(session, user_id)
+    memo = await session.get(UserMemo, memo_id)
+    if not memo or memo.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Memo not found")
+
+    await session.delete(memo)
+
+    # Update User.memo to latest remaining memo
+    latest_stmt = (
+        select(UserMemo)
+        .where(UserMemo.user_id == user_id, UserMemo.id != memo_id)
+        .order_by(UserMemo.created_at.desc())
+        .limit(1)
+    )
+    latest = (await session.execute(latest_stmt)).scalar_one_or_none()
+    user.memo = latest.content if latest else None
+    user.updated_at = datetime.now(timezone.utc)
+    session.add(user)
+
+    await session.commit()

@@ -94,6 +94,7 @@ async def _batch_descendant_counts(session: AsyncSession, user_ids: list[int]) -
 
 # ─── List ────────────────────────────────────────────────────────────
 
+
 @router.get("", response_model=AgentListResponse)
 async def list_agents(
     page: int = Query(1, ge=1),
@@ -108,13 +109,12 @@ async def list_agents(
     base = select(AdminUser).where(AdminUser.role != "super_admin")
 
     if search:
-        safe_search = search.replace("%", r"\%").replace("_", r"\_")
-        like_pattern = f"%{safe_search}%"
+        safe_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         base = base.where(
             or_(
-                AdminUser.username.ilike(like_pattern),
-                AdminUser.agent_code.ilike(like_pattern),
-                AdminUser.email.ilike(like_pattern),
+                AdminUser.username.ilike(f"%{safe_search}%", escape="\\"),
+                AdminUser.agent_code.ilike(f"%{safe_search}%", escape="\\"),
+                AdminUser.email.ilike(f"%{safe_search}%", escape="\\"),
             )
         )
     if role:
@@ -129,9 +129,11 @@ async def list_agents(
     total = (await session.execute(count_stmt)).scalar() or 0
 
     # Paginated results
-    stmt = base.order_by(AdminUser.depth, AdminUser.agent_code).offset(
-        (page - 1) * page_size
-    ).limit(page_size)
+    stmt = (
+        base.order_by(AdminUser.depth, AdminUser.agent_code)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     result = await session.execute(stmt)
     users = result.scalars().all()
 
@@ -143,6 +145,7 @@ async def list_agents(
 
 
 # ─── Create ──────────────────────────────────────────────────────────
+
 
 @router.post("", response_model=AgentResponse, status_code=status.HTTP_201_CREATED)
 async def create_agent(
@@ -163,11 +166,7 @@ async def create_agent(
     parent_depth = 0
     if body.parent_id:
         # Lock parent row to prevent race condition on max_sub_agents check
-        parent_stmt = (
-            select(AdminUser)
-            .where(AdminUser.id == body.parent_id)
-            .with_for_update()
-        )
+        parent_stmt = select(AdminUser).where(AdminUser.id == body.parent_id).with_for_update()
         parent = (await session.execute(parent_stmt)).scalar_one_or_none()
         if not parent:
             raise HTTPException(status_code=400, detail="Parent not found")
@@ -213,6 +212,7 @@ async def create_agent(
 
 # ─── Get One ─────────────────────────────────────────────────────────
 
+
 @router.get("/{agent_id}", response_model=AgentResponse)
 async def get_agent(
     agent_id: int,
@@ -227,6 +227,7 @@ async def get_agent(
 
 # ─── Update ──────────────────────────────────────────────────────────
 
+
 @router.put("/{agent_id}", response_model=AgentResponse)
 async def update_agent(
     agent_id: int,
@@ -238,7 +239,16 @@ async def update_agent(
     if not user:
         raise HTTPException(status_code=404, detail="Agent not found")
 
-    ALLOWED_UPDATE_FIELDS = {"email", "role", "status", "max_sub_agents", "rolling_rate", "losing_rate", "deposit_rate", "memo"}
+    ALLOWED_UPDATE_FIELDS = {
+        "email",
+        "role",
+        "status",
+        "max_sub_agents",
+        "rolling_rate",
+        "losing_rate",
+        "deposit_rate",
+        "memo",
+    }
     update_data = body.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         if field in ALLOWED_UPDATE_FIELDS:
@@ -253,6 +263,7 @@ async def update_agent(
 
 
 # ─── Delete (soft: status → banned) ─────────────────────────────────
+
 
 @router.delete("/{agent_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_agent(
@@ -274,6 +285,7 @@ async def delete_agent(
 
 # ─── Password Reset (by admin) ──────────────────────────────────────
 
+
 @router.post("/{agent_id}/reset-password", status_code=status.HTTP_200_OK)
 async def reset_agent_password(
     agent_id: int,
@@ -294,6 +306,7 @@ async def reset_agent_password(
 
 # ─── Tree: Descendants ───────────────────────────────────────────────
 
+
 @router.get("/{agent_id}/tree", response_model=AgentTreeResponse)
 async def get_agent_tree(
     agent_id: int,
@@ -309,6 +322,7 @@ async def get_agent_tree(
 
 
 # ─── Tree: Ancestors ─────────────────────────────────────────────────
+
 
 @router.get("/{agent_id}/ancestors")
 async def get_agent_ancestors(
@@ -335,6 +349,7 @@ async def get_agent_ancestors(
 
 # ─── Tree: Children ──────────────────────────────────────────────────
 
+
 @router.get("/{agent_id}/children")
 async def get_agent_children(
     agent_id: int,
@@ -352,6 +367,7 @@ async def get_agent_children(
 
 
 # ─── Tree: Move ──────────────────────────────────────────────────────
+
 
 @router.post("/{agent_id}/move", status_code=status.HTTP_200_OK)
 async def move_agent(
@@ -399,10 +415,7 @@ async def get_agent_commission_rates(
     if not user:
         raise HTTPException(status_code=404, detail="Agent not found")
 
-    stmt = (
-        select(AgentCommissionRate)
-        .where(AgentCommissionRate.agent_id == agent_id)
-    )
+    stmt = select(AgentCommissionRate).where(AgentCommissionRate.agent_id == agent_id)
     if commission_type:
         stmt = stmt.where(AgentCommissionRate.commission_type == commission_type)
 

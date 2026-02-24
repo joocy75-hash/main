@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,6 +39,8 @@ export default function UserTreePage() {
   const [rootInput, setRootInput] = useState('');
 
   const { nodes, loading } = useUserTree(rootId);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [translate, setTranslate] = useState({ x: 400, y: 60 });
 
   const treeData = useMemo(() => {
     if (nodes.length === 0) return null;
@@ -66,13 +68,33 @@ export default function UserTreePage() {
       }
     }
 
-    // If no explicit root matched, use first node
     if (!root && nodes.length > 0) {
       root = nodeMap.get(nodes[0].id) || null;
     }
 
     return root;
   }, [nodes, rootId]);
+
+  // Center the entire tree visually after render
+  useEffect(() => {
+    if (!treeData || !containerRef.current) return;
+
+    const timer = setTimeout(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const gEl = container.querySelector('.rd3t-g') as SVGGElement | null;
+      if (!gEl) return;
+
+      const bbox = gEl.getBBox();
+      const containerWidth = container.clientWidth;
+      const treeCenterX = bbox.x + bbox.width / 2;
+
+      setTranslate({ x: containerWidth / 2 - treeCenterX, y: 60 });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [treeData]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,10 +113,10 @@ export default function UserTreePage() {
         <text fill="white" strokeWidth="0" fontSize="9" textAnchor="middle" dy="3" fontWeight="bold">
           {nodeDatum.attributes?.rank}
         </text>
-        <text fill={isInactive ? '#9ca3af' : '#111827'} strokeWidth="0" fontSize="12" textAnchor="middle" dy="-32" fontWeight="600">
+        <text fill={isInactive ? '#9ca3af' : '#e5e7eb'} strokeWidth="0" fontSize="12" textAnchor="middle" dy="-32" fontWeight="600">
           {nodeDatum.name}
         </text>
-        <text fill="#6b7280" strokeWidth="0" fontSize="9" textAnchor="middle" dy="42">
+        <text fill="#9ca3af" strokeWidth="0" fontSize="9" textAnchor="middle" dy="42">
           {nodeDatum.attributes?.bal}
         </text>
       </g>
@@ -152,17 +174,18 @@ export default function UserTreePage() {
           ) : !treeData ? (
             <div className="h-[600px] flex items-center justify-center text-muted-foreground">트리 데이터가 없습니다</div>
           ) : (
-            <div className="h-[600px] w-full">
+            <div className="h-[600px] w-full" ref={containerRef}>
               <Tree
                 data={treeData}
                 orientation="vertical"
                 pathFunc="step"
-                translate={{ x: 400, y: 60 }}
+                translate={translate}
                 separation={{ siblings: 1.5, nonSiblings: 2 }}
                 nodeSize={{ x: 180, y: 120 }}
-                renderCustomNodeElement={(rd3tProps: any) => renderNodeLabel(rd3tProps)}
-                onNodeClick={(node: any) => {
-                  const raw = node.data?._raw;
+                renderCustomNodeElement={(rd3tProps) => renderNodeLabel(rd3tProps as unknown as { nodeDatum: TreeNodeData })}
+                onNodeClick={(node) => {
+                  const data = (node.data as unknown as TreeNodeData) ?? undefined;
+                  const raw = data?._raw;
                   if (raw?.id) router.push(`/dashboard/users/${raw.id}`);
                 }}
               />

@@ -8,10 +8,13 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { useUserDetail, resetUserPassword, setUserPassword, suspendUser } from '@/hooks/use-user-detail';
+import {
+  useUserDetail, resetUserPassword, setUserPassword,
+  activateUser, suspendUser, banUser, forceLogoutUser, pointAdjustment,
+} from '@/hooks/use-user-detail';
 import { updateUser } from '@/hooks/use-users';
 import { useToast } from '@/components/toast-provider';
-import { ArrowLeft, X, Edit, KeyRound, Lock, Ban } from 'lucide-react';
+import { ArrowLeft, X, Edit, KeyRound, Lock, Ban, CheckCircle, LogOut, Coins } from 'lucide-react';
 import TabGeneral from '@/app/dashboard/users/[id]/tab-general';
 import TabBetting from '@/app/dashboard/users/[id]/tab-betting';
 import TabMoney from '@/app/dashboard/users/[id]/tab-money';
@@ -101,23 +104,61 @@ export function UserDetailContent({ userId, onClose, isSheet }: Props) {
     });
   };
 
-  const handleSuspend = async () => {
+  const handleActivate = () => {
+    if (!user || user.status === 'active') return;
+    openConfirm('회원 활성화', '이 회원을 활성화하시겠습니까?', async () => {
+      try {
+        await activateUser(userId);
+        toast.success('활성화되었습니다.');
+        refetch();
+      } catch { toast.error('활성화 실패'); }
+    });
+  };
+
+  const handleSuspend = () => {
     if (!user) return;
-    if (user.status === 'suspended') {
-      openConfirm('정지 해제', '정지를 해제하시겠습니까?', async () => {
-        try {
-          await updateUser(userId, { status: 'active' });
-          refetch();
-        } catch { toast.error('정지 해제 실패'); }
-      });
-    } else {
-      openInputDialog('회원 정지', '정지 사유', 'text', async (reason) => {
-        try {
-          await suspendUser(userId, reason || undefined);
-          refetch();
-        } catch { toast.error('정지 실패'); }
-      });
-    }
+    openInputDialog('회원 정지', '정지 사유', 'text', async (reason) => {
+      try {
+        await suspendUser(userId, reason || undefined);
+        toast.success('정지 처리되었습니다.');
+        refetch();
+      } catch { toast.error('정지 실패'); }
+    });
+  };
+
+  const handleBan = () => {
+    if (!user) return;
+    openInputDialog('회원 차단', '차단 사유', 'text', async (reason) => {
+      try {
+        await banUser(userId, reason || undefined);
+        toast.success('차단 처리되었습니다.');
+        refetch();
+      } catch { toast.error('차단 실패'); }
+    });
+  };
+
+  const handleForceLogout = () => {
+    openConfirm('강제 로그아웃', '이 회원을 강제 로그아웃 하시겠습니까?', async () => {
+      try {
+        await forceLogoutUser(userId);
+        toast.success('강제 로그아웃 되었습니다.');
+      } catch { toast.error('강제 로그아웃 실패'); }
+    });
+  };
+
+  const handlePointAdjust = (action: 'credit' | 'debit') => {
+    const label = action === 'credit' ? '포인트 지급' : '포인트 차감';
+    openInputDialog(label, '금액 (숫자만 입력)', 'text', async (val) => {
+      const amount = parseFloat(val);
+      if (isNaN(amount) || amount <= 0) { toast.warning('올바른 금액을 입력하세요.'); return; }
+      try {
+        await pointAdjustment(userId, action, amount);
+        toast.success(`${label} 완료`);
+        refetch();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : `${label} 실패`);
+      }
+    });
   };
 
   if (loading || !detail || !user) {
@@ -221,13 +262,29 @@ export function UserDetailContent({ userId, onClose, isSheet }: Props) {
           <Button variant="outline" size="sm" onClick={handleSetPassword}>
             <Lock className="h-3 w-3 mr-1" />비밀번호
           </Button>
-          <Button
-            variant={user.status === 'suspended' ? 'default' : 'destructive'}
-            size="sm"
-            onClick={handleSuspend}
-          >
-            <Ban className="h-3 w-3 mr-1" />
-            {user.status === 'suspended' ? '해제' : '정지'}
+          {user.status !== 'active' && (
+            <Button variant="default" size="sm" onClick={handleActivate}>
+              <CheckCircle className="h-3 w-3 mr-1" />활성화
+            </Button>
+          )}
+          {user.status !== 'suspended' && (
+            <Button variant="destructive" size="sm" onClick={handleSuspend}>
+              <Ban className="h-3 w-3 mr-1" />정지
+            </Button>
+          )}
+          {user.status !== 'banned' && (
+            <Button variant="destructive" size="sm" onClick={handleBan}>
+              <Ban className="h-3 w-3 mr-1" />차단
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={handleForceLogout}>
+            <LogOut className="h-3 w-3 mr-1" />강제 로그아웃
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handlePointAdjust('credit')}>
+            <Coins className="h-3 w-3 mr-1" />포인트 지급
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handlePointAdjust('debit')}>
+            <Coins className="h-3 w-3 mr-1" />포인트 차감
           </Button>
         </div>
       </div>

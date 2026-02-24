@@ -41,10 +41,11 @@ async def list_announcements(
     if is_active is not None:
         base = base.where(Announcement.is_active == is_active)
     if search:
+        safe_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         base = base.where(
             or_(
-                Announcement.title.ilike(f"%{search}%"),
-                Announcement.content.ilike(f"%{search}%"),
+                Announcement.title.ilike(f"%{safe_search}%", escape="\\"),
+                Announcement.content.ilike(f"%{safe_search}%", escape="\\"),
             )
         )
 

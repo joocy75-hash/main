@@ -8,59 +8,63 @@ import { apiClient } from '@/lib/api-client';
 export type TransactionLimit = {
   id: number;
   scope_type: string;
-  scope_id: number | null;
-  type: string;
+  scope_id: number;
+  tx_type: string;
   min_amount: number;
   max_amount: number;
   daily_limit: number;
-  daily_count_limit: number;
+  daily_count: number;
   monthly_limit: number;
-  active: boolean;
-  created_at: string;
+  is_active: boolean;
+  updated_by: number | null;
   updated_at: string;
-  scope_name: string | null;
 };
 
 type TransactionLimitListResponse = {
   items: TransactionLimit[];
   total: number;
+  page: number;
+  page_size: number;
 };
 
 export type EffectiveTransactionLimit = {
-  type: string;
+  tx_type: string;
+  applied_scope: string;
+  applied_scope_id: number;
   min_amount: number;
   max_amount: number;
   daily_limit: number;
-  daily_count_limit: number;
+  daily_count: number;
   monthly_limit: number;
-  source: string;
 };
 
 export type BettingLimit = {
   id: number;
   scope_type: string;
-  scope_id: number | null;
+  scope_id: number;
   game_category: string;
   min_bet: number;
   max_bet: number;
-  daily_loss_limit: number;
-  active: boolean;
-  created_at: string;
+  max_daily_loss: number;
+  is_active: boolean;
+  updated_by: number | null;
   updated_at: string;
-  scope_name: string | null;
 };
 
 type BettingLimitListResponse = {
   items: BettingLimit[];
   total: number;
+  page: number;
+  page_size: number;
 };
 
 export type EffectiveBettingLimit = {
   game_category: string;
+  applied_scope: string;
+  applied_scope_id: number;
   min_bet: number;
   max_bet: number;
-  daily_loss_limit: number;
-  source: string;
+  max_daily_loss: number;
 };
 
 // ─── Transaction Limit Hooks ─────────────────────────────────────
@@ -78,7 +82,7 @@ export function useTransactionLimits(scopeType?: string) {
       if (scopeType) params.set('scope_type', scopeType);
       const qs = params.toString();
       const result = await apiClient.get<TransactionLimitListResponse>(
-        `/api/v1/limits/transaction${qs ? `?${qs}` : ''}`
+        `/api/v1/limits/transactions${qs ? `?${qs}` : ''}`
       );
       setData(result);
     } catch (err) {
@@ -100,7 +104,7 @@ export function useEffectiveTransactionLimits(userId: number) {
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
-    apiClient.get<EffectiveTransactionLimit[]>(`/api/v1/limits/transaction/effective/${userId}`)
+    apiClient.get<EffectiveTransactionLimit[]>(`/api/v1/limits/transactions/effective/${userId}`)
       .then(setData)
       .catch(() => setData([]))
       .finally(() => setLoading(false));
@@ -110,15 +114,16 @@ export function useEffectiveTransactionLimits(userId: number) {
 }
 
 export async function createTransactionLimit(body: Record<string, unknown>) {
-  return apiClient.post<TransactionLimit>('/api/v1/limits/transaction', body);
+  return apiClient.post<TransactionLimit>('/api/v1/limits/transactions', body);
 }
 
-export async function updateTransactionLimit(id: number, body: Record<string, unknown>) {
-  return apiClient.put<TransactionLimit>(`/api/v1/limits/transaction/${id}`, body);
+export async function updateTransactionLimit(_id: number, body: Record<string, unknown>) {
+  // Backend uses POST upsert (no PUT endpoint)
+  return apiClient.post<TransactionLimit>('/api/v1/limits/transactions', body);
 }
 
 export async function deleteTransactionLimit(id: number) {
-  return apiClient.delete(`/api/v1/limits/transaction/${id}`);
+  return apiClient.delete(`/api/v1/limits/transactions/${id}`);
 }
 
 // ─── Betting Limit Hooks ─────────────────────────────────────────
@@ -172,8 +177,9 @@ export async function createBettingLimit(body: Record<string, unknown>) {
   return apiClient.post<BettingLimit>('/api/v1/limits/betting', body);
 }
 
-export async function updateBettingLimit(id: number, body: Record<string, unknown>) {
-  return apiClient.put<BettingLimit>(`/api/v1/limits/betting/${id}`, body);
+export async function updateBettingLimit(_id: number, body: Record<string, unknown>) {
+  // Backend uses POST upsert (no PUT endpoint)
+  return apiClient.post<BettingLimit>('/api/v1/limits/betting', body);
 }
 
 export async function deleteBettingLimit(id: number) {

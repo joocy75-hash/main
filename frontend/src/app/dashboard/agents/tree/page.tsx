@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,6 +51,8 @@ export default function AgentTreePage() {
   const [rootInput, setRootInput] = useState(String(rootId));
 
   const { nodes, loading } = useAgentTree(rootId);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [translate, setTranslate] = useState({ x: 400, y: 60 });
 
   const treeData = useMemo(() => {
     if (nodes.length === 0) return null;
@@ -82,6 +84,27 @@ export default function AgentTreePage() {
 
     return root;
   }, [nodes, rootId]);
+
+  // Center the entire tree visually after render
+  useEffect(() => {
+    if (!treeData || !containerRef.current) return;
+
+    const timer = setTimeout(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const gEl = container.querySelector('.rd3t-g') as SVGGElement | null;
+      if (!gEl) return;
+
+      const bbox = gEl.getBBox();
+      const containerWidth = container.clientWidth;
+      const treeCenterX = bbox.x + bbox.width / 2;
+
+      setTranslate({ x: containerWidth / 2 - treeCenterX, y: 60 });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [treeData]);
 
   const handleRootChange = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,17 +212,18 @@ export default function AgentTreePage() {
               트리 데이터가 없습니다
             </div>
           ) : (
-            <div className="h-[600px] w-full">
+            <div className="h-[600px] w-full" ref={containerRef}>
               <Tree
                 data={treeData}
                 orientation="vertical"
                 pathFunc="step"
-                translate={{ x: 400, y: 60 }}
+                translate={translate}
                 separation={{ siblings: 1.5, nonSiblings: 2 }}
                 nodeSize={{ x: 160, y: 120 }}
-                renderCustomNodeElement={(rd3tProps: any) => renderNodeLabel(rd3tProps)}
-                onNodeClick={(node: any) => {
-                  const raw = node.data?._raw;
+                renderCustomNodeElement={(rd3tProps) => renderNodeLabel(rd3tProps as unknown as { nodeDatum: TreeNode })}
+                onNodeClick={(node) => {
+                  const data = (node.data as unknown as TreeNode) ?? undefined;
+                  const raw = data?._raw;
                   if (raw?.id) {
                     router.push(`/dashboard/agents/${raw.id}`);
                   }

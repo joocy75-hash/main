@@ -11,6 +11,10 @@ import {
   deleteMission,
   type Mission,
 } from '@/hooks/use-reward-settings';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/toast-provider';
 
 const amountFormatter = new Intl.NumberFormat('ko-KR');
@@ -57,6 +61,8 @@ export default function MissionsPage() {
   const [editingItem, setEditingItem] = useState<Mission | null>(null);
   const [form, setForm] = useState<FormData>(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Mission | null>(null);
 
   const activeCount = data.filter((d) => d.is_active).length;
   const inactiveCount = data.filter((d) => !d.is_active).length;
@@ -117,14 +123,21 @@ export default function MissionsPage() {
     }
   };
 
-  const handleDelete = async (id: number, name: string) => {
-    if (!window.confirm(`"${name}" 미션을 삭제합니다. 계속하시겠습니까?`)) return;
+  const handleDelete = (item: Mission) => {
+    setPendingDelete(item);
+    setConfirmOpen(true);
+  };
+
+  const confirmDeleteAction = async () => {
+    if (!pendingDelete) return;
     try {
-      await deleteMission(id);
+      await deleteMission(pendingDelete.id);
       refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '삭제 실패');
     }
+    setConfirmOpen(false);
+    setPendingDelete(null);
   };
 
   const handleCancel = () => {
@@ -135,6 +148,21 @@ export default function MissionsPage() {
 
   return (
     <div className="space-y-6">
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>미션 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{pendingDelete?.name}&quot; 미션을 삭제합니다. 계속하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteAction}>확인</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -347,7 +375,7 @@ export default function MissionsPage() {
                           수정
                         </button>
                         <button
-                          onClick={() => handleDelete(item.id, item.name)}
+                          onClick={() => handleDelete(item)}
                           className="text-red-600 hover:text-red-800 dark:text-red-400"
                         >
                           삭제

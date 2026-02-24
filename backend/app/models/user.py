@@ -49,6 +49,7 @@ class User(SQLModel, table=True):
     losing_rate: Decimal = Field(default=Decimal("0"), max_digits=5, decimal_places=2)
 
     memo: str | None = Field(default=None)
+    force_logout_at: datetime | None = Field(default=None)
     last_login_at: datetime | None = Field(default=None)
     last_login_ip: str | None = Field(default=None, max_length=45)
     last_deposit_at: datetime | None = Field(default=None)

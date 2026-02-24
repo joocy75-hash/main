@@ -3,7 +3,14 @@
 > **상태**: Phase 0~13 전체 완료 + 회원 상세 8탭 + 회원 목록 리뉴얼 + 계층적 커미션 시스템 + 암호화폐 입출금 전환 | Backend 137 routes | Frontend 41 routes + 8탭 + 슬라이드 패널
 > **Phase 상세**: @docs/reference/phases-completed.md
 > **회원 상세 계획서**: @docs/plans/user-detail-plan.md
-> **유저 사이트**: `user-site/` 디렉토리 (casino 프로젝트 기반, 커스텀 예정)
+> **양방향 운영 기능 계획서**: @docs/plans/2026-02-20-bidirectional-operations-design.md
+> **RapidAPI 통합 계획서**: @docs/plans/2026-02-24-rapidapi-integration-plan.md
+> **유저 페이지 계획서**: @docs/plans/2026-02-24-user-page-implementation-plan.md
+> **유저 페이지 상태**: Phase 0~9 전체 완료 (2026-02-24)
+> **유저 페이지 스택**: Turborepo + Next.js 16 + Fastify 5 + TypeScript (ESM) + Prisma 6 + PostgreSQL 16 + Redis 7
+> **유저 페이지 위치**: `user-page/` (모노레포: backend, frontend, shared)
+> **유저 페이지 포트**: Backend 8003, Frontend 3002, PostgreSQL 5435, Redis 6381
+> **품질 기준서**: @docs/standards/QUALITY-STANDARDS.md (코드 리뷰/수정/개발의 절대 기준)
 
 ## 기술 스택
 
@@ -51,6 +58,10 @@ cd backend && source .venv/bin/activate && python scripts/seed.py
 - 패키지 버전 임의 변경 금지
 - 명시적 요청 없이 커밋/푸시 금지
 - 프로덕션 서버 직접 조작 금지
+- **품질 기준서 준수 필수**: `docs/standards/QUALITY-STANDARDS.md` 참조
+  - 금전 코드 → 트랜잭션 + 동시성 보호 + 멱등성 + 감사 추적
+  - 인증 코드 → 환경변수 필수 + 토큰 블랙리스트 + 권한 검증
+  - 리뷰 → CRITICAL만 즉시 수정, 최대 2회 사이클, CRITICAL 0건이면 통과
 
 ## 코드 품질 도구
 
@@ -137,6 +148,45 @@ cd backend && source .venv/bin/activate && python scripts/seed.py
 - **백업**: `scripts/backup-db.sh` (pg_dump + gzip, 7일 자동 정리)
 - **환경변수**: `.env.prod.example` 참조 (DB_PASSWORD, SECRET_KEY 필수)
 - **보안**: prod compose에서 `${SECRET_KEY:?required}`, `${DB_PASSWORD:?required}` 강제
+
+## 양방향 운영 기능 완성 (2026-02-20 완료)
+
+> **계획서**: `docs/plans/2026-02-20-bidirectional-operations-design.md`
+> **결과**: 10개 핵심 운영 기능 중 10/10 완성 → **100% 달성**
+> **Backend**: 299 routes | Phase 1~5 전체 완료
+
+### 5 Phase 구조 (18 Task) - ALL COMPLETE
+
+| Phase | 내용 | 상태 |
+|-------|------|------|
+| 1 | 핵심 양방향 API (회원가입/활성화/포인트/로그아웃) | ✅ |
+| 2 | 보상 지급 엔진 (출석/미션/스핀/페이백/프로모션) | ✅ |
+| 3 | 쪽지 알림 시스템 (자동알림 + 대량발송) | ✅ |
+| 4 | 회수/취소 (프로모션/쿠폰/커미션) | ✅ |
+| 5 | 자동 승인 룰 + 메모 이력 | ✅ |
+
+### 핵심 설계 결정
+
+- **회원가입**: 추천코드 필수 + 자동승인 (추천코드 없으면 거절)
+- **이벤트 지급**: 혼합형 (임계값 이하 자동, 초과 관리자 승인)
+- **보상 엔진**: `RewardEngine` 단일 진입점 → 모든 이벤트/프로모션 공통
+- **쪽지 알림**: `MessageService` 템플릿 기반, 모든 상태변경/지급에 자동 발송
+- **양방향 원칙**: 지급↔회수, 활성화↔비활성화, 승인↔거절 모두 쌍으로 구현
+
+### 신규 테이블 (6개)
+
+`pending_rewards`, `user_attendance_logs`, `user_missions`, `user_spin_logs`, `auto_approve_rules`, `user_memos`
+
+### 신규 서비스 (2개)
+
+- `backend/app/services/reward_engine.py` - 보상 지급 엔진
+- `backend/app/services/message_service.py` - 쪽지 발송 서비스
+
+### 작업 지침
+
+- Task 완료마다 커밋 + 이 문서 업데이트
+- Phase 완료마다 빌드 검증 + swagger 확인
+- 중단 시 계획서 체크리스트로 복구 지점 파악
 
 ## 유저 사이트 (user-site/) - 2026-02-19 추가
 
@@ -397,6 +447,179 @@ Stripe/SuitPay/BsPay + PIX 결제 → 암호화폐 전용 입출금으로 전면
 **수정 파일 (백엔드 6개)**: AffiliateService, SpinService, MissionService, GameWebhookController, AffiliateWithdrawal, GameCategorySeeder, DatabaseSeeder
 **수정 파일 (프론트엔드 2개)**: middleware.ts, lib/api.ts
 **빌드 검증**: Next.js 28페이지 전체 프로덕션 빌드 성공
+
+## RapidAPI 외부 게임/스포츠 API 통합 (2026-02-24 시작)
+
+> **계획서**: `docs/plans/2026-02-24-rapidapi-integration-plan.md`
+> **API 문서**: `API-REFERENCE.md`
+> **현재 Phase**: Phase 0 (기반 인프라) 준비 중
+
+### 사용 가능한 외부 API (3개 Working + 1개 Partial)
+
+| API | 호스트 | 무료 쿼터 | 용도 |
+|-----|--------|-----------|------|
+| **Odds Feed** | odds-feed.p.rapidapi.com | 500/월 | 스포츠 배당률 (7개 북메이커) |
+| **SportAPI7** | sportapi7.p.rapidapi.com | 50/월 | 실시간 스포츠 (20+ 종목) |
+| **Casino & Slots** | live-casino-slots-...rapidapi.com | 299/월 | 카지노/슬롯 (100+ 프로바이더) |
+| All Sport Stream | all-sport-live-stream... | 99/월 | 스트리밍 (일부 깨짐) |
+
+### 핵심 설계 결정
+
+- **프록시 구조**: Admin Backend → RapidAPI → 유저사이트 (API Key 보호)
+- **캐싱 전략**: Redis TTL (프로바이더 24h, 게임 1h, 라이브 30s, 배당률 15s)
+- **쿼터 관리**: Redis 월별 카운터 + 80%/95%/100% 경고/차단
+- **기존 패턴 재활용**: BaseConnector 어댑터 패턴에 RapidAPI 커넥터 추가
+- **환경변수**: `RAPIDAPI_KEY`, `RAPIDAPI_{API}_QUOTA` (.env)
+
+### 6 Phase 구조 (총 20 Task)
+
+| Phase | 내용 | 우선순위 | 상태 |
+|-------|------|----------|------|
+| 0 | 기반 인프라 (클라이언트+캐싱+쿼터) | CRITICAL | ⬜ |
+| 1 | 카지노 & 슬롯 API 통합 (100+ 프로바이더) | P0 | ⬜ |
+| 2 | 스포츠 배당 API (Odds Feed) | P1 | ⬜ |
+| 3 | 실시간 스포츠 (SportAPI7) | P1 | ⬜ |
+| 4 | 관리자 모니터링 대시보드 | P2 | ⬜ |
+| 5 | 유저사이트 연동 + E2E 검증 | P2 | ⬜ |
+
+### 신규 파일 (예정)
+
+- `backend/app/services/rapidapi_client.py` - 공통 HTTP 클라이언트
+- `backend/app/services/quota_service.py` - 쿼터 관리
+- `backend/app/connectors/rapidapi_casino_connector.py` - 카지노 커넥터
+- `backend/app/connectors/rapidapi_sports_connector.py` - 스포츠 커넥터
+- `backend/app/api/v1/external_api.py` - 통합 라우터
+- `backend/app/services/sports_aggregator.py` - 스포츠 데이터 통합
+- `frontend/src/app/dashboard/external-api/page.tsx` - 모니터링 UI
+- `frontend/src/app/dashboard/sports-monitor/page.tsx` - 스포츠 모니터링
+
+### 비용 전략
+
+- **현재**: $0/월 (무료 플랜, 캐싱으로 운용)
+- **유저사이트 오픈 시**: $20/월 (Odds Pro $5 + SportAPI7 Pro $15)
+- **대규모 유입 시**: Casino Ultra $999/월 필요 (게임 런칭 폭증 시)
+
+## user-page (유저 게임 플랫폼) - 2026-02-24 완료
+
+> **계획서**: `docs/plans/2026-02-24-user-page-implementation-plan.md`
+> **결과**: Phase 0~9 전체 완료 | Backend 47 routes (7 모듈) | Frontend 23 pages
+> **테스트 계정**: testuser / test1234!
+
+### user-page 기술 스택
+
+- **모노레포**: Turborepo (backend, frontend, shared)
+- **Backend**: Fastify 5 + TypeScript (ESM) + Prisma 6 + PostgreSQL 16 + Redis 7
+- **Frontend**: Next.js 16.1.6 (App Router) + React 19 + TailwindCSS 4 + shadcn/ui + Zustand
+- **인증**: JWT HS256 (access 15min, refresh 7day) + Redis blacklist + bcrypt + Zod
+
+### user-page 포트 매핑
+
+| 서비스 | 관리자 패널 | 유저 페이지 |
+|--------|-------------|-------------|
+| PostgreSQL | 5433 | **5435** |
+| Redis | 6379 | **6381** |
+| Backend | 8002 | **8003** |
+| Frontend | 3001 | **3002** |
+
+### user-page 개발 명령어
+
+```bash
+# Docker DB+Redis 기동
+cd user-page && docker compose up -d
+
+# Backend 개발
+cd user-page/backend && npm run dev
+
+# Frontend 개발 (한글 경로 → --webpack 필수!)
+cd user-page/frontend && npx next dev --port 3002 --webpack
+
+# Frontend 빌드
+cd user-page/frontend && npx next build --webpack
+
+# DB 마이그레이션
+cd user-page/backend && npx prisma migrate deploy
+
+# 시드 데이터
+cd user-page/backend && npm run seed
+```
+
+### user-page 백엔드 라우트 (7 모듈, 47 엔드포인트)
+
+| 모듈 | 엔드포인트 수 | 주요 기능 |
+|------|--------------|-----------|
+| health | 2 | /, /health |
+| auth | 4 | register, login, refresh, logout |
+| games | 8 | categories, providers, search, popular, recent, launch, demo |
+| wallet | 8 | balance, addresses CRUD, deposit, withdraw, transactions |
+| events | 12 | attendance, missions, spin, promotions, VIP, points |
+| sports | 5 | events, odds, categories, esports live/categories |
+| profile | 17 | profile CRUD, password, history, affiliate, messages, inquiries |
+
+### user-page 프론트엔드 라우트 (23 페이지)
+
+```
+/, /games, /login, /register
+/wallet/deposit, /wallet/withdraw, /wallet/transactions
+/promotions, /promotions/attendance, /promotions/missions, /promotions/spin, /promotions/vip, /promotions/points
+/sports, /sports/esports
+/profile, /profile/bets, /profile/money, /profile/login-history
+/affiliate, /messages, /support
+```
+
+### user-page DB 스키마 (25 모델)
+
+User, LoginHistory, RefreshToken, WalletAddress, Deposit, Withdrawal,
+GameCategoryConfig, GameProvider, Game, BetRecord, GameRollingRate,
+MoneyLog, PointLog, CommissionRecord,
+AttendanceConfig, AttendanceLog, MissionConfig, MissionProgress,
+SpinConfig, SpinLog, PaybackConfig, PromotionConfig, UserPromotion,
+VipLevel, Message, Inquiry, InquiryReply
+
+### user-page Phase 진행 상태 (전체 완료)
+
+| Phase | 내용 | 상태 |
+|-------|------|------|
+| 0 | 모노레포 + Docker + Fastify + Next.js 초기화 | ✅ |
+| 1 | Prisma 스키마 (25 모델) + 시드 데이터 | ✅ |
+| 2 | JWT 인증 + 회원가입/로그인 | ✅ |
+| 3 | 다크 테마 + 레이아웃 + 로그인/회원가입 UI | ✅ |
+| 4 | 게임 로비 + 런칭 | ✅ |
+| 5 | 지갑 (입금/출금/거래내역) | ✅ |
+| 6 | 이벤트/보상 (출석/미션/스핀/VIP/포인트) | ✅ |
+| 7 | 스포츠 베팅 (Mock 데이터) | ✅ |
+| 8 | 마이페이지/추천/쪽지/고객센터 | ✅ |
+| 9 | 통합 테스트 + Docker + 보안 + 인수인계 | ✅ |
+
+### user-page 디렉토리 구조
+
+```
+user-page/
+├── docker-compose.yml              # PostgreSQL 16 + Redis 7
+├── turbo.json                      # Turborepo 설정
+├── shared/types/                   # 프론트+백엔드 공유 타입
+├── backend/
+│   ├── prisma/schema.prisma        # 25 모델
+│   ├── prisma/seed.ts              # 시드 데이터
+│   └── src/
+│       ├── index.ts                # Fastify 진입점
+│       ├── plugins/                # auth, redis, prisma, cors
+│       ├── routes/                 # 7 모듈 라우트
+│       ├── services/               # 비즈니스 로직
+│       └── middleware/             # auth-guard, rate-limit
+├── frontend/
+│   └── src/
+│       ├── app/                    # 23 페이지 (App Router)
+│       ├── components/             # UI, layout, game, wallet, sports, promotion
+│       ├── stores/                 # Zustand (auth, game, wallet, notification)
+│       ├── hooks/                  # use-auth, use-games, use-wallet, use-sports
+│       └── lib/                    # api-client, utils, constants
+```
+
+### user-page 알려진 이슈
+
+- 한글 경로(관리자페이지) → Turbopack 크래시 → `--webpack` 필수
+- 스포츠 데이터는 Mock (RapidAPI 연동은 별도 계획서)
+- DB 인증: userpage/secret (docker-compose.yml 기준)
 
 ## 인수인계 문서
 

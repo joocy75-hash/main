@@ -40,7 +40,12 @@ export default function NewUserPage() {
       if (form.real_name) body.real_name = form.real_name;
       if (form.phone) body.phone = form.phone;
       if (form.email) body.email = form.email;
-      if (form.referrer_code.trim()) body.referrer_code = form.referrer_code.trim();
+      if (!form.referrer_code.trim()) {
+        setError('추천인 코드는 필수입니다');
+        setLoading(false);
+        return;
+      }
+      body.referrer_code = form.referrer_code.trim();
       if (form.memo) body.memo = form.memo;
 
       const user = await createUser(body);
@@ -87,9 +92,9 @@ export default function NewUserPage() {
               <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">추천인 코드 (추천인의 아이디)</label>
-              <Input value={form.referrer_code} onChange={(e) => setForm({ ...form, referrer_code: e.target.value })} placeholder="추천인 아이디 입력 (없으면 빈칸)" />
-              <p className="text-xs text-muted-foreground">기존 회원의 아이디를 입력하면 해당 회원의 하위로 등록됩니다.</p>
+              <label className="text-sm font-medium">추천인 코드 (추천인의 아이디) <span className="text-red-500">*</span></label>
+              <Input value={form.referrer_code} onChange={(e) => setForm({ ...form, referrer_code: e.target.value })} placeholder="추천인 아이디 입력 (필수)" />
+              <p className="text-xs text-muted-foreground">기존 회원의 아이디를 입력하세요. 추천코드 없이는 가입이 불가합니다.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">레벨</label>

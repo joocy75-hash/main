@@ -26,3 +26,16 @@ class MessageListResponse(BaseModel):
 class MessageCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     content: str = Field(min_length=1)
+
+
+class BulkMessageCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    content: str = Field(min_length=1)
+    target: str = Field(pattern=r"^(all|by_status|by_rank|by_ids)$")
+    target_value: str | None = None
+
+
+class BulkMessageResponse(BaseModel):
+    sent_count: int
+    target: str
+    target_value: str | None

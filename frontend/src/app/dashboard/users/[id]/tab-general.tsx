@@ -16,6 +16,16 @@ import {
   deleteWalletAddress,
 } from '@/hooks/use-user-detail';
 import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Plus, Trash2, Save, Copy, Pencil } from 'lucide-react';
 import { useToast } from '@/components/toast-provider';
 import AssetSection from './asset-section';
@@ -54,6 +64,7 @@ export default function TabGeneral({ detail, userId, onRefetch }: Props) {
 
   const [showWalletForm, setShowWalletForm] = useState(false);
   const [walletForm, setWalletForm] = useState({ coin_type: 'USDT', network: 'TRC20', address: '', label: '' });
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const handleSave = async () => {
     setSaving(true);
@@ -129,11 +140,11 @@ export default function TabGeneral({ detail, userId, onRefetch }: Props) {
   };
 
   const handleDeleteWallet = async (walletId: number) => {
-    if (!confirm('이 지갑 주소를 삭제하시겠습니까?')) return;
     try {
       await deleteWalletAddress(userId, walletId);
       onRefetch();
     } catch { toast.error('지갑 삭제 실패'); }
+    finally { setDeleteTarget(null); }
   };
 
   const copyToClipboard = (text: string) => {
@@ -392,7 +403,7 @@ export default function TabGeneral({ detail, userId, onRefetch }: Props) {
                       </Button>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteWallet(w.id)}>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(w.id)}>
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                 </div>
@@ -417,6 +428,19 @@ export default function TabGeneral({ detail, userId, onRefetch }: Props) {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>지갑 주소 삭제</AlertDialogTitle>
+            <AlertDialogDescription>이 지갑 주소를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (deleteTarget !== null) handleDeleteWallet(deleteTarget); }}>삭제</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
