@@ -1,0 +1,29 @@
+import 'dotenv/config';
+
+export const config = {
+  port: parseInt(process.env.PORT || '8003', 10),
+  nodeEnv: process.env.NODE_ENV || 'development',
+  databaseUrl: process.env.DATABASE_URL || 'postgresql://userpage:secret@localhost:5435/user_page_db',
+  redisUrl: process.env.REDIS_URL || 'redis://localhost:6381',
+  jwt: {
+    secret: (() => {
+      const s = process.env.JWT_SECRET;
+      if (!s && (process.env.NODE_ENV || 'development') === 'production') {
+        throw new Error('JWT_SECRET environment variable is required in production');
+      }
+      return s || 'dev-jwt-secret-change-in-production';
+    })(),
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+  },
+  admin: {
+    apiUrl: process.env.ADMIN_API_URL || 'http://localhost:8002',
+    serviceToken: (() => {
+      const t = process.env.ADMIN_SERVICE_TOKEN;
+      if (!t && (process.env.NODE_ENV || 'development') === 'production') {
+        throw new Error('ADMIN_SERVICE_TOKEN environment variable is required in production');
+      }
+      return t || '';
+    })(),
+  },
+} as const;
