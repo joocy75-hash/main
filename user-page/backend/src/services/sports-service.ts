@@ -1,4 +1,7 @@
-// Sports service providing mock data that mimics real RapidAPI responses.
+// Sports service: fetches real data from admin backend RapidAPI proxy,
+// falls back to mock data when admin backend is unavailable.
+
+import { AdminApiClient } from '../utils/admin-api.js';
 
 interface SportCategory {
   code: string;
@@ -344,8 +347,21 @@ const generateOdds = (eventId: number): EventOdds => {
   return { eventId, bookmakers };
 };
 
+const adminApi = new AdminApiClient();
+
 export class SportsService {
   async getLiveEvents(sport?: string): Promise<SportEvent[]> {
+    try {
+      const res = await adminApi.getLiveEvents('LIVE');
+      let events = (res.data || []) as SportEvent[];
+      if (sport) {
+        events = events.filter((e) => e.sport === sport);
+      }
+      if (events.length > 0) return events;
+    } catch {
+      // Admin backend unavailable, fall through to mock
+    }
+
     let events = [...MOCK_LIVE_EVENTS];
     if (sport) {
       events = events.filter((e) => e.sport === sport);
@@ -354,6 +370,17 @@ export class SportsService {
   }
 
   async getScheduledEvents(sport?: string): Promise<SportEvent[]> {
+    try {
+      const res = await adminApi.getLiveEvents('SCHEDULED');
+      let events = (res.data || []) as SportEvent[];
+      if (sport) {
+        events = events.filter((e) => e.sport === sport);
+      }
+      if (events.length > 0) return events;
+    } catch {
+      // Fall through to mock
+    }
+
     let events = [...MOCK_SCHEDULED_EVENTS];
     if (sport) {
       events = events.filter((e) => e.sport === sport);
@@ -362,6 +389,15 @@ export class SportsService {
   }
 
   async getEventOdds(eventId: number): Promise<EventOdds> {
+    try {
+      const res = await adminApi.getEventOdds(eventId);
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        return { eventId, bookmakers: res.data as BookmakerOdds[] };
+      }
+    } catch {
+      // Fall through to mock
+    }
+
     return generateOdds(eventId);
   }
 
@@ -374,6 +410,14 @@ export class SportsService {
   }
 
   async getEsportsLive(): Promise<SportEvent[]> {
+    try {
+      const res = await adminApi.getEsportsLive();
+      const events = (res.data || []) as SportEvent[];
+      if (events.length > 0) return events;
+    } catch {
+      // Fall through to mock
+    }
+
     return [...MOCK_ESPORTS_LIVE];
   }
 }

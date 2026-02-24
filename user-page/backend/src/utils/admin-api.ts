@@ -93,6 +93,22 @@ export class AdminApiClient {
     return this.request<{ data: unknown[] }>(`/api/v1/external-api/sports/odds/${eventId}`);
   }
 
+  async getSportsLive(sport: string) {
+    return this.request<{ data: unknown[] }>(`/api/v1/external-api/sports/live/${sport}`);
+  }
+
+  async getEnrichedEvents(sport: string) {
+    return this.request<{ data: unknown[] }>(`/api/v1/external-api/sports/enriched/${sport}`);
+  }
+
+  async getEsportsLive() {
+    return this.request<{ data: unknown[] }>('/api/v1/external-api/esports/live');
+  }
+
+  async getEsportsCategories() {
+    return this.request<{ data: unknown[] }>('/api/v1/external-api/esports/categories');
+  }
+
   // Notification methods
   async notifyNewUser(user: { id: number; username: string; nickname: string; referrerCode: string }) {
     try {

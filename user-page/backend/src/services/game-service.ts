@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { GameCategory, Prisma } from '@prisma/client';
 import { createHmac } from 'crypto';
 import { config } from '../config.js';
+import { AdminApiClient } from '../utils/admin-api.js';
 
 interface PaginatedResult<T> {
   items: T[];
@@ -10,6 +11,8 @@ interface PaginatedResult<T> {
   limit: number;
   totalPages: number;
 }
+
+const adminApi = new AdminApiClient();
 
 export class GameService {
   constructor(private readonly fastify: FastifyInstance) {}
@@ -178,13 +181,25 @@ export class GameService {
       },
     });
 
-    // Generate HMAC-signed session token to avoid exposing userId in URL
-    const timestamp = Date.now();
-    const sessionToken = createHmac('sha256', config.jwt.secret)
-      .update(`${userId}:${game.externalId}:${timestamp}`)
-      .digest('hex')
-      .slice(0, 32);
-    const launchUrl = `https://game-placeholder.example.com/play?gameId=${game.externalId}&token=${sessionToken}&platform=${platform}&mode=real&t=${timestamp}`;
+    // Try admin backend RapidAPI proxy for real launch URL
+    let launchUrl: string;
+    try {
+      const res = await adminApi.launchGame({
+        userId,
+        gameId: game.externalId,
+        platform,
+        homeUrl: config.nodeEnv === 'production' ? 'https://user.example.com/games' : 'http://localhost:3002/games',
+      });
+      launchUrl = res.data.url;
+    } catch {
+      // Fallback: generate local HMAC-signed placeholder URL
+      const timestamp = Date.now();
+      const sessionToken = createHmac('sha256', config.jwt.secret)
+        .update(`${userId}:${game.externalId}:${timestamp}`)
+        .digest('hex')
+        .slice(0, 32);
+      launchUrl = `https://game-placeholder.example.com/play?gameId=${game.externalId}&token=${sessionToken}&platform=${platform}&mode=real&t=${timestamp}`;
+    }
 
     return {
       launchUrl,
@@ -216,8 +231,20 @@ export class GameService {
       throw { statusCode: 403, message: '현재 이용할 수 없는 게임입니다' };
     }
 
-    // Generate demo launch URL (money=0)
-    const launchUrl = `https://game-placeholder.example.com/play?gameId=${game.externalId}&userId=demo&platform=${platform}&mode=demo&money=0&t=${Date.now()}`;
+    // Try admin backend RapidAPI proxy for demo launch URL
+    let launchUrl: string;
+    try {
+      const res = await adminApi.launchGame({
+        userId: 0,
+        gameId: game.externalId,
+        platform,
+        homeUrl: config.nodeEnv === 'production' ? 'https://user.example.com/games' : 'http://localhost:3002/games',
+      });
+      launchUrl = res.data.url;
+    } catch {
+      // Fallback: placeholder demo URL
+      launchUrl = `https://game-placeholder.example.com/play?gameId=${game.externalId}&userId=demo&platform=${platform}&mode=demo&money=0&t=${Date.now()}`;
+    }
 
     return {
       launchUrl,
