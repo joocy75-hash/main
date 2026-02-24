@@ -111,100 +111,6 @@ interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
-// Mock data
-const MOCK_PROFILE: Profile = {
-  id: 1,
-  username: 'testuser',
-  nickname: '테스트유저',
-  phone: '01012345678',
-  status: 'active',
-  balance: '999949',
-  points: '50900',
-  bonusBalance: '0',
-  vipLevel: 1,
-  myReferralCode: 'TESTCODE',
-  createdAt: '2026-02-24T00:00:00Z',
-  lastLoginAt: '2026-02-24T14:30:00Z',
-};
-
-const MOCK_BETS: BetRecord[] = [
-  { id: 1, gameCategory: 'slot', gameName: 'Sweet Bonanza', betAmount: '50000', winAmount: '120000', result: 'win', createdAt: '2026-02-24T14:00:00Z' },
-  { id: 2, gameCategory: 'casino', gameName: 'Baccarat Live', betAmount: '100000', winAmount: '0', result: 'lose', createdAt: '2026-02-24T13:30:00Z' },
-  { id: 3, gameCategory: 'sports', gameName: '맨유 vs 리버풀', betAmount: '30000', winAmount: '0', result: 'pending', createdAt: '2026-02-24T13:00:00Z' },
-  { id: 4, gameCategory: 'holdem', gameName: 'Texas Holdem', betAmount: '200000', winAmount: '380000', result: 'win', createdAt: '2026-02-23T22:00:00Z' },
-  { id: 5, gameCategory: 'mini_game', gameName: 'Aviator', betAmount: '10000', winAmount: '25000', result: 'win', createdAt: '2026-02-23T21:00:00Z' },
-];
-
-const MOCK_MONEY_LOGS: MoneyLog[] = [
-  { id: 1, type: 'deposit', amount: '500000', balanceAfter: '999949', description: '입금 승인', createdAt: '2026-02-24T10:00:00Z' },
-  { id: 2, type: 'bet', amount: '-50000', balanceAfter: '499949', description: 'Sweet Bonanza 베팅', createdAt: '2026-02-24T14:00:00Z' },
-  { id: 3, type: 'win', amount: '120000', balanceAfter: '619949', description: 'Sweet Bonanza 당첨', createdAt: '2026-02-24T14:00:00Z' },
-  { id: 4, type: 'withdrawal', amount: '-200000', balanceAfter: '419949', description: '출금 신청', createdAt: '2026-02-23T18:00:00Z' },
-  { id: 5, type: 'bonus', amount: '50000', balanceAfter: '469949', description: '첫 입금 보너스', createdAt: '2026-02-23T10:00:00Z' },
-];
-
-const MOCK_LOGIN_HISTORY: LoginHistory[] = [
-  { id: 1, ip: '123.456.78.90', device: 'Desktop', os: 'macOS', browser: 'Chrome 120', createdAt: '2026-02-24T14:30:00Z' },
-  { id: 2, ip: '123.456.78.90', device: 'Mobile', os: 'iOS 18', browser: 'Safari', createdAt: '2026-02-24T09:15:00Z' },
-  { id: 3, ip: '111.222.33.44', device: 'Desktop', os: 'Windows 11', browser: 'Edge', createdAt: '2026-02-23T22:00:00Z' },
-  { id: 4, ip: '123.456.78.90', device: 'Desktop', os: 'macOS', browser: 'Chrome 120', createdAt: '2026-02-23T10:30:00Z' },
-];
-
-const MOCK_AFFILIATE: AffiliateDashboard = {
-  totalReferrals: 12,
-  thisMonthCommission: '5000',
-  totalCommission: '50000',
-  rollingRates: [
-    { category: '카지노', rate: '1.5' },
-    { category: '슬롯', rate: '5.0' },
-    { category: '홀덤', rate: '5.0' },
-    { category: '스포츠', rate: '5.0' },
-    { category: '슈팅', rate: '5.0' },
-    { category: '코인', rate: '5.0' },
-    { category: '미니게임', rate: '3.0' },
-  ],
-};
-
-const MOCK_MEMBERS: AffiliateMember[] = [
-  { id: 1, username: 'user001', nickname: '유저1', joinedAt: '2026-02-20T00:00:00Z', totalBet: '1000000', commission: '15000' },
-  { id: 2, username: 'user002', nickname: '유저2', joinedAt: '2026-02-21T00:00:00Z', totalBet: '500000', commission: '7500' },
-  { id: 3, username: 'user003', nickname: '유저3', joinedAt: '2026-02-22T00:00:00Z', totalBet: '300000', commission: '4500' },
-];
-
-const MOCK_COMMISSIONS: CommissionRecord[] = [
-  { id: 1, type: 'rolling', gameCategory: '슬롯', amount: '2500', fromUser: 'user001', createdAt: '2026-02-24T12:00:00Z' },
-  { id: 2, type: 'rolling', gameCategory: '카지노', amount: '1500', fromUser: 'user002', createdAt: '2026-02-24T11:00:00Z' },
-  { id: 3, type: 'rolling', gameCategory: '슬롯', amount: '1000', fromUser: 'user001', createdAt: '2026-02-23T15:00:00Z' },
-];
-
-const MOCK_MESSAGES: Message[] = [
-  { id: 1, title: '입금 승인 알림', content: '500,000원 입금이 승인되었습니다.', isRead: false, createdAt: '2026-02-24T14:30:00Z' },
-  { id: 2, title: '출석체크 보상 지급', content: '출석체크 보상 1,000P가 지급되었습니다.', isRead: false, createdAt: '2026-02-24T13:00:00Z' },
-  { id: 3, title: '스핀 보상 지급', content: '럭키스핀 보상 5,000P가 지급되었습니다.', isRead: true, createdAt: '2026-02-23T20:00:00Z' },
-  { id: 4, title: '환영합니다!', content: 'Game Platform에 가입하신 것을 환영합니다. 다양한 게임과 이벤트를 즐겨보세요!', isRead: true, createdAt: '2026-02-22T12:00:00Z' },
-];
-
-const MOCK_INQUIRIES: Inquiry[] = [
-  {
-    id: 1,
-    title: '입금 지연 문의',
-    content: '입금한지 30분이 지났는데 아직 반영이 안 됩니다.',
-    status: 'answered',
-    createdAt: '2026-02-24T10:00:00Z',
-    replies: [
-      { id: 1, content: '입금한지 30분이 지났는데 아직 반영이 안 됩니다.', isAdmin: false, createdAt: '2026-02-24T10:00:00Z' },
-      { id: 2, content: '안녕하세요. 확인 결과 네트워크 지연으로 인해 입금이 늦어지고 있습니다. 현재 처리 완료되었으니 확인 부탁드립니다.', isAdmin: true, createdAt: '2026-02-24T10:30:00Z' },
-    ],
-  },
-  {
-    id: 2,
-    title: '게임 오류 신고',
-    content: 'Sweet Bonanza 게임 중 화면이 멈추는 현상이 발생합니다.',
-    status: 'pending',
-    createdAt: '2026-02-23T18:00:00Z',
-  },
-];
-
 interface ProfileState {
   // Profile
   profile: Profile | null;
@@ -310,7 +216,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<Profile>('/api/profile');
       set({ profile: data, isLoading: false });
     } catch {
-      set({ profile: MOCK_PROFILE, isLoading: false });
+      set({ profile: null, isLoading: false });
     }
   },
 
@@ -350,7 +256,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         isLoading: false,
       });
     } catch {
-      set({ bets: MOCK_BETS, betsTotal: MOCK_BETS.length, isLoading: false });
+      set({ bets: [], betsTotal: 0, isLoading: false });
     }
   },
 
@@ -370,7 +276,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         isLoading: false,
       });
     } catch {
-      set({ moneyLogs: MOCK_MONEY_LOGS, moneyLogsTotal: MOCK_MONEY_LOGS.length, isLoading: false });
+      set({ moneyLogs: [], moneyLogsTotal: 0, isLoading: false });
     }
   },
 
@@ -401,7 +307,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<LoginHistory[]>('/api/profile/login-history');
       set({ loginHistory: data, isLoading: false });
     } catch {
-      set({ loginHistory: MOCK_LOGIN_HISTORY, isLoading: false });
+      set({ loginHistory: [], isLoading: false });
     }
   },
 
@@ -411,7 +317,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<AffiliateDashboard>('/api/affiliate/dashboard');
       set({ affiliateDashboard: data });
     } catch {
-      set({ affiliateDashboard: MOCK_AFFILIATE });
+      set({ affiliateDashboard: null });
     }
   },
 
@@ -420,7 +326,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<PaginatedResponse<AffiliateMember>>('/api/affiliate/members', { page: String(page) });
       set({ affiliateMembers: data.data });
     } catch {
-      set({ affiliateMembers: MOCK_MEMBERS });
+      set({ affiliateMembers: [] });
     }
   },
 
@@ -429,7 +335,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<PaginatedResponse<CommissionRecord>>('/api/affiliate/commissions', { page: String(page) });
       set({ commissionRecords: data.data });
     } catch {
-      set({ commissionRecords: MOCK_COMMISSIONS });
+      set({ commissionRecords: [] });
     }
   },
 
@@ -444,7 +350,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         isLoading: false,
       });
     } catch {
-      set({ messages: MOCK_MESSAGES, messagesTotal: MOCK_MESSAGES.length, isLoading: false });
+      set({ messages: [], messagesTotal: 0, isLoading: false });
     }
   },
 
@@ -453,11 +359,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<{ count: number }>('/api/messages/unread-count');
       set({ unreadCount: data.count });
     } catch {
-      const { messages } = get();
-      const mockCount = messages.length > 0
-        ? messages.filter((m) => !m.isRead).length
-        : MOCK_MESSAGES.filter((m) => !m.isRead).length;
-      set({ unreadCount: mockCount });
+      set({ unreadCount: 0 });
     }
   },
 
@@ -470,8 +372,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       }));
       return data;
     } catch {
-      // Fallback: use local data
-      const msg = get().messages.find((m) => m.id === id) || MOCK_MESSAGES.find((m) => m.id === id) || null;
+      const msg = get().messages.find((m) => m.id === id) || null;
       if (msg) {
         set((state) => ({
           messages: state.messages.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
@@ -501,7 +402,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<Inquiry[]>('/api/inquiries');
       set({ inquiries: data, isLoading: false });
     } catch {
-      set({ inquiries: MOCK_INQUIRIES, isLoading: false });
+      set({ inquiries: [], isLoading: false });
     }
   },
 
@@ -510,7 +411,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const data = await api.get<Inquiry>(`/api/inquiries/${id}`);
       set({ selectedInquiry: data });
     } catch {
-      const inquiry = get().inquiries.find((i) => i.id === id) || MOCK_INQUIRIES.find((i) => i.id === id) || null;
+      const inquiry = get().inquiries.find((i) => i.id === id) || null;
       set({ selectedInquiry: inquiry });
     }
   },

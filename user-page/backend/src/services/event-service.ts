@@ -424,14 +424,18 @@ export class EventService {
         throw { statusCode: 400, message: '이미 보상을 수령했습니다' };
       }
 
-      // Update status to claimed
-      await tx.missionProgress.update({
-        where: { id: progress.id },
+      // Atomic CAS: only update if status is still 'completed' (prevents double-claim race condition)
+      const updated = await tx.missionProgress.updateMany({
+        where: { id: progress.id, status: 'completed' },
         data: {
           status: 'claimed',
           claimedAt: new Date(),
         },
       });
+
+      if (updated.count === 0) {
+        throw { statusCode: 400, message: '이미 보상을 수령했습니다' };
+      }
 
       // Grant reward
       await this.grantReward(
@@ -489,32 +493,46 @@ export class EventService {
     // Select prize
     const prize = this.selectPrize(configs);
 
-    // Execute in transaction
-    await prisma.$transaction(async (tx) => {
-      // Create spin log
-      await tx.spinLog.create({
-        data: {
-          userId,
-          spinDate: today,
-          prizeName: prize.prizeName,
-          amount: prize.amount,
-          rewardType: prize.rewardType,
-        },
-      });
+    try {
+      // Execute in transaction with DB-level count revalidation
+      await prisma.$transaction(async (tx) => {
+        // DB-level revalidation: count today's spins inside transaction
+        const dbCount = await tx.spinLog.count({
+          where: { userId, spinDate: today },
+        });
+        if (dbCount >= MAX_DAILY_SPINS) {
+          throw { statusCode: 400, message: `일일 스핀 횟수(${MAX_DAILY_SPINS}회)를 모두 사용했습니다` };
+        }
 
-      // Grant reward (skip if amount is 0 - "miss" prize)
-      const amountNum = parseFloat(prize.amount.toString());
-      if (amountNum > 0) {
-        await this.grantReward(
-          tx,
-          userId,
-          prize.rewardType,
-          prize.amount,
-          'spin',
-          `럭키스핀 보상: ${prize.prizeName}`,
-        );
-      }
-    });
+        // Create spin log
+        await tx.spinLog.create({
+          data: {
+            userId,
+            spinDate: today,
+            prizeName: prize.prizeName,
+            amount: prize.amount,
+            rewardType: prize.rewardType,
+          },
+        });
+
+        // Grant reward (skip if amount is 0 - "miss" prize)
+        const amountNum = parseFloat(prize.amount.toString());
+        if (amountNum > 0) {
+          await this.grantReward(
+            tx,
+            userId,
+            prize.rewardType,
+            prize.amount,
+            'spin',
+            `럭키스핀 보상: ${prize.prizeName}`,
+          );
+        }
+      });
+    } catch (err) {
+      // Rollback Redis counter if DB transaction failed
+      await redis.decr(redisKey);
+      throw err;
+    }
 
     return {
       prizeName: prize.prizeName,
@@ -617,6 +635,17 @@ export class EventService {
           orderBy: { createdAt: 'desc' },
           select: { amount: true },
         });
+
+        // Validate minimum deposit requirement
+        if (promo.minDeposit) {
+          if (!recentDeposit || recentDeposit.amount.lt(promo.minDeposit)) {
+            throw {
+              statusCode: 400,
+              message: `최소 입금액 ${promo.minDeposit} USDT 이상이 필요합니다`,
+            };
+          }
+        }
+
         if (recentDeposit) {
           const calculated = recentDeposit.amount.mul(promo.bonusRate).div(100);
           bonusAmount = calculated.gt(promo.maxBonus) ? promo.maxBonus : calculated;

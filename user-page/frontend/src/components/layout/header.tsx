@@ -37,16 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { GAME_CATEGORIES } from '@/lib/constants';
 import { useProfileStore } from '@/stores/profile-store';
-
-// Placeholder auth state (will be wired to auth store later)
-const MOCK_USER = {
-  isLoggedIn: true,
-  username: 'testuser',
-  nickname: '테스트유저',
-  balance: 1250000,
-  points: 35000,
-  notifications: 3,
-};
+import { useAuthStore } from '@/stores/auth-store';
 
 const formatKRW = (amount: number) => {
   return new Intl.NumberFormat('ko-KR').format(amount);
@@ -67,19 +58,19 @@ const SUPPORT_MENU = [
 export const Header = ({ className }: { className?: string }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { unreadCount, fetchUnreadCount } = useProfileStore();
-  const user = MOCK_USER;
+  const { user: authUser, isAuthenticated, logout } = useAuthStore();
 
-  // Poll unread count every 60s
+  // Poll unread count every 60s (only when authenticated)
   useEffect(() => {
+    if (!isAuthenticated) return;
     fetchUnreadCount();
     const interval = setInterval(() => {
       fetchUnreadCount();
     }, 60000);
     return () => clearInterval(interval);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Use real unread count from store, fallback to mock
-  const notificationCount = unreadCount > 0 ? unreadCount : user.notifications;
+  const notificationCount = unreadCount;
 
   return (
     <header
@@ -178,13 +169,13 @@ export const Header = ({ className }: { className?: string }) => {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          {user.isLoggedIn ? (
+          {isAuthenticated && authUser ? (
             <>
               {/* Balance (compact on mobile) */}
               <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-2.5 py-1.5 lg:px-3">
                 <Wallet className="size-4 text-accent" />
                 <span className="text-xs font-semibold lg:text-sm">
-                  {formatKRW(user.balance)}
+                  {formatKRW(Number(authUser.balance) || 0)}
                 </span>
                 <span className="hidden text-xs text-muted-foreground lg:inline">
                   원
@@ -218,20 +209,20 @@ export const Header = ({ className }: { className?: string }) => {
                   >
                     <Avatar className="size-7">
                       <AvatarFallback className="bg-primary/20 text-xs text-primary">
-                        {user.nickname.charAt(0)}
+                        {authUser.nickname.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <span className="hidden text-sm lg:inline">
-                      {user.nickname}
+                      {authUser.nickname}
                     </span>
                     <ChevronDown className="hidden size-3 lg:block" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{user.nickname}</p>
+                    <p className="text-sm font-medium">{authUser.nickname}</p>
                     <p className="text-xs text-muted-foreground">
-                      @{user.username}
+                      @{authUser.username}
                     </p>
                   </div>
                   <DropdownMenuSeparator />
@@ -254,7 +245,10 @@ export const Header = ({ className }: { className?: string }) => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                  <DropdownMenuItem
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                    onClick={() => logout().then(() => { window.location.href = '/login'; })}
+                  >
                     <LogOut className="size-4" />
                     로그아웃
                   </DropdownMenuItem>

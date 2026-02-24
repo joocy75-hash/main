@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api-client';
+import { setAuthCallbacks } from '@/lib/api-client';
 
 interface User {
   id: number;
@@ -126,9 +127,57 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: () => {
     const token = localStorage.getItem('accessToken');
     if (token) {
+      // Check if token is expired by decoding JWT payload
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const now = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < now) {
+          // Token expired - attempt refresh
+          const refresh = localStorage.getItem('refreshToken');
+          if (refresh) {
+            set({ isAuthenticated: false, isLoading: true });
+            get().refreshToken().then(() => {
+              set({ isLoading: false });
+            }).catch(() => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              set({ user: null, isAuthenticated: false, isLoading: false });
+            });
+            return;
+          }
+          localStorage.removeItem('accessToken');
+          set({ user: null, isAuthenticated: false, isLoading: false });
+          return;
+        }
+      } catch {
+        // Invalid token format - clear it
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        return;
+      }
       set({ isAuthenticated: true, isLoading: false });
     } else {
       set({ isAuthenticated: false, isLoading: false });
     }
+
+    // Register api-client auth sync callbacks
+    setAuthCallbacks({
+      onRefreshed: (accessToken, refreshToken) => {
+        // Sync Zustand store when api-client auto-refreshes
+        try {
+          const payload = JSON.parse(atob(accessToken.split('.')[1]));
+          if (payload.userId) {
+            set({ isAuthenticated: true });
+          }
+        } catch {
+          // Token parse failed, but localStorage is already updated
+          set({ isAuthenticated: true });
+        }
+      },
+      onCleared: () => {
+        set({ user: null, isAuthenticated: false });
+      },
+    });
   },
 }));

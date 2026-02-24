@@ -16,6 +16,10 @@ export const config = {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
+  corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3002,http://localhost:3001')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   admin: {
     apiUrl: process.env.ADMIN_API_URL || 'http://localhost:8002',
     serviceToken: (() => {

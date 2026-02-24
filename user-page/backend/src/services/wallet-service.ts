@@ -25,6 +25,20 @@ const MIN_DEPOSIT_AMOUNTS: Record<string, number> = {
 // Max addresses per user
 const MAX_ADDRESSES_PER_USER = 10;
 
+// Withdrawal password brute-force protection
+const WITHDRAWAL_PW_MAX_ATTEMPTS = 5;
+const WITHDRAWAL_PW_LOCKOUT_SECONDS = 900; // 15 minutes
+
+// Minimal Redis interface for withdrawal brute-force protection
+interface RedisLike {
+  get(key: string): Promise<string | null>;
+  set(...args: unknown[]): Promise<unknown>;
+  incr(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<number>;
+  del(...keys: string[]): Promise<number>;
+  ttl(key: string): Promise<number>;
+}
+
 // Address prefix by network for mock deposit address generation
 const ADDRESS_PREFIX: Record<string, { prefix: string; length: number }> = {
   'TRC20': { prefix: 'T', length: 34 },
@@ -193,6 +207,7 @@ export class WalletService {
 
   async createWithdrawal(
     prisma: PrismaClient,
+    redis: RedisLike,
     userId: number,
     coinType: CoinType,
     network: NetworkType,
@@ -200,7 +215,20 @@ export class WalletService {
     amount: number,
     password: string,
   ) {
-    // 1. Verify password
+    // 1. Check brute-force lockout
+    const lockKey = `wd_lock:${userId}`;
+    const attemptsKey = `wd_attempts:${userId}`;
+
+    const locked = await redis.get(lockKey);
+    if (locked) {
+      const ttl = await redis.ttl(lockKey);
+      throw {
+        statusCode: 429,
+        message: `비밀번호 시도 횟수 초과. ${Math.ceil(ttl / 60)}분 후 다시 시도해주세요`,
+      };
+    }
+
+    // 2. Verify password
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { passwordHash: true },
@@ -212,8 +240,24 @@ export class WalletService {
 
     const passwordValid = await compare(password, user.passwordHash);
     if (!passwordValid) {
-      throw { statusCode: 401, message: '비밀번호가 일치하지 않습니다' };
+      const attempts = await redis.incr(attemptsKey);
+      await redis.expire(attemptsKey, WITHDRAWAL_PW_LOCKOUT_SECONDS);
+      if (attempts >= WITHDRAWAL_PW_MAX_ATTEMPTS) {
+        await redis.set(lockKey, '1', 'EX', WITHDRAWAL_PW_LOCKOUT_SECONDS);
+        await redis.del(attemptsKey);
+        throw {
+          statusCode: 429,
+          message: '비밀번호 시도 횟수 초과. 15분 후 다시 시도해주세요',
+        };
+      }
+      throw {
+        statusCode: 401,
+        message: `비밀번호가 일치하지 않습니다 (${WITHDRAWAL_PW_MAX_ATTEMPTS - attempts}회 남음)`,
+      };
     }
+
+    // Clear failed attempts on successful password
+    await redis.del(attemptsKey);
 
     // 2. Calculate fee
     const feeKey = `${coinType}_${network}`;

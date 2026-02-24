@@ -38,18 +38,16 @@ export default fp(async (fastify: FastifyInstance) => {
         });
       }
 
-      // Check token blacklist in Redis
+      // Always check token blacklist after successful jwtVerify
       const authHeader = request.headers.authorization;
-      if (authHeader) {
-        const token = authHeader.replace('Bearer ', '');
-        const tokenHash = hashToken(token);
-        const isBlacklisted = await fastify.redis.get(`bl:${tokenHash}`);
-        if (isBlacklisted) {
-          return reply.code(401).send({
-            success: false,
-            error: '만료된 토큰입니다',
-          });
-        }
+      const token = authHeader?.replace('Bearer ', '') || '';
+      const tokenHash = hashToken(token);
+      const isBlacklisted = await fastify.redis.get(`bl:${tokenHash}`);
+      if (isBlacklisted) {
+        return reply.code(401).send({
+          success: false,
+          error: '만료된 토큰입니다',
+        });
       }
     } catch {
       return reply.code(401).send({

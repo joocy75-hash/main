@@ -4,6 +4,18 @@ interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
 }
 
+// Auth state sync callbacks (registered by auth-store to avoid circular imports)
+let onAuthRefreshed: ((accessToken: string, refreshToken: string) => void) | null = null;
+let onAuthCleared: (() => void) | null = null;
+
+export function setAuthCallbacks(callbacks: {
+  onRefreshed: (accessToken: string, refreshToken: string) => void;
+  onCleared: () => void;
+}) {
+  onAuthRefreshed = callbacks.onRefreshed;
+  onAuthCleared = callbacks.onCleared;
+}
+
 // Mutex to prevent concurrent refresh requests
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -32,6 +44,7 @@ async function doRefresh(): Promise<string | null> {
 
     localStorage.setItem('accessToken', data.data.accessToken);
     localStorage.setItem('refreshToken', data.data.refreshToken);
+    onAuthRefreshed?.(data.data.accessToken, data.data.refreshToken);
 
     return data.data.accessToken;
   } catch {
@@ -42,6 +55,7 @@ async function doRefresh(): Promise<string | null> {
 function clearAuth() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  onAuthCleared?.();
   if (typeof window !== 'undefined') {
     window.location.href = '/login';
   }

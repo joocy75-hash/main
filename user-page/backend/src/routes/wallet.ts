@@ -5,6 +5,20 @@ import { WalletService } from '../services/wallet-service.js';
 const coinTypeEnum = z.enum(['USDT', 'TRX', 'ETH', 'BTC', 'BNB']);
 const networkTypeEnum = z.enum(['TRC20', 'ERC20', 'BEP20', 'BTC']);
 
+// Valid coin-network combinations (see crypto-payment skill)
+const VALID_COIN_NETWORKS: Record<string, string[]> = {
+  'USDT': ['TRC20', 'ERC20', 'BEP20'],
+  'TRX': ['TRC20'],
+  'ETH': ['ERC20'],
+  'BTC': ['BTC'],
+  'BNB': ['BEP20'],
+};
+
+const isValidCoinNetwork = (coinType: string, network: string): boolean => {
+  const valid = VALID_COIN_NETWORKS[coinType];
+  return valid ? valid.includes(network) : false;
+};
+
 // Network-specific wallet address validators
 const addressValidators: Record<string, RegExp> = {
   'TRC20': /^T[a-zA-Z0-9]{33}$/,
@@ -18,6 +32,9 @@ const addAddressSchema = z.object({
   network: networkTypeEnum,
   address: z.string().min(1, '주소를 입력해주세요'),
   label: z.string().max(50, '라벨은 50자 이하로 입력해주세요').optional(),
+}).refine((data) => isValidCoinNetwork(data.coinType, data.network), {
+  message: '유효하지 않은 코인-네트워크 조합입니다',
+  path: ['network'],
 }).refine((data) => {
   const regex = addressValidators[data.network];
   return regex ? regex.test(data.address) : false;
@@ -27,6 +44,9 @@ const depositSchema = z.object({
   coinType: coinTypeEnum,
   network: networkTypeEnum,
   amount: z.number().positive('입금액은 0보다 커야 합니다'),
+}).refine((data) => isValidCoinNetwork(data.coinType, data.network), {
+  message: '유효하지 않은 코인-네트워크 조합입니다',
+  path: ['network'],
 });
 
 const withdrawSchema = z.object({
@@ -35,6 +55,9 @@ const withdrawSchema = z.object({
   address: z.string().min(1, '출금 주소를 입력해주세요'),
   amount: z.number().positive('출금액은 0보다 커야 합니다'),
   password: z.string().min(1, '비밀번호를 입력해주세요'),
+}).refine((data) => isValidCoinNetwork(data.coinType, data.network), {
+  message: '유효하지 않은 코인-네트워크 조합입니다',
+  path: ['network'],
 }).refine((data) => {
   const regex = addressValidators[data.network];
   return regex ? regex.test(data.address) : false;
@@ -228,6 +251,7 @@ export default async function walletRoutes(fastify: FastifyInstance) {
         const { coinType, network, address, amount, password } = parsed.data;
         const data = await walletService.createWithdrawal(
           fastify.prisma,
+          fastify.redis,
           userId,
           coinType,
           network,

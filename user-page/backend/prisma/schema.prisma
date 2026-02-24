@@ -156,6 +156,7 @@ model User {
   loginHistory      LoginHistory[]
   commissionRecords CommissionRecord[]
   refreshTokens     RefreshToken[]
+  userPromotions    UserPromotion[]
 
   @@map("users")
 }
@@ -487,8 +488,10 @@ model UserPromotion {
   status       String   @default("active") @db.VarChar(20) // active, completed, revoked
   claimedAt    DateTime @default(now()) @map("claimed_at")
 
+  user      User            @relation(fields: [userId], references: [id])
   promotion PromotionConfig @relation(fields: [promotionId], references: [id])
 
+  @@unique([userId, promotionId])
   @@map("user_promotions")
 }
 
