@@ -1,0 +1,36 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "tsx prisma/seed.ts",
+    "generate": "prisma generate"
+  },
+  "dependencies": {
+    "fastify": "^5",
+    "@fastify/cors": "^11",
+    "@fastify/jwt": "^9",
+    "@fastify/redis": "^7",
+    "@fastify/rate-limit": "^10",
+    "@prisma/client": "^6",
+    "bcryptjs": "^2.4",
+    "zod": "^3.24",
+    "dotenv": "^16",
+    "fastify-plugin": "^5",
+    "ua-parser-js": "^2"
+  },
+  "devDependencies": {
+    "prisma": "^6",
+    "typescript": "^5.7",
+    "tsx": "^4",
+    "@types/node": "^22",
+    "@types/bcryptjs": "^2.4",
+    "@types/ua-parser-js": "^0.7"
+  }
+}
