@@ -3,27 +3,26 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
+  User,
+  Wallet,
+  CreditCard,
+  ArrowDownToLine,
+  ArrowUpFromLine,
   FileText,
-  DollarSign,
+  History,
   Gem,
-  Clock,
+  Trophy,
   Users,
   Mail,
   Headset,
+  HelpCircle,
+  CalendarCheck,
+  Target,
   Lock,
   ChevronRight,
+  Copy,
+  Check,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
@@ -32,33 +31,57 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
 const VIP_NAMES: Record<number, { name: string; icon: string }> = {
-  1: { name: '브론즈', icon: '🥉' },
-  2: { name: '실버', icon: '🥈' },
-  3: { name: '골드', icon: '🥇' },
-  4: { name: '플래티넘', icon: '💎' },
-  5: { name: '다이아몬드', icon: '👑' },
-  6: { name: '마스터', icon: '🏆' },
-  7: { name: '그랜드마스터', icon: '⭐' },
-  8: { name: '챔피언', icon: '🌟' },
-  9: { name: '레전드', icon: '🔱' },
-  10: { name: '미소시아', icon: '✨' },
+  1: { name: 'Bronze', icon: '🥉' },
+  2: { name: 'Silver', icon: '🥈' },
+  3: { name: 'Gold', icon: '🥇' },
+  4: { name: 'Platinum', icon: '💎' },
+  5: { name: 'Diamond', icon: '👑' },
+  6: { name: 'Master', icon: '🏆' },
+  7: { name: 'Grand Master', icon: '⭐' },
+  8: { name: 'Champion', icon: '🌟' },
+  9: { name: 'Legend', icon: '🔱' },
+  10: { name: 'Mythic', icon: '✨' },
 };
+
+const QUICK_ACTIONS = [
+  { name: '입금', href: '/wallet/deposit', icon: ArrowDownToLine, color: 'text-emerald-400' },
+  { name: '출금', href: '/wallet/withdraw', icon: ArrowUpFromLine, color: 'text-blue-400' },
+  { name: '거래내역', href: '/wallet/transactions', icon: FileText, color: 'text-purple-400' },
+  { name: 'VIP', href: '/promotions/vip', icon: Trophy, color: 'text-amber-400' },
+];
+
+const PROMO_BANNERS = [
+  { name: '프로모션', desc: '이벤트 정보', href: '/promotions', gradient: 'from-purple-600 to-indigo-600', icon: '🎁' },
+  { name: '출석 보너스', desc: '매일 출석체크', href: '/promotions/attendance', gradient: 'from-blue-600 to-cyan-600', icon: '📅' },
+  { name: '럭키 스핀', desc: '스핀 & 윈', href: '/promotions/spin', gradient: 'from-pink-600 to-rose-600', icon: '🎰' },
+  { name: '미션 허브', desc: '미션 완료 보상', href: '/promotions/missions', gradient: 'from-amber-600 to-orange-600', icon: '🎯' },
+  { name: '포인트', desc: '포인트 전환', href: '/promotions/points', gradient: 'from-emerald-600 to-teal-600', icon: '💰' },
+];
+
+const GENERAL_MENU = [
+  { name: '프로필 설정', desc: '개인정보 수정', href: '/profile', icon: User, color: 'text-blue-400' },
+  { name: '내 지갑', desc: '잔액 · 포인트', href: '/wallet/deposit', icon: Wallet, color: 'text-emerald-400' },
+  { name: '입금', desc: '암호화폐 입금', href: '/wallet/deposit', icon: ArrowDownToLine, color: 'text-green-400' },
+  { name: '출금', desc: '암호화폐 출금', href: '/wallet/withdraw', icon: ArrowUpFromLine, color: 'text-orange-400' },
+  { name: '거래 내역', desc: '입출금 · 보너스', href: '/wallet/transactions', icon: CreditCard, color: 'text-purple-400' },
+  { name: '베팅 내역', desc: '베팅 기록 · 상태', href: '/profile/bets', icon: FileText, color: 'text-red-400' },
+  { name: '포인트 내역', desc: '적립 · 사용 현황', href: '/promotions/points', icon: Gem, color: 'text-cyan-400' },
+];
+
+const SERVICE_MENU = [
+  { name: '추천/커미션', desc: '어필리에이트', href: '/affiliate', icon: Users, color: 'text-amber-400' },
+  { name: '쪽지함', desc: '알림 · 공지', href: '/messages', icon: Mail, color: 'text-blue-400' },
+  { name: '고객센터', desc: '문의 · 도움말', href: '/support', icon: Headset, color: 'text-green-400' },
+  { name: '출석체크', desc: '매일 보상 받기', href: '/promotions/attendance', icon: CalendarCheck, color: 'text-pink-400' },
+  { name: '미션', desc: '미션 완료 보상', href: '/promotions/missions', icon: Target, color: 'text-orange-400' },
+  { name: '도움말', desc: '자주 묻는 질문', href: '/support', icon: HelpCircle, color: 'text-slate-400' },
+];
 
 const formatAmount = (value: string) =>
   new Intl.NumberFormat('ko-KR').format(Number(value));
-
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-};
 
 const formatDateTime = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -70,16 +93,6 @@ const formatDateTime = (dateStr: string) => {
     minute: '2-digit',
   });
 };
-
-const QUICK_LINKS = [
-  { name: '베팅내역', href: '/profile/bets', icon: FileText },
-  { name: '머니내역', href: '/profile/money', icon: DollarSign },
-  { name: '포인트내역', href: '/promotions/points', icon: Gem },
-  { name: '접속내역', href: '/profile/login-history', icon: Clock },
-  { name: '추천/커미션', href: '/affiliate', icon: Users },
-  { name: '쪽지함', href: '/messages', icon: Mail },
-  { name: '고객센터', href: '/support', icon: Headset },
-];
 
 export default function ProfilePage() {
   const {
@@ -93,12 +106,12 @@ export default function ProfilePage() {
   const [editPhone, setEditPhone] = useState('');
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -142,205 +155,338 @@ export default function ProfilePage() {
     }
   };
 
+  const handleCopyReferralCode = () => {
+    if (profile?.myReferralCode) {
+      navigator.clipboard.writeText(profile.myReferralCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
   if (!profile) return null;
 
   const vipData = VIP_NAMES[profile.vipLevel] || VIP_NAMES[1];
+  const vipProgress = Math.min((profile.vipLevel / 10) * 100, 100);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <span>👤</span> 마이페이지
-          </CardTitle>
-        </CardHeader>
-      </Card>
+      {/* User Header Card */}
+      <div className="rounded-lg bg-white p-4 md:p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          {/* Left: Avatar + Info */}
+          <div className="flex items-center gap-4">
+            {/* Avatar */}
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 text-2xl font-bold text-white">
+              {profile.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-[#252531]">{profile.username}</span>
+                <span className="bg-[#f4b53e]/90 px-2 py-0.5 text-xs font-bold text-black rounded-md">
+                  VIP {profile.vipLevel}
+                </span>
+              </div>
+              <p className="text-xs text-[#707070]">
+                마지막 접속: {formatDateTime(profile.lastLoginAt)}
+              </p>
+              <div className="mt-1 flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-[#707070]">잔액</span>
+                  <span className="text-sm font-bold text-[#f4b53e]">{formatAmount(profile.balance)}</span>
+                </div>
+                <div className="h-3 w-px bg-[#dddddd]" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-[#707070]">포인트</span>
+                  <span className="text-sm font-bold text-[#f4b53e]">{formatAmount(profile.points)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      {/* Basic info */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">기본 정보</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+          {/* Right: Quick Actions */}
+          <div className="flex items-center gap-2 md:gap-4">
+            {QUICK_ACTIONS.map((action) => {
+              const Icon = action.icon;
+              return (
+                <Link
+                  key={action.href + action.name}
+                  href={action.href}
+                  className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors hover:bg-[#edeef3]"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#edeef3]">
+                    <Icon className={`size-5 ${action.color}`} />
+                  </div>
+                  <span className="text-xs text-[#252531]">{action.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* VIP Progress */}
+        <div className="mt-4 flex items-center gap-3">
+          <span className="text-xs text-[#707070]">
+            {vipData.icon} {vipData.name}
+          </span>
+          <Progress value={vipProgress} className="h-1.5 flex-1" />
+          <span className="text-xs text-[#707070]">
+            {profile.vipLevel < 10 ? `Next: ${VIP_NAMES[(profile.vipLevel + 1) as keyof typeof VIP_NAMES]?.name || ''}` : 'MAX'}
+          </span>
+        </div>
+      </div>
+
+      {/* Promo Banners Row */}
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+        {PROMO_BANNERS.map((promo) => (
+          <Link
+            key={promo.href + promo.name}
+            href={promo.href}
+            className={`flex min-w-[160px] flex-1 items-center gap-3 rounded-lg bg-gradient-to-r ${promo.gradient} p-3 transition-transform hover:scale-[1.02]`}
+          >
+            <span className="text-2xl">{promo.icon}</span>
+            <div>
+              <p className="text-sm font-bold text-white">{promo.name}</p>
+              <p className="text-xs text-white/70">{promo.desc}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* General Section */}
+      <div className="rounded-lg bg-white p-5">
+        <h3 className="mb-5 border-l-4 border-[#f4b53e] pl-4 text-lg font-bold text-[#252531]">
+          General
+        </h3>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {GENERAL_MENU.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href + item.name}
+                href={item.href}
+                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[#edeef3]"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#edeef3]">
+                  <Icon className={`size-5 ${item.color}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#252531]">{item.name}</p>
+                  <p className="truncate text-xs text-[#707070]">{item.desc}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Service Section */}
+      <div className="rounded-lg bg-white p-5">
+        <h3 className="mb-5 border-l-4 border-[#f4b53e] pl-4 text-lg font-bold text-[#252531]">
+          Service
+        </h3>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {SERVICE_MENU.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href + item.name}
+                href={item.href}
+                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[#edeef3]"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#edeef3]">
+                  <Icon className={`size-5 ${item.color}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#252531]">{item.name}</p>
+                  <p className="truncate text-xs text-[#707070]">{item.desc}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Account Section */}
+      <div className="rounded-lg bg-white p-5">
+        <h3 className="mb-5 border-l-4 border-[#f4b53e] pl-4 text-lg font-bold text-[#252531]">
+          Account
+        </h3>
+        <div className="flex flex-col gap-4">
           {/* Username */}
-          <div className="flex items-center justify-between">
-            <Label className="text-sm text-muted-foreground">아이디</Label>
-            <span className="text-sm font-medium">{profile.username}</span>
+          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <User className="size-4 text-[#707070]" />
+              <label className="text-sm text-[#707070]">아이디</label>
+            </div>
+            <span className="text-sm font-medium text-[#252531]">{profile.username}</span>
           </div>
 
           {/* Nickname */}
-          <div className="flex items-center justify-between gap-2">
-            <Label className="shrink-0 text-sm text-muted-foreground">닉네임</Label>
+          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <User className="size-4 text-[#707070]" />
+              <label className="text-sm text-[#707070]">닉네임</label>
+            </div>
             {isEditingNickname ? (
               <div className="flex items-center gap-2">
-                <Input
+                <input
                   value={editNickname}
                   onChange={(e) => setEditNickname(e.target.value)}
-                  className="h-8 w-32"
+                  className="h-9 w-32 rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
                 />
-                <Button size="sm" variant="default" onClick={handleSaveNickname}>
+                <button
+                  className="bg-[#f4b53e] text-black font-medium rounded-md px-4 py-2 hover:bg-[#f4b53e]/90 text-sm"
+                  onClick={handleSaveNickname}
+                >
                   저장
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditingNickname(false)}>
+                </button>
+                <button
+                  className="text-[#707070] hover:bg-[#edeef3] rounded-md px-3 py-1 text-sm"
+                  onClick={() => setIsEditingNickname(false)}
+                >
                   취소
-                </Button>
+                </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{profile.nickname}</span>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditingNickname(true)}>
+                <span className="text-sm font-medium text-[#252531]">{profile.nickname}</span>
+                <button
+                  className="text-[#f4b53e] hover:bg-[#f4b53e]/10 text-xs h-7 px-2 rounded"
+                  onClick={() => setIsEditingNickname(true)}
+                >
                   수정
-                </Button>
+                </button>
               </div>
             )}
           </div>
 
           {/* Phone */}
-          <div className="flex items-center justify-between gap-2">
-            <Label className="shrink-0 text-sm text-muted-foreground">전화번호</Label>
+          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <User className="size-4 text-[#707070]" />
+              <label className="text-sm text-[#707070]">전화번호</label>
+            </div>
             {isEditingPhone ? (
               <div className="flex items-center gap-2">
-                <Input
+                <input
                   value={editPhone}
                   onChange={(e) => setEditPhone(e.target.value)}
-                  className="h-8 w-36"
+                  className="h-9 w-36 rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
                 />
-                <Button size="sm" variant="default" onClick={handleSavePhone}>
+                <button
+                  className="bg-[#f4b53e] text-black font-medium rounded-md px-4 py-2 hover:bg-[#f4b53e]/90 text-sm"
+                  onClick={handleSavePhone}
+                >
                   저장
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditingPhone(false)}>
+                </button>
+                <button
+                  className="text-[#707070] hover:bg-[#edeef3] rounded-md px-3 py-1 text-sm"
+                  onClick={() => setIsEditingPhone(false)}
+                >
                   취소
-                </Button>
+                </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{profile.phone}</span>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditingPhone(true)}>
+                <span className="text-sm font-medium text-[#252531]">{profile.phone}</span>
+                <button
+                  className="text-[#f4b53e] hover:bg-[#f4b53e]/10 text-xs h-7 px-2 rounded"
+                  onClick={() => setIsEditingPhone(true)}
+                >
                   수정
-                </Button>
+                </button>
               </div>
             )}
           </div>
 
-          {/* Join date */}
-          <div className="flex items-center justify-between">
-            <Label className="text-sm text-muted-foreground">가입일</Label>
-            <span className="text-sm">{formatDate(profile.createdAt)}</span>
-          </div>
-
-          {/* Last login */}
-          <div className="flex items-center justify-between">
-            <Label className="text-sm text-muted-foreground">마지막 접속</Label>
-            <span className="text-sm">{formatDateTime(profile.lastLoginAt)}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* VIP and balance */}
-      <Card>
-        <CardContent className="flex flex-col gap-3 pt-4">
-          {/* VIP */}
-          <div className="flex items-center gap-2">
-            <span className="text-xl">{vipData.icon}</span>
-            <div>
-              <p className="text-sm font-bold">
-                VIP: {vipData.name} (Lv.{profile.vipLevel})
-              </p>
+          {/* Referral Code */}
+          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Users className="size-4 text-[#707070]" />
+              <label className="text-sm text-[#707070]">추천코드</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm font-bold text-[#f4b53e]">{profile.myReferralCode}</span>
+              <button
+                className="text-[#707070] hover:bg-[#edeef3] rounded-md px-3 py-1 h-7"
+                onClick={handleCopyReferralCode}
+              >
+                {copiedCode ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+              </button>
             </div>
           </div>
 
-          <Separator />
+          {/* Login history & Password */}
+          <div className="flex gap-3">
+            <Link
+              href="/profile/login-history"
+              className="flex flex-1 items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3 transition-colors hover:bg-[#edeef3]"
+            >
+              <div className="flex items-center gap-3">
+                <History className="size-4 text-[#707070]" />
+                <span className="text-sm text-[#252531]">접속 내역</span>
+              </div>
+              <ChevronRight className="size-4 text-[#707070]" />
+            </Link>
 
-          {/* Balance */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground">잔액</p>
-              <p className="text-lg font-bold text-primary">{formatAmount(profile.balance)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">포인트</p>
-              <p className="text-lg font-bold text-yellow-400">{formatAmount(profile.points)}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Password change */}
-      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Lock className="size-4" />
-            비밀번호 변경
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>비밀번호 변경</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div>
-              <Label className="text-sm">현재 비밀번호</Label>
-              <Input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm">새 비밀번호</Label>
-              <Input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1"
-                placeholder="8자 이상, 영문+숫자"
-              />
-            </div>
-            <div>
-              <Label className="text-sm">새 비밀번호 확인</Label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            {passwordError && (
-              <p className="text-sm text-destructive">{passwordError}</p>
-            )}
-            <Button onClick={handleChangePassword}>변경하기</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Quick links */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">바로가기</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-1">
-            {QUICK_LINKS.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center justify-between rounded-md px-3 py-2.5 transition-colors hover:bg-secondary"
-                >
+            <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+              <DialogTrigger asChild>
+                <button className="flex flex-1 items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3 transition-colors hover:bg-[#edeef3]">
                   <div className="flex items-center gap-3">
-                    <Icon className="size-4 text-muted-foreground" />
-                    <span className="text-sm">{link.name}</span>
+                    <Lock className="size-4 text-[#707070]" />
+                    <span className="text-sm text-[#252531]">비밀번호 변경</span>
                   </div>
-                  <ChevronRight className="size-4 text-muted-foreground" />
-                </Link>
-              );
-            })}
+                  <ChevronRight className="size-4 text-[#707070]" />
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>비밀번호 변경</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label className="text-sm text-[#707070]">현재 비밀번호</label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="mt-1 h-9 w-full rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-[#707070]">새 비밀번호</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="mt-1 h-9 w-full rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                      placeholder="8자 이상, 영문+숫자"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-[#707070]">새 비밀번호 확인</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="mt-1 h-9 w-full rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                    />
+                  </div>
+                  {passwordError && (
+                    <p className="text-sm text-red-500">{passwordError}</p>
+                  )}
+                  <button
+                    className="w-full bg-[#f4b53e] text-black font-medium rounded-md py-2 hover:bg-[#f4b53e]/90"
+                    onClick={handleChangePassword}
+                  >
+                    변경하기
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -27,7 +27,15 @@ export const config = {
       if (!t && (process.env.NODE_ENV || 'development') === 'production') {
         throw new Error('ADMIN_SERVICE_TOKEN environment variable is required in production');
       }
-      return t || '';
+      return t || 'user-page-service-token-2026';
     })(),
+  },
+  pandaScore: {
+    apiKey: process.env.PANDASCORE_API_KEY || '',
+    baseUrl: 'https://api.pandascore.co',
+  },
+  apiFootball: {
+    apiKey: process.env.API_FOOTBALL_KEY || '',
+    baseUrl: 'https://v3.football.api-sports.io',
   },
 } as const;

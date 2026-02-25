@@ -16,7 +16,7 @@ export default function MainLayout({
         <Suspense>
           <Sidebar className="hidden lg:block" />
         </Suspense>
-        <main className="flex-1 p-4 pb-20 lg:p-6 lg:pb-6">{children}</main>
+        <main className="flex-1 p-4 pb-16 lg:p-6 lg:pb-6">{children}</main>
       </div>
       <Footer className="hidden lg:block" />
       <MobileNav className="lg:hidden" />

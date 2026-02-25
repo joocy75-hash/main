@@ -18,7 +18,7 @@ from app.api.v1.content import router as content_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.deposit_bonus import router as deposit_bonus_router
 from app.api.v1.events import router as events_router
-from app.api.v1.external_api import router as external_api_router
+from app.api.v1.external_api import router as external_api_router, user_proxy_router
 from app.api.v1.exchange_rate import router as exchange_rate_router
 from app.api.v1.finance import router as finance_router
 from app.api.v1.fraud import router as fraud_router
@@ -82,7 +82,7 @@ app.add_middleware(
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Service-Token"],
     expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "Retry-After"],
 )
 
@@ -131,6 +131,7 @@ app.include_router(mission_router, prefix="/api/v1")
 app.include_router(rewards_router, prefix="/api/v1")
 app.include_router(admin_log_router, prefix="/api/v1")
 app.include_router(external_api_router, prefix="/api/v1")
+app.include_router(user_proxy_router, prefix="/api/v1")
 
 
 @app.get("/health")

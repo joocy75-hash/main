@@ -2,17 +2,6 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Loader2, Wallet } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -20,14 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { COINS, DEFAULT_NETWORK } from '@/lib/constants';
 import { useWalletStore } from '@/stores/wallet-store';
@@ -52,15 +33,15 @@ const DAILY_LIMITS: Record<string, number> = {
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variants: Record<string, { label: string; className: string }> = {
-    pending: { label: '대기중', className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-    approved: { label: '승인', className: 'bg-green-500/20 text-green-400 border-green-500/30' },
-    rejected: { label: '거부', className: 'bg-red-500/20 text-red-400 border-red-500/30' },
+    pending: { label: '대기중', className: 'bg-yellow-50 text-yellow-600' },
+    approved: { label: '승인', className: 'bg-green-50 text-green-600' },
+    rejected: { label: '거부', className: 'bg-red-50 text-red-500' },
   };
   const v = variants[status] || variants.pending;
   return (
-    <Badge variant="outline" className={v.className}>
+    <span className={cn('inline-block rounded px-2 py-0.5 text-xs font-medium', v.className)}>
       {v.label}
-    </Badge>
+    </span>
   );
 };
 
@@ -117,7 +98,6 @@ export default function WithdrawPage() {
     fetchWithdrawals();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reset address selection when coin changes
   useEffect(() => {
     setSelectedAddressId('');
     setManualAddress('');
@@ -189,28 +169,29 @@ export default function WithdrawPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">출금</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-5">
+      {/* Withdraw form card */}
+      <div className="rounded-lg bg-white shadow-sm">
+        <div className="border-b border-[#dddddd] px-5 py-4">
+          <h2 className="text-lg font-bold text-[#252531]">출금</h2>
+        </div>
+        <div className="flex flex-col gap-5 p-5">
           {/* Balance display */}
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary/30 px-4 py-3">
-            <Wallet className="size-5 text-accent" />
+          <div className="flex items-center gap-3 rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-4 py-3">
+            <Wallet className="size-5 text-[#f4b53e]" />
             <div>
-              <p className="text-xs text-muted-foreground">보유 잔액</p>
-              <p className="text-lg font-bold">
+              <p className="text-xs text-[#707070]">보유 잔액</p>
+              <p className="text-lg font-bold text-[#252531]">
                 {parseFloat(balance).toLocaleString('ko-KR')}{' '}
-                <span className="text-sm font-normal text-muted-foreground">USDT</span>
+                <span className="text-sm font-normal text-[#707070]">USDT</span>
               </p>
             </div>
           </div>
 
           {/* Coin selection */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               코인 선택
-            </Label>
+            </label>
             <div className="flex flex-wrap gap-2">
               {COINS.map((coin) => (
                 <button
@@ -219,8 +200,8 @@ export default function WithdrawPage() {
                   className={cn(
                     'flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
                     selectedCoin === coin.type
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      ? 'border-[#f4b53e] bg-[#fef8e8] text-[#f4b53e]'
+                      : 'border-[#dddddd] bg-white text-[#707070] hover:bg-[#f8f9fc] hover:text-[#252531]'
                   )}
                 >
                   <span className="text-base">{coin.icon}</span>
@@ -232,9 +213,9 @@ export default function WithdrawPage() {
 
           {/* Withdraw address */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               출금 주소
-            </Label>
+            </label>
             <Select
               value={selectedAddressId}
               onValueChange={(val) => {
@@ -242,7 +223,7 @@ export default function WithdrawPage() {
                 if (val !== 'manual') setManualAddress('');
               }}
             >
-              <SelectTrigger className="bg-card">
+              <SelectTrigger className="border-[#dddddd] bg-white">
                 <SelectValue placeholder="출금 주소 선택" />
               </SelectTrigger>
               <SelectContent>
@@ -256,8 +237,8 @@ export default function WithdrawPage() {
             </Select>
 
             {selectedAddressId === 'manual' && (
-              <Input
-                className="mt-2 bg-card"
+              <input
+                className="mt-2 w-full rounded-lg border border-[#dddddd] bg-white px-3 py-2.5 text-sm text-[#252531] placeholder:text-[#707070] outline-none focus:border-[#f4b53e]"
                 placeholder={`${selectedCoin} 주소 입력`}
                 value={manualAddress}
                 onChange={(e) => setManualAddress(e.target.value)}
@@ -267,11 +248,11 @@ export default function WithdrawPage() {
 
           {/* Amount input */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               출금 금액
-            </Label>
+            </label>
             <div className="relative">
-              <Input
+              <input
                 type="number"
                 placeholder="0"
                 value={amount}
@@ -279,22 +260,22 @@ export default function WithdrawPage() {
                   setAmount(e.target.value);
                   setError('');
                 }}
-                className="bg-card pr-16"
+                className="w-full rounded-lg border border-[#dddddd] bg-white px-3 py-2.5 pr-16 text-sm text-[#252531] placeholder:text-[#707070] outline-none focus:border-[#f4b53e]"
                 min={0}
                 step="any"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#707070]">
                 {selectedCoin}
               </span>
             </div>
-            <div className="mt-2 flex flex-col gap-1 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-col gap-1 text-xs text-[#707070]">
               <div className="flex justify-between">
                 <span>수수료:</span>
                 <span>{fee} {selectedCoin}</span>
               </div>
               <div className="flex justify-between">
                 <span>실수령:</span>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-[#252531]">
                   {netAmount > 0 ? netAmount.toLocaleString('ko-KR') : '0'} {selectedCoin}
                 </span>
               </div>
@@ -305,14 +286,15 @@ export default function WithdrawPage() {
             </div>
           </div>
 
-          <Separator />
+          {/* Divider */}
+          <div className="border-t border-[#dddddd]" />
 
           {/* Password */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               비밀번호 확인
-            </Label>
-            <Input
+            </label>
+            <input
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={password}
@@ -320,21 +302,25 @@ export default function WithdrawPage() {
                 setPassword(e.target.value);
                 setError('');
               }}
-              className="bg-card"
+              className="w-full rounded-lg border border-[#dddddd] bg-white px-3 py-2.5 text-sm text-[#252531] placeholder:text-[#707070] outline-none focus:border-[#f4b53e]"
             />
           </div>
 
           {/* Error message */}
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-red-500">{error}</p>
           )}
 
           {/* Submit button */}
-          <Button
-            size="lg"
+          <button
             onClick={handleSubmit}
             disabled={isSubmitting || !isFormValid}
-            className="w-full"
+            className={cn(
+              'flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold text-white transition-opacity',
+              isSubmitting || !isFormValid
+                ? 'cursor-not-allowed bg-[#dddddd] text-[#707070]'
+                : 'bg-gradient-to-b from-[#ffd651] to-[#fe960e] hover:opacity-90'
+            )}
           >
             {isSubmitting ? (
               <>
@@ -344,19 +330,19 @@ export default function WithdrawPage() {
             ) : (
               '출금 신청'
             )}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
-      {/* Recent withdrawals */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">최근 출금 내역</CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Recent withdrawals card */}
+      <div className="rounded-lg bg-white shadow-sm">
+        <div className="border-b border-[#dddddd] px-5 py-4">
+          <h2 className="text-base font-bold text-[#252531]">최근 출금 내역</h2>
+        </div>
+        <div className="p-5">
           {withdrawals.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#707070]">
                 출금 내역이 없습니다
               </p>
             </div>
@@ -364,38 +350,38 @@ export default function WithdrawPage() {
             <>
               {/* Desktop table */}
               <div className="hidden sm:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>일시</TableHead>
-                      <TableHead>코인</TableHead>
-                      <TableHead className="text-right">금액</TableHead>
-                      <TableHead>TX Hash</TableHead>
-                      <TableHead className="text-center">상태</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#dddddd] bg-[#f8f9fc]">
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">일시</th>
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">코인</th>
+                      <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">금액</th>
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">TX Hash</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-medium text-[#707070]">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {withdrawals.slice(0, 5).map((w: Withdrawal) => (
-                      <TableRow key={w.id}>
-                        <TableCell className="text-sm text-muted-foreground">
+                      <tr key={w.id} className="border-b border-[#dddddd] last:border-b-0">
+                        <td className="px-3 py-2.5 text-sm text-[#707070]">
                           {formatDate(w.createdAt)}
-                        </TableCell>
-                        <TableCell className="text-sm font-medium">
+                        </td>
+                        <td className="px-3 py-2.5 text-sm font-medium text-[#252531]">
                           {w.coinType}
-                        </TableCell>
-                        <TableCell className="text-right text-sm font-medium text-red-400">
+                        </td>
+                        <td className="px-3 py-2.5 text-right text-sm font-medium text-red-500">
                           -{parseFloat(w.amount).toLocaleString('ko-KR')}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs text-muted-foreground">
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-[#707070]">
                           {truncateHash(w.txHash || '')}
-                        </TableCell>
-                        <TableCell className="text-center">
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
                           <StatusBadge status={w.status} />
-                        </TableCell>
-                      </TableRow>
+                        </td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
 
               {/* Mobile card layout */}
@@ -403,18 +389,18 @@ export default function WithdrawPage() {
                 {withdrawals.slice(0, 5).map((w: Withdrawal) => (
                   <div
                     key={w.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 px-3 py-2.5"
+                    className="flex items-center justify-between rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-2.5"
                   >
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{w.coinType}</span>
+                        <span className="text-sm font-medium text-[#252531]">{w.coinType}</span>
                         <StatusBadge status={w.status} />
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-[#707070]">
                         {formatDate(w.createdAt)}
                       </span>
                     </div>
-                    <span className="text-sm font-semibold text-red-400">
+                    <span className="text-sm font-semibold text-red-500">
                       -{parseFloat(w.amount).toLocaleString('ko-KR')}
                     </span>
                   </div>
@@ -422,8 +408,8 @@ export default function WithdrawPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -523,4 +523,221 @@ async def get_esports_live(
 async def get_esports_categories(
     current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
 ):
+    return ESPORTS_CATEGORIES
+
+
+# ═══════════════════════════════════════════════════════════════════
+# User-Page Proxy (service token authentication)
+# ═══════════════════════════════════════════════════════════════════
+
+
+async def verify_service_token(x_service_token: str = Header(...)):
+    expected = settings.USER_PAGE_SERVICE_TOKEN
+    if not expected or x_service_token != expected:
+        raise HTTPException(status_code=401, detail="Invalid service token")
+
+
+user_proxy_router = APIRouter(prefix="/user-proxy", tags=["user-proxy"])
+
+
+@user_proxy_router.get("/casino/providers")
+async def proxy_casino_providers(_: str = Depends(verify_service_token)):
+    connector = RapidAPICasinoConnector(
+        provider_id=0,
+        api_url="https://rapidapi.com",
+        api_key=settings.RAPIDAPI_KEY,
+    )
+    try:
+        return await connector.get_providers()
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.get("/casino/games/{provider_code}")
+async def proxy_casino_games(
+    provider_code: str,
+    _: str = Depends(verify_service_token),
+):
+    connector = RapidAPICasinoConnector(
+        provider_id=0,
+        api_url="https://rapidapi.com",
+        api_key=settings.RAPIDAPI_KEY,
+        api_secret=provider_code,
+    )
+    try:
+        return await connector.get_games()
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.post("/casino/launch")
+async def proxy_casino_launch(
+    body: GameLaunchRequest,
+    session: AsyncSession = Depends(get_session),
+    _: str = Depends(verify_service_token),
+):
+    result = await session.execute(
+        select(Game).where(Game.code == body.game_id)
+    )
+    game = result.scalar_one_or_none()
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    if not game.is_active:
+        raise HTTPException(status_code=403, detail="Game is currently disabled")
+
+    provider = await session.get(GameProvider, game.provider_id)
+    if not provider or not provider.is_active:
+        raise HTTPException(status_code=403, detail="Game provider is disabled")
+
+    game_code_parts = game.code.split("_", 1)
+    raw_game_code = game_code_parts[1] if len(game_code_parts) > 1 else game.code
+
+    connector = RapidAPICasinoConnector(
+        provider_id=provider.id,
+        api_url="https://rapidapi.com",
+        api_key=settings.RAPIDAPI_KEY,
+        api_secret=provider.code,
+    )
+    try:
+        return await connector.launch_game(
+            game_code=raw_game_code,
+            user_id=str(body.user_id),
+            platform=body.platform,
+            home_url=body.home_url,
+            currency=body.currency,
+        )
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.get("/sports/events")
+async def proxy_sports_events(
+    status: str = "LIVE",
+    _: str = Depends(verify_service_token),
+):
+    connector = _sports_connector()
+    try:
+        return await connector.get_live_events(status)
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.get("/sports/odds/{event_id}")
+async def proxy_sports_odds(
+    event_id: int,
+    _: str = Depends(verify_service_token),
+):
+    connector = _sports_connector()
+    try:
+        return await connector.get_event_odds(event_id)
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.get("/sports/live/{sport}")
+async def proxy_sport_live(
+    sport: str,
+    _: str = Depends(verify_service_token),
+):
+    connector = _sports_connector()
+    try:
+        return await connector.get_sport_live(sport)
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.get("/sports/enriched/{sport}")
+async def proxy_enriched_events(
+    sport: str,
+    _: str = Depends(verify_service_token),
+):
+    connector = _sports_connector()
+    try:
+        sport7_events = await connector.get_sport_live(sport)
+        odds_events = await connector.get_live_events("LIVE")
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+    odds_by_teams: dict[str, dict] = {}
+    for event in odds_events:
+        if not isinstance(event, dict):
+            continue
+        home = event.get("homeTeam", event.get("home", {}))
+        away = event.get("awayTeam", event.get("away", {}))
+        home_name = home.get("name", "") if isinstance(home, dict) else str(home)
+        away_name = away.get("name", "") if isinstance(away, dict) else str(away)
+        if home_name and away_name:
+            key = f"{home_name.lower()}|{away_name.lower()}"
+            odds_by_teams[key] = event
+
+    enriched: list[dict] = []
+    for event in sport7_events:
+        if not isinstance(event, dict):
+            continue
+        home_team = event.get("homeTeam", event.get("home", {}))
+        away_team = event.get("awayTeam", event.get("away", {}))
+        home_name = home_team.get("name", "") if isinstance(home_team, dict) else str(home_team)
+        away_name = away_team.get("name", "") if isinstance(away_team, dict) else str(away_team)
+
+        matched_odds = None
+        if home_name and away_name:
+            key = f"{home_name.lower()}|{away_name.lower()}"
+            matched_odds = odds_by_teams.get(key)
+
+        combined = {**event}
+        if matched_odds:
+            combined["odds_data"] = matched_odds
+            combined["odds_matched"] = True
+        else:
+            combined["odds_matched"] = False
+
+        enriched.append(combined)
+
+    return enriched
+
+
+@user_proxy_router.get("/esports/live")
+async def proxy_esports_live(_: str = Depends(verify_service_token)):
+    connector = _sports_connector()
+    try:
+        return await connector.get_sport_live("esports")
+    except QuotaExceededError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except RapidAPIError as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+    finally:
+        await connector.close()
+
+
+@user_proxy_router.get("/esports/categories")
+async def proxy_esports_categories(_: str = Depends(verify_service_token)):
     return ESPORTS_CATEGORIES

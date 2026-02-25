@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useSportsStore } from '@/stores/sports-store';
-
-const formatOdds = (value: number) => value.toFixed(2);
 
 const formatTime = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -15,101 +13,70 @@ const formatTime = (dateStr: string) => {
   return `${month}/${day} ${hours}:${minutes}`;
 };
 
-export default function SportsPage() {
+export default function EsportsPage() {
   const {
-    sportEvents,
-    sportCategories,
-    selectedStatus,
-    selectedSport,
+    esportsEvents,
+    esportsCategories,
+    selectedEsportGame,
     isLoading,
-    fetchSportEvents,
-    fetchSportCategories,
-    setSelectedStatus,
-    setSelectedSport,
+    fetchEsportsEvents,
+    fetchEsportsCategories,
+    setSelectedEsportGame,
   } = useSportsStore();
 
-  const loadEvents = useCallback(() => {
-    fetchSportEvents();
-  }, [fetchSportEvents]);
-
   useEffect(() => {
-    fetchSportCategories();
-    loadEvents();
+    fetchEsportsCategories();
+    fetchEsportsEvents();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-refresh for live events every 30s
+  // Auto-refresh every 30s
   useEffect(() => {
-    if (selectedStatus !== 'LIVE') return;
     const interval = setInterval(() => {
-      fetchSportEvents();
+      fetchEsportsEvents();
     }, 30000);
     return () => clearInterval(interval);
-  }, [selectedStatus, fetchSportEvents]);
+  }, [fetchEsportsEvents]);
 
-  // Refetch when status or sport changes
+  // Refetch when game filter changes
   useEffect(() => {
-    fetchSportEvents();
-  }, [selectedStatus, selectedSport]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchEsportsEvents(selectedEsportGame);
+  }, [selectedEsportGame]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="bg-white rounded-lg px-5 py-4">
         <h2 className="text-lg font-bold text-[#252531] flex items-center gap-2">
-          <span>⚽</span> 스포츠
+          <span>🎮</span> e스포츠
         </h2>
       </div>
 
-      {/* Status tabs */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setSelectedStatus('LIVE')}
-          className={cn(
-            'flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
-            selectedStatus === 'LIVE'
-              ? 'bg-[#f4b53e] text-white'
-              : 'bg-[#edeef3] text-[#707070] hover:bg-[#dddddd]'
-          )}
-        >
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-red-500" />
-          </span>
-          라이브
-        </button>
-        <button
-          onClick={() => setSelectedStatus('SCHEDULED')}
-          className={cn(
-            'text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
-            selectedStatus === 'SCHEDULED'
-              ? 'bg-[#f4b53e] text-white'
-              : 'bg-[#edeef3] text-[#707070] hover:bg-[#dddddd]'
-          )}
-        >
-          예정
-        </button>
-      </div>
-
-      {/* Sport category filter */}
+      {/* Category filter */}
       <div className="flex gap-2 overflow-x-auto scrollbar-none">
-        {sportCategories.map((cat) => (
+        <button
+          onClick={() => setSelectedEsportGame('all')}
+          className={cn(
+            'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
+            selectedEsportGame === 'all'
+              ? 'bg-[#f4b53e] text-white'
+              : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+          )}
+        >
+          전체
+        </button>
+        {esportsCategories.map((cat) => (
           <button
             key={cat.code}
-            onClick={() => setSelectedSport(cat.code)}
+            onClick={() => setSelectedEsportGame(cat.code)}
             className={cn(
-              'shrink-0 flex items-center gap-1 text-sm px-3 py-1.5 rounded-full transition-colors',
-              selectedSport === cat.code
+              'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors flex items-center gap-1',
+              selectedEsportGame === cat.code
                 ? 'bg-[#f4b53e] text-white'
                 : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
             )}
           >
             <span>{cat.icon}</span>
             <span>{cat.nameKo}</span>
-            {cat.eventCount > 0 && (
-              <span className="bg-[#edeef3] text-[#707070] text-[10px] px-1.5 rounded-full ml-1">
-                {cat.eventCount}
-              </span>
-            )}
           </button>
         ))}
       </div>
@@ -117,33 +84,27 @@ export default function SportsPage() {
       {/* Events list */}
       <div className="flex flex-col gap-3">
         {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-[#edeef3] rounded-lg">
-              <div className="p-4">
-                <div className="h-5 w-24 bg-[#dddddd] rounded mb-2" />
-                <div className="h-8 w-full bg-[#dddddd] rounded mb-2" />
-                <div className="h-6 w-48 bg-[#dddddd] rounded" />
-              </div>
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-lg border border-[#dddddd] p-4">
+              <div className="mb-2 h-5 w-32 rounded bg-[#edeef3] animate-pulse" />
+              <div className="mb-2 h-8 w-full rounded bg-[#edeef3] animate-pulse" />
+              <div className="h-6 w-48 rounded bg-[#edeef3] animate-pulse" />
             </div>
           ))
-        ) : sportEvents.length === 0 ? (
-          <div className="bg-white rounded-lg">
-            <div className="flex flex-col items-center gap-2 py-12">
-              <span className="text-4xl">🏟️</span>
-              <p className="text-sm text-[#707070]">
-                {selectedStatus === 'LIVE'
-                  ? '현재 진행 중인 경기가 없습니다'
-                  : '예정된 경기가 없습니다'}
-              </p>
-            </div>
+        ) : esportsEvents.length === 0 ? (
+          <div className="bg-white rounded-lg border border-[#dddddd] flex flex-col items-center gap-2 py-12">
+            <span className="text-4xl">🎮</span>
+            <p className="text-sm text-[#707070]">
+              현재 진행 중이거나 예정된 e스포츠 경기가 없습니다
+            </p>
           </div>
         ) : (
-          sportEvents.map((event) => (
+          esportsEvents.map((event) => (
             <div
               key={event.id}
               className="bg-white rounded-lg border border-[#dddddd] p-4 hover:border-[#f4b53e] transition-colors"
             >
-              {/* League and status */}
+              {/* Game, tournament, and status */}
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {event.status === 'LIVE' && (
@@ -152,28 +113,22 @@ export default function SportsPage() {
                       <span className="relative inline-flex size-2 rounded-full bg-red-500" />
                     </span>
                   )}
-                  <span
-                    className={cn(
-                      'text-[10px] px-2 py-0.5 rounded-full',
-                      event.status === 'LIVE'
-                        ? 'bg-red-500 text-white'
-                        : 'bg-[#edeef3] text-[#707070]'
-                    )}
-                  >
-                    {event.status === 'LIVE' ? 'LIVE' : '예정'}
-                  </span>
+                  {event.status === 'LIVE' ? (
+                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">
+                      LIVE
+                    </span>
+                  ) : (
+                    <span className="bg-[#edeef3] text-[#707070] text-[10px] px-2 py-0.5 rounded-full">
+                      예정
+                    </span>
+                  )}
                   <span className="text-xs text-[#707070]">
-                    {event.sportKo} &middot; {event.leagueKo}
+                    {event.leagueKo}
                   </span>
                 </div>
-                {event.status === 'LIVE' && event.elapsed && (
-                  <span className="text-xs font-medium text-red-500">
-                    {event.period ? `${event.period} ` : ''}{event.elapsed}
-                  </span>
-                )}
-                {event.status === 'SCHEDULED' && (
-                  <span className="text-xs text-[#707070]">
-                    {formatTime(event.startTime)}
+                {event.period && (
+                  <span className="border border-[#dddddd] text-[#707070] text-[10px] px-2 py-0.5 rounded-full">
+                    {event.period}
                   </span>
                 )}
               </div>
@@ -215,6 +170,20 @@ export default function SportsPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Elapsed info for live */}
+              {event.status === 'LIVE' && event.elapsed && (
+                <p className="mb-3 text-xs text-[#707070]">
+                  {event.elapsed}
+                </p>
+              )}
+
+              {/* Start time for scheduled */}
+              {event.status === 'SCHEDULED' && (
+                <p className="mb-3 text-xs text-[#707070]">
+                  시작 시간: {formatTime(event.startTime)}
+                </p>
+              )}
             </div>
           ))
         )}

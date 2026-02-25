@@ -3,17 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -87,23 +76,19 @@ export default function SupportPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <span>📞</span> 고객센터
-            </CardTitle>
-          </div>
-        </CardHeader>
-      </Card>
+      <div className="bg-white rounded-lg px-5 py-4">
+        <h1 className="flex items-center gap-2 text-[#252531] font-bold text-lg">
+          <span>📞</span> 고객센터
+        </h1>
+      </div>
 
       {/* New inquiry button */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button className="gap-2">
+          <button className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#ffd651] to-[#fe960e] text-white font-bold rounded-lg px-4 py-2 transition-opacity hover:opacity-90">
             <Plus className="size-4" />
             문의하기
-          </Button>
+          </button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -111,107 +96,112 @@ export default function SupportPage() {
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div>
-              <Label className="text-sm">제목</Label>
-              <Input
+              <label className="text-sm text-[#252531] font-medium">제목</label>
+              <input
+                type="text"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="문의 제목을 입력하세요"
-                className="mt-1"
+                className="mt-1 w-full rounded-lg border border-[#dddddd] px-3 py-2 text-sm focus:outline-none focus:border-[#f4b53e] focus:ring-1 focus:ring-[#f4b53e]"
               />
             </div>
             <div>
-              <Label className="text-sm">내용</Label>
+              <label className="text-sm text-[#252531] font-medium">내용</label>
               <textarea
                 value={newContent}
                 onChange={(e) => setNewContent(e.target.value)}
                 placeholder="문의 내용을 상세히 작성해주세요"
-                className="mt-1 min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-1 min-h-32 w-full rounded-lg border border-[#dddddd] px-3 py-2 text-sm focus:outline-none focus:border-[#f4b53e] focus:ring-1 focus:ring-[#f4b53e]"
               />
             </div>
-            <Button
+            <button
               onClick={handleSubmit}
               disabled={isSubmitting || !newTitle.trim() || !newContent.trim()}
+              className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] text-white font-bold rounded-lg px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? '보내는 중...' : '보내기'}
-            </Button>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Inquiry list */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">내 문의 내역</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      <div className="bg-white rounded-lg">
+        <div className="px-5 py-4 border-b border-[#dddddd]">
+          <h2 className="text-[#252531] font-bold text-base">내 문의 내역</h2>
+        </div>
+        <div>
           {isLoading ? (
             <div className="flex flex-col gap-2 p-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+                <div key={i} className="animate-pulse bg-[#edeef3] rounded h-16 w-full" />
               ))}
             </div>
           ) : inquiries.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-12">
               <span className="text-4xl">📋</span>
-              <p className="text-sm text-muted-foreground">문의 내역이 없습니다</p>
+              <p className="text-sm text-[#707070]">문의 내역이 없습니다</p>
             </div>
           ) : (
-            <div className="flex flex-col divide-y divide-border">
+            <div className="flex flex-col divide-y divide-[#dddddd]">
               {inquiries.map((inquiry) => (
                 <div key={inquiry.id}>
                   {/* Inquiry header */}
                   <button
                     onClick={() => handleExpand(inquiry.id)}
                     className={cn(
-                      'flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-secondary/50',
-                      expandedId === inquiry.id && 'bg-secondary/30'
+                      'flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#f8f9fc]',
+                      expandedId === inquiry.id && 'bg-[#f8f9fc]'
                     )}
                   >
                     <div className="flex flex-1 flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{inquiry.title}</span>
-                        <Badge
-                          variant={inquiry.status === 'answered' ? 'default' : 'secondary'}
-                          className="text-[10px]"
+                        <span className="text-sm font-medium text-[#252531]">{inquiry.title}</span>
+                        <span
+                          className={cn(
+                            'text-xs px-2 py-0.5 rounded-full',
+                            inquiry.status === 'answered'
+                              ? 'bg-green-50 text-green-600'
+                              : 'bg-yellow-50 text-yellow-600'
+                          )}
                         >
                           {inquiry.status === 'answered' ? '답변완료' : '대기중'}
-                        </Badge>
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-[#707070]">
                         {formatDateTime(inquiry.createdAt)}
                       </span>
                     </div>
                     {expandedId === inquiry.id ? (
-                      <ChevronUp className="size-4 text-muted-foreground" />
+                      <ChevronUp className="size-4 text-[#707070]" />
                     ) : (
-                      <ChevronDown className="size-4 text-muted-foreground" />
+                      <ChevronDown className="size-4 text-[#707070]" />
                     )}
                   </button>
 
                   {/* Expanded detail + replies */}
                   {expandedId === inquiry.id && (
-                    <div className="border-t border-border bg-card/50 px-4 py-3">
+                    <div className="border-t border-[#dddddd] bg-[#f8f9fc] px-4 py-3">
                       {selectedInquiry?.replies && selectedInquiry.replies.length > 0 ? (
                         <div className="flex flex-col gap-3">
                           {selectedInquiry.replies.map((reply) => (
                             <div
                               key={reply.id}
                               className={cn(
-                                'rounded-lg px-3 py-2',
                                 reply.isAdmin
-                                  ? 'ml-4 bg-primary/10 border border-primary/20'
-                                  : 'mr-4 bg-secondary'
+                                  ? 'ml-4 bg-[#fff8e7] border border-[#f4b53e]/20 rounded-lg px-3 py-2'
+                                  : 'mr-4 bg-[#f8f9fc] rounded-lg px-3 py-2'
                               )}
                             >
                               <div className="mb-1 flex items-center gap-2">
-                                <span className="text-xs font-medium">
+                                <span className="text-xs font-medium text-[#252531]">
                                   {reply.isAdmin ? '관리자' : '나'}
                                 </span>
-                                <span className="text-[10px] text-muted-foreground">
+                                <span className="text-[10px] text-[#707070]">
                                   {formatFullDateTime(reply.createdAt)}
                                 </span>
                               </div>
-                              <p className="whitespace-pre-wrap text-sm">
+                              <p className="whitespace-pre-wrap text-sm text-[#252531]">
                                 {reply.content}
                               </p>
                             </div>
@@ -219,11 +209,11 @@ export default function SupportPage() {
                         </div>
                       ) : (
                         <div>
-                          <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                          <p className="whitespace-pre-wrap text-sm text-[#707070]">
                             {inquiry.content}
                           </p>
                           {inquiry.status === 'pending' && (
-                            <p className="mt-2 text-xs text-muted-foreground">
+                            <p className="mt-2 text-xs text-[#707070]">
                               답변 대기 중입니다. 빠른 시일 내에 답변 드리겠습니다.
                             </p>
                           )}
@@ -235,8 +225,8 @@ export default function SupportPage() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

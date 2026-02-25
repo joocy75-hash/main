@@ -12,9 +12,6 @@ import {
   Settings,
   ChevronDown,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import {
   Avatar,
   AvatarFallback,
@@ -33,7 +30,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { GAME_CATEGORIES } from '@/lib/constants';
 import { useProfileStore } from '@/stores/profile-store';
@@ -75,7 +71,7 @@ export const Header = ({ className }: { className?: string }) => {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm',
+        'sticky top-0 z-50 border-b border-[#dddddd] bg-white',
         className
       )}
     >
@@ -83,57 +79,60 @@ export const Header = ({ className }: { className?: string }) => {
         {/* Mobile menu button */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon-sm">
+            <button
+              type="button"
+              className="text-[#707070] hover:text-[#252531] p-1.5 rounded-lg hover:bg-[#f8f9fc] lg:hidden"
+            >
               <Menu className="size-5" />
-            </Button>
+            </button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <SheetHeader className="border-b border-border p-4">
+          <SheetContent side="left" className="w-72 bg-white p-0">
+            <SheetHeader className="border-b border-[#dddddd] p-4">
               <SheetTitle>
                 <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                  <span className="text-xl font-bold text-primary">GP</span>
-                  <span className="text-lg font-semibold">Game Platform</span>
+                  <span className="text-xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">GP</span>
+                  <span className="text-lg font-semibold text-[#252531]">Game Platform</span>
                 </Link>
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-1 p-3">
-              <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+              <p className="px-3 py-2 text-xs font-semibold uppercase text-[#707070]">
                 게임
               </p>
               {GAME_CATEGORIES.map((cat) => (
                 <Link
                   key={cat.code}
                   href={`/games/${cat.code}`}
-                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-[#252531] transition-colors hover:bg-[#f8f9fc]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="text-base">{cat.icon}</span>
                   <span>{cat.name}</span>
                 </Link>
               ))}
-              <Separator className="my-2" />
-              <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+              <div className="my-2 border-t border-[#dddddd]" />
+              <p className="px-3 py-2 text-xs font-semibold uppercase text-[#707070]">
                 프로모션
               </p>
               {PROMO_MENU.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-[#252531] transition-colors hover:bg-[#f8f9fc]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>{item.name}</span>
                 </Link>
               ))}
-              <Separator className="my-2" />
-              <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+              <div className="my-2 border-t border-[#dddddd]" />
+              <p className="px-3 py-2 text-xs font-semibold uppercase text-[#707070]">
                 지원
               </p>
               {SUPPORT_MENU.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-[#252531] transition-colors hover:bg-[#f8f9fc]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>{item.name}</span>
@@ -145,21 +144,22 @@ export const Header = ({ className }: { className?: string }) => {
 
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="text-xl font-extrabold tracking-tight text-primary lg:text-2xl">
-            GP
+          <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent lg:text-2xl">
+            KZ
           </span>
-          <span className="hidden text-base font-semibold sm:inline">
-            Game Platform
+          <span className="hidden text-base font-semibold text-[#252531] sm:inline">
+            Casino
           </span>
         </Link>
 
         {/* Search bar (desktop) */}
         <div className="mx-4 hidden flex-1 lg:block lg:max-w-md">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+            <input
+              type="text"
               placeholder="게임 검색..."
-              className="h-9 bg-secondary/50 pl-9"
+              className="h-9 w-full bg-[#f8f9fc] border border-[#dddddd] rounded-lg pl-9 pr-3 text-sm focus:outline-none focus:border-[#f4b53e] focus:ring-1 focus:ring-[#f4b53e]"
             />
           </div>
         </div>
@@ -172,43 +172,46 @@ export const Header = ({ className }: { className?: string }) => {
           {isAuthenticated && authUser ? (
             <>
               {/* Balance (compact on mobile) */}
-              <div className="flex items-center gap-1.5 rounded-lg bg-secondary/60 px-2.5 py-1.5 lg:px-3">
-                <Wallet className="size-4 text-accent" />
-                <span className="text-xs font-semibold lg:text-sm">
+              <div className="bg-[#f8f9fc] rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 lg:px-3">
+                <Wallet className="size-4 text-[#f4b53e]" />
+                <span className="text-xs font-semibold text-[#252531] lg:text-sm">
                   {formatKRW(Number(authUser.balance) || 0)}
                 </span>
-                <span className="hidden text-xs text-muted-foreground lg:inline">
+                <span className="hidden text-xs text-[#707070] lg:inline">
                   원
                 </span>
               </div>
 
-              {/* Deposit button */}
-              <Button size="sm" className="hidden sm:flex" asChild>
-                <Link href="/wallet/deposit">입금</Link>
-              </Button>
+              {/* Deposit button - gold prominent CTA */}
+              <Link
+                href="/wallet/deposit"
+                className="hidden sm:flex items-center bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold hover:from-amber-400 hover:to-yellow-400 shadow-lg shadow-amber-500/20 text-sm px-4 py-1.5 rounded-lg"
+              >
+                입금
+              </Link>
 
               {/* Notification bell */}
-              <Button variant="ghost" size="icon-sm" className="relative" asChild>
-                <Link href="/messages">
-                  <Bell className="size-4" />
-                  {notificationCount > 0 && (
-                    <Badge className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center p-0 text-[10px]">
-                      {notificationCount > 99 ? '99+' : notificationCount}
-                    </Badge>
-                  )}
-                </Link>
-              </Button>
+              <Link
+                href="/messages"
+                className="text-[#707070] hover:text-[#252531] relative p-1.5 rounded-lg hover:bg-[#f8f9fc]"
+              >
+                <Bell className="size-4" />
+                {notificationCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center p-0 text-[10px] bg-red-500 text-white rounded-full">
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Profile dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 px-1.5 lg:px-2"
+                  <button
+                    type="button"
+                    className="text-[#252531] hover:bg-[#f8f9fc] rounded-lg px-1.5 py-1 flex items-center gap-1.5"
                   >
                     <Avatar className="size-7">
-                      <AvatarFallback className="bg-primary/20 text-xs text-primary">
+                      <AvatarFallback className="bg-[#f4b53e]/20 text-xs text-[#f4b53e]">
                         {authUser.nickname.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
@@ -216,7 +219,7 @@ export const Header = ({ className }: { className?: string }) => {
                       {authUser.nickname}
                     </span>
                     <ChevronDown className="hidden size-3 lg:block" />
-                  </Button>
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-2 py-1.5">
@@ -257,12 +260,18 @@ export const Header = ({ className }: { className?: string }) => {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">로그인</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/register">회원가입</Link>
-              </Button>
+              <Link
+                href="/login"
+                className="text-[#707070] hover:text-[#252531] text-sm px-3 py-1.5 rounded-lg hover:bg-[#f8f9fc]"
+              >
+                로그인
+              </Link>
+              <Link
+                href="/register"
+                className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] text-white font-bold text-sm px-4 py-1.5 rounded-lg"
+              >
+                회원가입
+              </Link>
             </>
           )}
         </div>

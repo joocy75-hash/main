@@ -1,23 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
@@ -39,11 +22,11 @@ const DATE_FILTERS = [
   { value: 'all', label: '전체' },
 ];
 
-const RESULT_BADGE: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  win: { label: '승리', variant: 'default' },
-  lose: { label: '패배', variant: 'destructive' },
-  draw: { label: '무승부', variant: 'secondary' },
-  pending: { label: '대기', variant: 'outline' },
+const RESULT_STYLE: Record<string, { label: string; className: string }> = {
+  win: { label: '승리', className: 'bg-green-50 text-green-600 text-xs px-2 py-0.5 rounded-full' },
+  lose: { label: '패배', className: 'bg-red-50 text-red-500 text-xs px-2 py-0.5 rounded-full' },
+  draw: { label: '무승부', className: 'bg-[#edeef3] text-[#707070] text-xs px-2 py-0.5 rounded-full' },
+  pending: { label: '대기', className: 'border border-[#dddddd] text-[#707070] text-xs px-2 py-0.5 rounded-full' },
 };
 
 const formatAmount = (value: string) =>
@@ -114,134 +97,145 @@ export default function BetsPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">베팅내역</CardTitle>
-        </CardHeader>
-      </Card>
+      <div className="bg-white rounded-lg px-5 py-4">
+        <h2 className="text-lg font-bold text-[#252531]">베팅내역</h2>
+      </div>
 
       {/* Category filter */}
       <div className="flex gap-2 overflow-x-auto scrollbar-none">
         {CATEGORY_FILTERS.map((f) => (
-          <Button
+          <button
             key={f.value}
-            variant={category === f.value ? 'default' : 'secondary'}
-            size="sm"
             onClick={() => setCategory(f.value)}
-            className="shrink-0"
+            className={cn(
+              'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
+              category === f.value
+                ? 'bg-[#f4b53e] text-white'
+                : 'bg-[#edeef3] text-[#707070] hover:bg-[#dddddd]'
+            )}
           >
             {f.label}
-          </Button>
+          </button>
         ))}
       </div>
 
       {/* Date filter */}
       <div className="flex gap-2">
         {DATE_FILTERS.map((f) => (
-          <Button
+          <button
             key={f.value}
-            variant={dateFilter === f.value ? 'default' : 'outline'}
-            size="sm"
             onClick={() => setDateFilter(f.value)}
+            className={cn(
+              'text-sm px-3 py-1 rounded-full transition-colors',
+              dateFilter === f.value
+                ? 'bg-[#f4b53e] text-white'
+                : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+            )}
           >
             {f.label}
-          </Button>
+          </button>
         ))}
       </div>
 
       {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex flex-col gap-2 p-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : bets.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-12">
-              <span className="text-4xl">📋</span>
-              <p className="text-sm text-muted-foreground">베팅내역이 없습니다</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-20">종목</TableHead>
-                    <TableHead>게임</TableHead>
-                    <TableHead className="text-right">베팅액</TableHead>
-                    <TableHead className="text-right">당첨액</TableHead>
-                    <TableHead className="text-center">결과</TableHead>
-                    <TableHead className="text-right">일시</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bets.map((bet) => {
-                    const resultInfo = RESULT_BADGE[bet.result] || RESULT_BADGE.pending;
-                    return (
-                      <TableRow key={bet.id}>
-                        <TableCell className="text-xs">
-                          {CATEGORY_FILTERS.find((c) => c.value === bet.gameCategory)?.label || bet.gameCategory}
-                        </TableCell>
-                        <TableCell className="text-sm font-medium">{bet.gameName}</TableCell>
-                        <TableCell className="text-right text-sm">{formatAmount(bet.betAmount)}</TableCell>
-                        <TableCell className={cn(
-                          'text-right text-sm',
-                          Number(bet.winAmount) > 0 && 'text-green-400'
-                        )}>
-                          {formatAmount(bet.winAmount)}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={resultInfo.variant} className="text-[10px]">
-                            {resultInfo.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right text-xs text-muted-foreground">
-                          {formatDateTime(bet.createdAt)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-lg">
+        {isLoading ? (
+          <div className="flex flex-col gap-2 p-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-[#edeef3] rounded h-12 w-full" />
+            ))}
+          </div>
+        ) : bets.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-12">
+            <span className="text-4xl">📋</span>
+            <p className="text-sm text-[#707070]">베팅내역이 없습니다</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#f8f9fc]">
+                  <th className="px-4 py-3 text-left text-[#707070] text-xs font-medium uppercase w-20">종목</th>
+                  <th className="px-4 py-3 text-left text-[#707070] text-xs font-medium uppercase">게임</th>
+                  <th className="px-4 py-3 text-right text-[#707070] text-xs font-medium uppercase">베팅액</th>
+                  <th className="px-4 py-3 text-right text-[#707070] text-xs font-medium uppercase">당첨액</th>
+                  <th className="px-4 py-3 text-center text-[#707070] text-xs font-medium uppercase">결과</th>
+                  <th className="px-4 py-3 text-right text-[#707070] text-xs font-medium uppercase">일시</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bets.map((bet) => {
+                  const resultInfo = RESULT_STYLE[bet.result] || RESULT_STYLE.pending;
+                  return (
+                    <tr key={bet.id} className="border-b border-[#f0f0f0] hover:bg-[#f8f9fc] transition-colors">
+                      <td className="px-4 py-3 text-xs text-[#252531]">
+                        {CATEGORY_FILTERS.find((c) => c.value === bet.gameCategory)?.label || bet.gameCategory}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-[#252531]">{bet.gameName}</td>
+                      <td className="px-4 py-3 text-right text-sm text-[#252531]">{formatAmount(bet.betAmount)}</td>
+                      <td className={cn(
+                        'px-4 py-3 text-right text-sm text-[#252531]',
+                        Number(bet.winAmount) > 0 && 'text-green-600'
+                      )}>
+                        {formatAmount(bet.winAmount)}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={resultInfo.className}>
+                          {resultInfo.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs text-[#707070]">
+                        {formatDateTime(bet.createdAt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             disabled={betsPage <= 1}
             onClick={() => handlePageChange(betsPage - 1)}
+            className={cn(
+              'border border-[#dddddd] text-[#707070] text-sm px-3 h-8 rounded-lg flex items-center justify-center hover:bg-[#f8f9fc] transition-colors',
+              betsPage <= 1 && 'opacity-40 cursor-not-allowed hover:bg-transparent'
+            )}
           >
             이전
-          </Button>
+          </button>
           {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
             const page = i + 1;
             return (
-              <Button
+              <button
                 key={page}
-                variant={betsPage === page ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => handlePageChange(page)}
+                className={cn(
+                  'text-sm w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+                  betsPage === page
+                    ? 'bg-[#f4b53e] text-white'
+                    : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+                )}
               >
                 {page}
-              </Button>
+              </button>
             );
           })}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             disabled={!betsHasMore}
             onClick={() => handlePageChange(betsPage + 1)}
+            className={cn(
+              'border border-[#dddddd] text-[#707070] text-sm px-3 h-8 rounded-lg flex items-center justify-center hover:bg-[#f8f9fc] transition-colors',
+              !betsHasMore && 'opacity-40 cursor-not-allowed hover:bg-transparent'
+            )}
           >
             다음
-          </Button>
+          </button>
         </div>
       )}
     </div>

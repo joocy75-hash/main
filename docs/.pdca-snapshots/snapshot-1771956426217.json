@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-02-24T11:28:43.330Z",
+  "timestamp": "2026-02-24T18:07:06.217Z",
   "reason": "compaction",
   "status": {
     "version": "2.0",
-    "lastUpdated": "2026-02-24T10:32:33.175Z",
+    "lastUpdated": "2026-02-24T18:05:23.949Z",
     "activeFeatures": [
       "scripts",
       "backend",
@@ -121,7 +121,8 @@
       "quota_service.py",
       "rapidapi_client.py",
       "external-api",
-      "sports-monitor"
+      "sports-monitor",
+      "event-service.ts"
     ],
     "primaryFeature": "scripts",
     "features": {
@@ -147,7 +148,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T14:11:27.559Z",
-          "lastUpdated": "2026-02-24T10:30:10.388Z"
+          "lastUpdated": "2026-02-24T11:36:37.398Z"
         },
         "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/main.py"
       },
@@ -186,9 +187,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T14:11:43.600Z",
-          "lastUpdated": "2026-02-24T10:31:14.370Z"
+          "lastUpdated": "2026-02-24T11:38:30.485Z"
         },
-        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/api/v1/external_api.py"
+        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/api/v1/bi.py"
       },
       "__init__.py": {
         "phase": "do",
@@ -212,7 +213,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T14:11:45.750Z",
-          "lastUpdated": "2026-02-19T18:45:30.981Z"
+          "lastUpdated": "2026-02-24T11:38:37.082Z"
         },
         "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/middleware/rate_limit.py"
       },
@@ -225,7 +226,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T14:11:46.830Z",
-          "lastUpdated": "2026-02-24T10:27:11.693Z"
+          "lastUpdated": "2026-02-24T11:36:05.915Z"
         },
         "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/connectors/__init__.py"
       },
@@ -264,9 +265,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T14:15:49.657Z",
-          "lastUpdated": "2026-02-24T10:32:33.175Z"
+          "lastUpdated": "2026-02-24T11:39:20.978Z"
         },
-        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/components/sidebar-nav.tsx"
+        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/components/auth-guard.tsx"
       },
       "stores": {
         "phase": "do",
@@ -355,9 +356,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T21:15:42.083Z",
-          "lastUpdated": "2026-02-19T20:25:05.883Z"
+          "lastUpdated": "2026-02-24T11:37:43.790Z"
         },
-        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/app/dashboard/agents/[id]/commission-rate-tab.tsx"
+        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/app/dashboard/users/[id]/tab-transactions.tsx"
       },
       "tree": {
         "phase": "do",
@@ -368,9 +369,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-17T21:16:13.303Z",
-          "lastUpdated": "2026-02-21T08:07:53.990Z"
+          "lastUpdated": "2026-02-24T11:40:45.861Z"
         },
-        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/app/dashboard/agents/tree/page.tsx"
+        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/app/dashboard/users/tree/page.tsx"
       },
       "commission_engine.py": {
         "phase": "do",
@@ -1369,7 +1370,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-20T06:00:39.903Z",
-          "lastUpdated": "2026-02-20T06:00:39.903Z"
+          "lastUpdated": "2026-02-24T11:38:26.833Z"
         },
         "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/services/message_service.py"
       },
@@ -1642,9 +1643,22 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-24T10:30:45.088Z",
-          "lastUpdated": "2026-02-24T10:30:45.088Z"
+          "lastUpdated": "2026-02-24T11:41:17.423Z"
         },
         "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/app/dashboard/sports-monitor/page.tsx"
+      },
+      "event-service.ts": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-24T18:04:29.290Z",
+          "lastUpdated": "2026-02-24T18:05:23.948Z"
+        },
+        "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/services/event-service.ts"
       }
     },
     "pipeline": {
@@ -1655,7 +1669,7 @@
     "session": {
       "startedAt": "2026-02-17T13:41:04.691Z",
       "onboardingCompleted": false,
-      "lastActivity": "2026-02-24T10:32:33.175Z"
+      "lastActivity": "2026-02-24T18:05:23.949Z"
     },
     "history": [
       {
@@ -11939,6 +11953,474 @@
       {
         "timestamp": "2026-02-24T10:32:33.175Z",
         "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:07.671Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:19.611Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:25.875Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:31.235Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:35.536Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:36.522Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:42.700Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:47.923Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:49.632Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:35:56.094Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:02.412Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:05.915Z",
+        "feature": "connectors",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:07.109Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:09.170Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:11.366Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:12.214Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:12.714Z",
+        "feature": "message_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:18.366Z",
+        "feature": "message_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:20.131Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:21.039Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:24.131Z",
+        "feature": "message_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:26.958Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:31.751Z",
+        "feature": "message_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:33.323Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:33.617Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:37.399Z",
+        "feature": "backend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:39.603Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:43.584Z",
+        "feature": "middleware",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:46.371Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:47.812Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:50.097Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:52.666Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:36:57.684Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:00.572Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:04.992Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:08.354Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:11.059Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:15.076Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:19.895Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:21.281Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:26.227Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:30.164Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:31.260Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:31.567Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:36.033Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:36.369Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:41.269Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:43.790Z",
+        "feature": "[id]",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:51.169Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:51.654Z",
+        "feature": "tree",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:53.388Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:53.979Z",
+        "feature": "tree",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:37:58.984Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:02.253Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:04.588Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:09.836Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:12.214Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:16.377Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:18.542Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:24.787Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:26.833Z",
+        "feature": "message_service.py",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:30.485Z",
+        "feature": "v1",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:31.665Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:37.082Z",
+        "feature": "middleware",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:37.874Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:44.638Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:51.628Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:38:58.042Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:39:05.077Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:39:11.534Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:39:20.978Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:39:44.431Z",
+        "feature": "sports-monitor",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:40:43.744Z",
+        "feature": "tree",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:40:45.861Z",
+        "feature": "tree",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T11:41:17.423Z",
+        "feature": "sports-monitor",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T18:04:29.290Z",
+        "feature": "event-service.ts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T18:04:54.791Z",
+        "feature": "event-service.ts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-24T18:05:23.949Z",
+        "feature": "event-service.ts",
         "phase": "do",
         "action": "updated"
       }

@@ -1,75 +1,14 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Loader2, Check, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 
-const DAYS_OF_WEEK = ['일', '월', '화', '수', '목', '금', '토'];
-
-const BONUS_DAYS = [7, 14, 21, 30];
-
 const REWARD_TABLE = [
-  { range: '1~6일', reward: '1,000P' },
-  { range: '7일 (보너스)', reward: '5,000P' },
-  { range: '8~13일', reward: '1,500P' },
-  { range: '14일 (보너스)', reward: '10,000P' },
-  { range: '15~20일', reward: '2,000P' },
-  { range: '21일 (보너스)', reward: '30,000P' },
-  { range: '22~29일', reward: '2,500P' },
-  { range: '30일 (보너스)', reward: '100,000P' },
+  { deposit: '0', bet: '0', days: ['1,000P', '2,000P', '2,500P', '3,000P', '3,500P', '4,000P', '5,000P'], weekBonus: '10,000P' },
+  { deposit: '50,000', bet: '50,000', days: ['2,000P', '3,000P', '3,500P', '4,000P', '4,500P', '5,000P', '8,000P'], weekBonus: '15,000P' },
 ];
-
-const DayCell = ({
-  day,
-  isChecked,
-  isToday,
-  isBonusDay,
-  isPast,
-}: {
-  day: number;
-  isChecked: boolean;
-  isToday: boolean;
-  isBonusDay: boolean;
-  isPast: boolean;
-}) => {
-  const isFuture = !isChecked && !isToday && !isPast;
-
-  return (
-    <div
-      className={cn(
-        'relative flex aspect-square flex-col items-center justify-center rounded-lg border text-sm transition-all',
-        isChecked && 'border-green-500/50 bg-green-500/10',
-        isToday && !isChecked && 'animate-pulse border-yellow-500/50 bg-yellow-500/10',
-        isFuture && 'border-border bg-card/50 opacity-50',
-        isPast && !isChecked && 'border-border bg-card/30 opacity-40',
-        isBonusDay && 'ring-1 ring-yellow-500/40'
-      )}
-    >
-      {isChecked ? (
-        <Check className="size-5 text-green-400" />
-      ) : isToday ? (
-        <span className="text-yellow-400">?</span>
-      ) : (
-        <span className="text-muted-foreground">{day}</span>
-      )}
-      <span className="mt-0.5 text-[10px] text-muted-foreground">{day}</span>
-      {isBonusDay && (
-        <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-yellow-500 text-[8px] font-bold text-black">
-          B
-        </span>
-      )}
-    </div>
-  );
-};
 
 export default function AttendancePage() {
   const {
@@ -98,196 +37,220 @@ export default function AttendancePage() {
     }
   }, [checkIn]);
 
-  const today = new Date();
-  const currentDay = today.getDate();
-
-  // Build 30-day grid data
-  const checkedDays = new Set(
-    attendanceStatus?.monthLogs?.map((log) => {
-      const d = new Date(log.date);
-      return d.getDate();
-    }) || []
-  );
-
-  // Calculate first day offset for calendar grid
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const consecutiveDays = attendanceStatus?.consecutiveDays || 0;
   const checkedToday = attendanceStatus?.checkedToday || false;
   const nextReward = attendanceStatus?.nextReward;
 
+  const checkedDaysSet = new Set(
+    attendanceStatus?.monthLogs?.map((log) => {
+      const d = new Date(log.date);
+      return d.getDay();
+    }) || []
+  );
+
+  // 7-day check-in display (kzkzb style: 6 regular + 1 bonus)
+  const dayLabels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Header card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">출석체크</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">연속 출석</p>
-              <p className="text-2xl font-bold">
-                {consecutiveDays}일째
-                {consecutiveDays >= 3 && <span className="ml-1">🔥</span>}
-              </p>
-            </div>
-            {nextReward && (
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">오늘의 보상</p>
-                <p className="text-lg font-bold text-yellow-400">
-                  {Number(nextReward.amount).toLocaleString('ko-KR')}
-                  {nextReward.rewardType === 'point' ? 'P' : '원'}
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Banner - kzkzb style large header */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-600 via-blue-500 to-cyan-400 p-8 md:p-12">
+        <div className="relative z-10">
+          <h1 className="text-3xl font-extrabold text-white md:text-5xl">Check-in</h1>
+          <p className="mt-2 text-base text-white/80 md:text-lg">
+            and earn up to <span className="font-bold text-white">₩100,000</span>
+          </p>
+          <p className="text-base text-white/80 md:text-lg">Rewards!</p>
+        </div>
+        {/* Decorative elements */}
+        <div className="absolute top-4 right-4 text-7xl opacity-20 md:text-8xl">📅</div>
+        <div className="absolute right-16 bottom-2 text-5xl opacity-20 md:text-6xl">🔔</div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+      </div>
 
-      {/* Calendar grid */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">
-            {year}년 {month + 1}월
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Day of week headers */}
-          <div className="mb-2 grid grid-cols-7 gap-1.5">
-            {DAYS_OF_WEEK.map((day) => (
+      {/* Check-in status card */}
+      <div className="rounded-xl bg-white p-6">
+        {/* Current reward info */}
+        <div className="mb-6 text-center">
+          <p className="text-sm text-[#707070]">Check in now to get</p>
+          <p className="text-2xl font-bold text-[#f4b53e]">
+            {nextReward
+              ? `₩${Number(nextReward.amount).toLocaleString('ko-KR')}`
+              : '₩1,000'
+            }
+          </p>
+        </div>
+
+        {/* 7-day grid (kzkzb: 6 + 1 layout) */}
+        <div className="flex items-stretch gap-2">
+          {/* Day 1-6: regular cells */}
+          {dayLabels.slice(0, 6).map((label, i) => {
+            const dayNum = i + 1;
+            const isChecked = dayNum <= consecutiveDays;
+            return (
               <div
-                key={day}
-                className="flex items-center justify-center py-1 text-xs font-medium text-muted-foreground"
+                key={label}
+                className={cn(
+                  'flex flex-1 flex-col items-center justify-center rounded-lg py-4 transition-all',
+                  isChecked
+                    ? 'bg-emerald-500/20'
+                    : 'bg-[#edeef3]/50'
+                )}
               >
-                {day}
+                {isChecked ? (
+                  <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500/30">
+                    <Check className="size-5 text-green-600" />
+                  </div>
+                ) : (
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#edeef3]/50">
+                    <Check className="size-5 text-[#707070]/30" />
+                  </div>
+                )}
+                <span className="mt-2 text-xs font-medium uppercase text-[#707070]">
+                  {label}
+                </span>
               </div>
-            ))}
+            );
+          })}
+
+          {/* Day 7: bonus day (kzkzb: wider, amber bg) */}
+          <div
+            className={cn(
+              'flex flex-[1.5] flex-col items-center justify-center rounded-lg py-4 transition-all',
+              consecutiveDays >= 7
+                ? 'bg-[#f4b53e]/30'
+                : 'bg-[#f4b53e]/10 border border-[#f4b53e]/20'
+            )}
+          >
+            {consecutiveDays >= 7 ? (
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#f4b53e]/40">
+                <Check className="size-5 text-[#f4b53e]" />
+              </div>
+            ) : (
+              <Gift className="size-10 text-[#f4b53e]" />
+            )}
+            <span className="mt-2 text-sm font-bold uppercase text-[#f4b53e]">
+              Day 7
+            </span>
           </div>
+        </div>
 
-          {/* Calendar cells */}
-          <div className="grid grid-cols-7 gap-1.5">
-            {/* Empty cells for offset */}
-            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
-
-            {/* Day cells */}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const isChecked = checkedDays.has(day);
-              const isToday = day === currentDay;
-              const isBonusDay = BONUS_DAYS.includes(day);
-              const isPast = day < currentDay;
-
-              return (
-                <DayCell
-                  key={day}
-                  day={day}
-                  isChecked={isChecked}
-                  isToday={isToday}
-                  isBonusDay={isBonusDay}
-                  isPast={isPast}
-                />
-              );
-            })}
-          </div>
-
-          {/* Legend */}
-          <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="size-3 rounded border border-green-500/50 bg-green-500/10" />
-              <span>출석 완료</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="size-3 animate-pulse rounded border border-yellow-500/50 bg-yellow-500/10" />
-              <span>오늘</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="size-3 rounded border border-border ring-1 ring-yellow-500/40" />
-              <span>보너스</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Check-in button */}
-      <Card>
-        <CardContent className="pt-6">
+        {/* Check-in button (kzkzb: full width, rounded-full, amber bg) */}
+        <div className="mt-6">
           {checkInResult && (
-            <div className="mb-4 rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-center">
-              <p className="text-sm font-medium text-green-400">
+            <div className="mb-4 rounded-lg bg-emerald-500/10 p-3 text-center">
+              <p className="text-sm font-medium text-green-600">
                 {checkInResult.dayNumber}일차 출석 완료!
               </p>
-              <p className="mt-1 text-lg font-bold text-green-300">
+              <p className="mt-1 text-lg font-bold text-green-500">
                 +{Number(checkInResult.reward).toLocaleString('ko-KR')}P
               </p>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-center">
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-center">
+              <p className="text-sm text-red-500">{error}</p>
             </div>
           )}
 
-          <Button
-            size="lg"
+          <button
             onClick={handleCheckIn}
             disabled={isCheckingIn || checkedToday || isLoading}
-            className="w-full text-base font-bold"
+            className={cn(
+              'w-full rounded-full py-4 text-lg font-bold transition-all',
+              checkedToday
+                ? 'cursor-not-allowed bg-[#edeef3] text-[#707070]'
+                : 'bg-[#f4b53e] text-black hover:bg-[#f4b53e]/90 active:scale-[0.98]'
+            )}
           >
             {isCheckingIn ? (
-              <>
-                <Loader2 className="mr-2 size-5 animate-spin" />
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="size-5 animate-spin" />
                 처리 중...
-              </>
+              </span>
             ) : checkedToday ? (
-              <>
-                <Check className="mr-2 size-5" />
+              <span className="flex items-center justify-center gap-2">
+                <Check className="size-5" />
                 오늘 출석 완료!
-              </>
+              </span>
             ) : (
-              '출석 체크하기!'
+              'Check-In Now'
             )}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
-      {/* Reward table */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">보상 안내</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            {REWARD_TABLE.map((item) => {
-              const isBonus = item.range.includes('보너스');
-              return (
-                <div
-                  key={item.range}
+      {/* Reward table (kzkzb style: amber header) */}
+      <div className="rounded-xl bg-white p-4">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-[#f4b53e]/90 text-black">
+                <th className="rounded-tl-lg px-3 py-2.5 text-left text-xs font-semibold">
+                  Deposit / Bet
+                </th>
+                {dayLabels.map((d) => (
+                  <th key={d} className="px-2 py-2.5 text-center text-xs font-semibold">
+                    {d}
+                  </th>
+                ))}
+                <th className="rounded-tr-lg px-2 py-2.5 text-center text-xs font-semibold">
+                  Weekly Bonus
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {REWARD_TABLE.map((row, idx) => (
+                <tr
+                  key={idx}
                   className={cn(
-                    'flex items-center justify-between rounded-lg px-3 py-2 text-sm',
-                    isBonus
-                      ? 'border border-yellow-500/30 bg-yellow-500/5'
-                      : 'bg-secondary/30'
+                    'border-b border-[#dddddd]/30',
+                    idx % 2 === 0 ? 'bg-[#edeef3]/20' : 'bg-[#edeef3]/10'
                   )}
                 >
-                  <span className={cn(isBonus && 'font-medium text-yellow-400')}>
-                    {item.range}
-                  </span>
-                  <span className={cn('font-semibold', isBonus ? 'text-yellow-400' : 'text-foreground')}>
-                    {item.reward}
-                  </span>
-                </div>
-              );
-            })}
+                  <td className="px-3 py-2.5 text-xs">
+                    <span className="text-[#707070]">≥</span> ₩{row.deposit} / <span className="text-[#707070]">≥</span> ₩{row.bet}
+                  </td>
+                  {row.days.map((val, di) => (
+                    <td key={di} className="px-2 py-2.5 text-center text-xs font-medium">
+                      {val}
+                    </td>
+                  ))}
+                  <td className="px-2 py-2.5 text-center">
+                    <span className="inline-block rounded bg-[#f4b53e]/20 px-2 py-0.5 text-xs font-bold text-[#f4b53e]">
+                      Extra Bonus {row.weekBonus}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="mt-3 text-center text-xs text-[#707070]">
+          Check in 7 days bonus
+        </p>
+      </div>
+
+      {/* Consecutive days info */}
+      <div className="rounded-xl bg-white p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-[#707070]">연속 출석</p>
+            <p className="text-xl font-bold">
+              {consecutiveDays}일째
+              {consecutiveDays >= 3 && <span className="ml-1">🔥</span>}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="text-right">
+            <p className="text-xs text-[#707070]">이번 달 출석</p>
+            <p className="text-xl font-bold">
+              {attendanceStatus?.monthLogs?.length || 0}일
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

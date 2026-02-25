@@ -196,11 +196,11 @@ const main = async () => {
 
   // 8. Game Providers (5)
   const providers = [
-    { code: 'EVOLUTION', name: 'Evolution', category: 'casino' as const, gameCount: 50, logo: 'https://placehold.co/200x80/1a1a2e/e0e0e0?text=Evolution' },
-    { code: 'PRAGMATIC', name: 'Pragmatic Play', category: 'slot' as const, gameCount: 80, logo: 'https://placehold.co/200x80/1a1a2e/e0e0e0?text=Pragmatic' },
-    { code: 'PGSOFT', name: 'PG Soft', category: 'slot' as const, gameCount: 60, logo: 'https://placehold.co/200x80/1a1a2e/e0e0e0?text=PGSoft' },
-    { code: 'JILI', name: 'JILI', category: 'slot' as const, gameCount: 40, logo: 'https://placehold.co/200x80/1a1a2e/e0e0e0?text=JILI' },
-    { code: 'SPRIBE', name: 'Spribe', category: 'mini_game' as const, gameCount: 20, logo: 'https://placehold.co/200x80/1a1a2e/e0e0e0?text=Spribe' },
+    { code: 'EVOLUTION', name: 'Evolution', category: 'casino' as const, gameCount: 50, logo: 'https://placehold.co/200x80/0a0a1a/DAA520?text=EVOLUTION&font=montserrat' },
+    { code: 'PRAGMATIC', name: 'Pragmatic Play', category: 'slot' as const, gameCount: 80, logo: 'https://placehold.co/200x80/1a0a2e/00BFFF?text=PRAGMATIC&font=montserrat' },
+    { code: 'PGSOFT', name: 'PG Soft', category: 'slot' as const, gameCount: 60, logo: 'https://placehold.co/200x80/0a1a0a/7CFC00?text=PG+SOFT&font=montserrat' },
+    { code: 'JILI', name: 'JILI', category: 'slot' as const, gameCount: 40, logo: 'https://placehold.co/200x80/2a0a0a/FF4444?text=JILI&font=montserrat' },
+    { code: 'SPRIBE', name: 'Spribe', category: 'mini_game' as const, gameCount: 20, logo: 'https://placehold.co/200x80/0a1a2e/00CED1?text=SPRIBE&font=montserrat' },
   ];
 
   for (const prov of providers) {
@@ -222,49 +222,49 @@ const main = async () => {
   const spribeProvider = await prisma.gameProvider.findUnique({ where: { code: 'SPRIBE' } });
 
   const gameData: { externalId: string; name: string; providerId: number; category: 'casino' | 'slot' | 'mini_game'; thumbnail: string; sortOrder: number; launchCount: number }[] = [
-    // Evolution (casino) - 8 games
-    { externalId: 'EVOLUTION_001', name: '라이브 바카라', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Live+Baccarat', sortOrder: 1, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_002', name: '드래곤 타이거', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Dragon+Tiger', sortOrder: 2, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_003', name: '라이브 블랙잭', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Live+Blackjack', sortOrder: 3, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_004', name: '라이브 룰렛', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Live+Roulette', sortOrder: 4, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_005', name: '크레이지 타임', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Crazy+Time', sortOrder: 5, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_006', name: '라이트닝 바카라', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Lightning+Baccarat', sortOrder: 6, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_007', name: '스피드 바카라', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Speed+Baccarat', sortOrder: 7, launchCount: randomLaunch() },
-    { externalId: 'EVOLUTION_008', name: '딜 오어 노 딜', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Deal+or+No+Deal', sortOrder: 8, launchCount: randomLaunch() },
+    // Evolution (casino) - 8 games — gold/black theme
+    { externalId: 'EVOLUTION_001', name: '라이브 바카라', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a0a00/DAA520?text=Live%0ABaccarat&font=montserrat', sortOrder: 1, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_002', name: '드래곤 타이거', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/2a0a0a/FF6347?text=Dragon%0ATiger&font=montserrat', sortOrder: 2, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_003', name: '라이브 블랙잭', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/0a1a0a/2ECC71?text=Live%0ABlackjack&font=montserrat', sortOrder: 3, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_004', name: '라이브 룰렛', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a0000/DC143C?text=Live%0ARoulette&font=montserrat', sortOrder: 4, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_005', name: '크레이지 타임', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/2a1a3a/FF69B4?text=Crazy%0ATime&font=montserrat', sortOrder: 5, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_006', name: '라이트닝 바카라', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/0a0a2a/FFD700?text=Lightning%0ABaccarat&font=montserrat', sortOrder: 6, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_007', name: '스피드 바카라', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/1a1a00/F0E68C?text=Speed%0ABaccarat&font=montserrat', sortOrder: 7, launchCount: randomLaunch() },
+    { externalId: 'EVOLUTION_008', name: '딜 오어 노 딜', providerId: evolutionProvider!.id, category: 'casino', thumbnail: 'https://placehold.co/400x300/2a1a00/FFA500?text=Deal+or%0ANo+Deal&font=montserrat', sortOrder: 8, launchCount: randomLaunch() },
 
-    // Pragmatic Play (slot) - 8 games
-    { externalId: 'PRAGMATIC_001', name: '게이트 오브 올림푸스', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Gates+of+Olympus', sortOrder: 1, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_002', name: '스위트 보난자', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Sweet+Bonanza', sortOrder: 2, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_003', name: '더 독 하우스', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=The+Dog+House', sortOrder: 3, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_004', name: '빅 배스 보난자', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Big+Bass+Bonanza', sortOrder: 4, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_005', name: '스타라이트 프린세스', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Starlight+Princess', sortOrder: 5, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_006', name: '울프 골드', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Wolf+Gold', sortOrder: 6, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_007', name: '북 오브 데드', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Book+of+Dead', sortOrder: 7, launchCount: randomLaunch() },
-    { externalId: 'PRAGMATIC_008', name: '슈가 러쉬', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Sugar+Rush', sortOrder: 8, launchCount: randomLaunch() },
+    // Pragmatic Play (slot) - 8 games — purple/blue theme
+    { externalId: 'PRAGMATIC_001', name: '게이트 오브 올림푸스', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a0a3a/00BFFF?text=Gates+of%0AOlympus&font=montserrat', sortOrder: 1, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_002', name: '스위트 보난자', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a0a2a/FF1493?text=Sweet%0ABonanza&font=montserrat', sortOrder: 2, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_003', name: '더 독 하우스', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a0a/FFD700?text=The+Dog%0AHouse&font=montserrat', sortOrder: 3, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_004', name: '빅 배스 보난자', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/0a1a2a/1E90FF?text=Big+Bass%0ABonanza&font=montserrat', sortOrder: 4, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_005', name: '스타라이트 프린세스', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a0a3a/DA70D6?text=Starlight%0APrincess&font=montserrat', sortOrder: 5, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_006', name: '울프 골드', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a00/B8860B?text=Wolf%0AGold&font=montserrat', sortOrder: 6, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_007', name: '북 오브 데드', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a1a0a/CD853F?text=Book+of%0ADead&font=montserrat', sortOrder: 7, launchCount: randomLaunch() },
+    { externalId: 'PRAGMATIC_008', name: '슈가 러쉬', providerId: pragmaticProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a0a1a/FF6B81?text=Sugar%0ARush&font=montserrat', sortOrder: 8, launchCount: randomLaunch() },
 
-    // PG Soft (slot) - 7 games
-    { externalId: 'PGSOFT_001', name: '마작 웨이즈', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Mahjong+Ways', sortOrder: 1, launchCount: randomLaunch() },
-    { externalId: 'PGSOFT_002', name: '포춘 타이거', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Fortune+Tiger', sortOrder: 2, launchCount: randomLaunch() },
-    { externalId: 'PGSOFT_003', name: '럭키 네코', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Lucky+Neko', sortOrder: 3, launchCount: randomLaunch() },
-    { externalId: 'PGSOFT_004', name: '보물 대장정', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Treasure+Hunt', sortOrder: 4, launchCount: randomLaunch() },
-    { externalId: 'PGSOFT_005', name: '드래곤 해치', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Dragon+Hatch', sortOrder: 5, launchCount: randomLaunch() },
-    { externalId: 'PGSOFT_006', name: '캡틴스 바운티', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Captains+Bounty', sortOrder: 6, launchCount: randomLaunch() },
-    { externalId: 'PGSOFT_007', name: '포춘 옥스', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Fortune+Ox', sortOrder: 7, launchCount: randomLaunch() },
+    // PG Soft (slot) - 7 games — green/teal theme
+    { externalId: 'PGSOFT_001', name: '마작 웨이즈', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/0a1a1a/20B2AA?text=Mahjong%0AWays&font=montserrat', sortOrder: 1, launchCount: randomLaunch() },
+    { externalId: 'PGSOFT_002', name: '포춘 타이거', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a1a00/FF8C00?text=Fortune%0ATiger&font=montserrat', sortOrder: 2, launchCount: randomLaunch() },
+    { externalId: 'PGSOFT_003', name: '럭키 네코', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a0a1a/FF69B4?text=Lucky%0ANeko&font=montserrat', sortOrder: 3, launchCount: randomLaunch() },
+    { externalId: 'PGSOFT_004', name: '보물 대장정', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a0a/DAA520?text=Treasure%0AHunt&font=montserrat', sortOrder: 4, launchCount: randomLaunch() },
+    { externalId: 'PGSOFT_005', name: '드래곤 해치', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a0a0a/FF4500?text=Dragon%0AHatch&font=montserrat', sortOrder: 5, launchCount: randomLaunch() },
+    { externalId: 'PGSOFT_006', name: '캡틴스 바운티', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/0a0a2a/4169E1?text=Captains%0ABounty&font=montserrat', sortOrder: 6, launchCount: randomLaunch() },
+    { externalId: 'PGSOFT_007', name: '포춘 옥스', providerId: pgsoftProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a0a00/FF6347?text=Fortune%0AOx&font=montserrat', sortOrder: 7, launchCount: randomLaunch() },
 
-    // JILI (slot) - 6 games
-    { externalId: 'JILI_001', name: '슈퍼 에이스', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Super+Ace', sortOrder: 1, launchCount: randomLaunch() },
-    { externalId: 'JILI_002', name: '골든 엠파이어', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Golden+Empire', sortOrder: 2, launchCount: randomLaunch() },
-    { externalId: 'JILI_003', name: '마니 커밍', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Money+Coming', sortOrder: 3, launchCount: randomLaunch() },
-    { externalId: 'JILI_004', name: '박싱 킹', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Boxing+King', sortOrder: 4, launchCount: randomLaunch() },
-    { externalId: 'JILI_005', name: '크레이지 777', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Crazy+777', sortOrder: 5, launchCount: randomLaunch() },
-    { externalId: 'JILI_006', name: '포춘 젬스', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Fortune+Gems', sortOrder: 6, launchCount: randomLaunch() },
+    // JILI (slot) - 6 games — red/warm theme
+    { externalId: 'JILI_001', name: '슈퍼 에이스', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a0a2a/9370DB?text=Super%0AAce&font=montserrat', sortOrder: 1, launchCount: randomLaunch() },
+    { externalId: 'JILI_002', name: '골든 엠파이어', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/1a1a00/FFD700?text=Golden%0AEmpire&font=montserrat', sortOrder: 2, launchCount: randomLaunch() },
+    { externalId: 'JILI_003', name: '마니 커밍', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/0a2a0a/32CD32?text=Money%0AComing&font=montserrat', sortOrder: 3, launchCount: randomLaunch() },
+    { externalId: 'JILI_004', name: '박싱 킹', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a0a0a/FF0000?text=Boxing%0AKing&font=montserrat', sortOrder: 4, launchCount: randomLaunch() },
+    { externalId: 'JILI_005', name: '크레이지 777', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/2a1a3a/EE82EE?text=Crazy%0A777&font=montserrat', sortOrder: 5, launchCount: randomLaunch() },
+    { externalId: 'JILI_006', name: '포춘 젬스', providerId: jiliProvider!.id, category: 'slot', thumbnail: 'https://placehold.co/400x300/0a2a2a/00CED1?text=Fortune%0AGems&font=montserrat', sortOrder: 6, launchCount: randomLaunch() },
 
-    // Spribe (mini_game) - 5 games
-    { externalId: 'SPRIBE_001', name: '에비에이터', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Aviator', sortOrder: 1, launchCount: randomLaunch() },
-    { externalId: 'SPRIBE_002', name: '마인즈', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Mines', sortOrder: 2, launchCount: randomLaunch() },
-    { externalId: 'SPRIBE_003', name: '다이스', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Dice', sortOrder: 3, launchCount: randomLaunch() },
-    { externalId: 'SPRIBE_004', name: '골', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Goal', sortOrder: 4, launchCount: randomLaunch() },
-    { externalId: 'SPRIBE_005', name: '하이로', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a1a2e/e0e0e0?text=Hi-Lo', sortOrder: 5, launchCount: randomLaunch() },
+    // Spribe (mini_game) - 5 games — cyan/neon theme
+    { externalId: 'SPRIBE_001', name: '에비에이터', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a0000/FF2400?text=Aviator%0A%E2%9C%88&font=montserrat', sortOrder: 1, launchCount: randomLaunch() },
+    { externalId: 'SPRIBE_002', name: '마인즈', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/0a0a1a/1E90FF?text=Mines%0A%F0%9F%92%8E&font=montserrat', sortOrder: 2, launchCount: randomLaunch() },
+    { externalId: 'SPRIBE_003', name: '다이스', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/0a1a0a/00FF7F?text=Dice%0A%F0%9F%8E%B2&font=montserrat', sortOrder: 3, launchCount: randomLaunch() },
+    { externalId: 'SPRIBE_004', name: '골', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/0a1a1a/00BFFF?text=Goal%0A%E2%9A%BD&font=montserrat', sortOrder: 4, launchCount: randomLaunch() },
+    { externalId: 'SPRIBE_005', name: '하이로', providerId: spribeProvider!.id, category: 'mini_game', thumbnail: 'https://placehold.co/400x300/1a1a0a/FFD700?text=Hi-Lo%0A%F0%9F%83%8F&font=montserrat', sortOrder: 5, launchCount: randomLaunch() },
   ];
 
   for (const game of gameData) {

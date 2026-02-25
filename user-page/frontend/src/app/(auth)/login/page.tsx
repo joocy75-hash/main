@@ -4,10 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuthStore } from '@/stores/auth-store';
 
@@ -70,107 +66,109 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">
+    <div className="flex min-h-screen items-center justify-center bg-[#f1f2f7] px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <div className="mb-6 text-center">
+          <h1 className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] bg-clip-text text-2xl font-bold tracking-tight text-transparent">
             Game Platform
-          </CardTitle>
-          <CardDescription className="text-base">
+          </h1>
+          <p className="mt-1 text-base text-[#707070]">
             로그인
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="username">아이디</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="아이디를 입력하세요"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="pl-10"
-                  autoComplete="username"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
+          </p>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">비밀번호</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="비밀번호를 입력하세요"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
-                  autoComplete="current-password"
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="remember"
-                checked={rememberUsername}
-                onCheckedChange={(checked) => setRememberUsername(checked === true)}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <label htmlFor="username" className="text-sm font-medium text-[#252531]">
+              아이디
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+              <input
+                id="username"
+                type="text"
+                placeholder="아이디를 입력하세요"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                autoComplete="username"
+                disabled={isSubmitting}
               />
-              <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
-                아이디 저장
-              </Label>
             </div>
+          </div>
 
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  로그인 중...
-                </>
-              ) : (
-                '로그인'
-              )}
-            </Button>
-
-            <p className="text-center text-sm text-muted-foreground">
-              계정이 없으신가요?{' '}
-              <Link
-                href="/register"
-                className="text-primary hover:underline font-medium"
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium text-[#252531]">
+              비밀번호
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="비밀번호를 입력하세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                autoComplete="current-password"
+                disabled={isSubmitting}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] transition-colors hover:text-[#252531]"
+                tabIndex={-1}
               >
-                회원가입
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+                {showPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="remember"
+              checked={rememberUsername}
+              onCheckedChange={(checked) => setRememberUsername(checked === true)}
+            />
+            <label htmlFor="remember" className="cursor-pointer text-sm font-normal text-[#252531]">
+              아이디 저장
+            </label>
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            className="w-full rounded-lg bg-gradient-to-r from-[#ffd651] to-[#fe960e] py-3 text-base font-bold text-black hover:opacity-90 disabled:opacity-50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                로그인 중...
+              </span>
+            ) : (
+              '로그인'
+            )}
+          </button>
+
+          <p className="text-center text-sm text-[#707070]">
+            계정이 없으신가요?{' '}
+            <Link
+              href="/register"
+              className="font-medium text-[#f4b53e] hover:underline"
+            >
+              회원가입
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

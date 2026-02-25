@@ -2,15 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -18,14 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useWalletStore } from '@/stores/wallet-store';
 import type { Transaction } from '@/stores/wallet-store';
@@ -51,30 +34,30 @@ const PAGE_SIZE = 10;
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variants: Record<string, { label: string; className: string }> = {
-    pending: { label: '대기중', className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-    approved: { label: '완료', className: 'bg-green-500/20 text-green-400 border-green-500/30' },
-    rejected: { label: '거부', className: 'bg-red-500/20 text-red-400 border-red-500/30' },
+    pending: { label: '대기중', className: 'bg-yellow-50 text-yellow-600' },
+    approved: { label: '완료', className: 'bg-green-50 text-green-600' },
+    rejected: { label: '거부', className: 'bg-red-50 text-red-500' },
   };
   const v = variants[status] || variants.pending;
   return (
-    <Badge variant="outline" className={v.className}>
+    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', v.className)}>
       {v.label}
-    </Badge>
+    </span>
   );
 };
 
 const TypeBadge = ({ type }: { type: string }) => {
   if (type === 'deposit') {
     return (
-      <Badge variant="outline" className="border-green-500/30 bg-green-500/10 text-green-400">
+      <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600">
         입금
-      </Badge>
+      </span>
     );
   }
   return (
-    <Badge variant="outline" className="border-red-500/30 bg-red-500/10 text-red-400">
+    <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-500">
       출금
-    </Badge>
+    </span>
   );
 };
 
@@ -168,15 +151,17 @@ export default function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">거래 내역</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+      <div className="rounded-lg bg-white shadow-sm">
+        {/* Header */}
+        <div className="border-b border-[#dddddd] px-5 py-4">
+          <h2 className="text-lg font-bold text-[#252531]">거래 내역</h2>
+        </div>
+
+        <div className="flex flex-col gap-4 p-5">
           {/* Filters */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Type tabs */}
-            <div className="flex gap-1 rounded-lg border border-border bg-secondary/30 p-1">
+            <div className="flex gap-1 rounded-lg bg-[#f8f9fc] p-1">
               {TYPE_TABS.map((tab) => (
                 <button
                   key={tab.value}
@@ -184,8 +169,8 @@ export default function TransactionsPage() {
                   className={cn(
                     'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                     typeFilter === tab.value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-[#f4b53e] text-white'
+                      : 'text-[#707070] hover:text-[#252531]'
                   )}
                 >
                   {tab.label}
@@ -199,7 +184,7 @@ export default function TransactionsPage() {
                 value={periodFilter}
                 onValueChange={(val) => setPeriodFilter(val as PeriodFilter)}
               >
-                <SelectTrigger className="h-8 w-24 bg-card text-xs">
+                <SelectTrigger className="h-8 w-24 border-[#dddddd] bg-white text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -220,8 +205,8 @@ export default function TransactionsPage() {
                 className={cn(
                   'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
                   statusFilter === sf.value
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border text-muted-foreground hover:bg-secondary hover:text-foreground'
+                    ? 'border-[#f4b53e] bg-[#f4b53e] text-white'
+                    : 'border-[#dddddd] text-[#707070] hover:border-[#f4b53e] hover:text-[#252531]'
                 )}
               >
                 {sf.label}
@@ -233,74 +218,74 @@ export default function TransactionsPage() {
           {isLoading ? (
             <div className="flex flex-col gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                <div key={i} className="h-12 w-full animate-pulse rounded-lg bg-[#edeef3]" />
               ))}
             </div>
           ) : transactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#707070]">
                 거래 내역이 없습니다
               </p>
             </div>
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden sm:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>일시</TableHead>
-                      <TableHead>유형</TableHead>
-                      <TableHead>코인</TableHead>
-                      <TableHead className="text-right">금액</TableHead>
-                      <TableHead>TX Hash</TableHead>
-                      <TableHead className="text-center">상태</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[#f8f9fc]">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">일시</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">유형</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">코인</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-[#707070]">금액</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">TX Hash</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-[#707070]">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#dddddd]">
                     {transactions.map((tx: Transaction) => (
-                      <TableRow key={`${tx.type}-${tx.id}`}>
-                        <TableCell className="text-sm text-muted-foreground">
+                      <tr key={`${tx.type}-${tx.id}`} className="hover:bg-[#f8f9fc] transition-colors">
+                        <td className="px-4 py-3 text-sm text-[#707070]">
                           {formatDate(tx.createdAt)}
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="px-4 py-3">
                           <TypeBadge type={tx.type} />
-                        </TableCell>
-                        <TableCell className="text-sm font-medium">
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-[#252531]">
                           {tx.coinType}
-                        </TableCell>
-                        <TableCell
+                        </td>
+                        <td
                           className={cn(
-                            'text-right text-sm font-medium',
-                            tx.type === 'deposit' ? 'text-green-400' : 'text-red-400'
+                            'px-4 py-3 text-right text-sm font-medium',
+                            tx.type === 'deposit' ? 'text-green-600' : 'text-red-500'
                           )}
                         >
                           {formatAmount(tx)}
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="px-4 py-3">
                           {tx.txHash ? (
                             <button
                               onClick={() => handleCopyHash(tx.txHash!)}
-                              className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
+                              className="inline-flex items-center gap-1 font-mono text-xs text-[#707070] transition-colors hover:text-[#252531]"
                             >
                               {truncateHash(tx.txHash)}
                               {copiedHash === tx.txHash ? (
-                                <Check className="size-3 text-green-400" />
+                                <Check className="size-3 text-green-600" />
                               ) : (
                                 <Copy className="size-3" />
                               )}
                             </button>
                           ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
+                            <span className="text-xs text-[#707070]">-</span>
                           )}
-                        </TableCell>
-                        <TableCell className="text-center">
+                        </td>
+                        <td className="px-4 py-3 text-center">
                           <StatusBadge status={tx.status} />
-                        </TableCell>
-                      </TableRow>
+                        </td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
 
               {/* Mobile card layout */}
@@ -308,24 +293,24 @@ export default function TransactionsPage() {
                 {transactions.map((tx: Transaction) => (
                   <div
                     key={`${tx.type}-${tx.id}`}
-                    className="rounded-lg border border-border bg-secondary/30 px-3 py-3"
+                    className="rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-3"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <TypeBadge type={tx.type} />
-                        <span className="text-sm font-medium">{tx.coinType}</span>
+                        <span className="text-sm font-medium text-[#252531]">{tx.coinType}</span>
                       </div>
                       <span
                         className={cn(
                           'text-sm font-semibold',
-                          tx.type === 'deposit' ? 'text-green-400' : 'text-red-400'
+                          tx.type === 'deposit' ? 'text-green-600' : 'text-red-500'
                         )}
                       >
                         {formatAmount(tx)}
                       </span>
                     </div>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-[#707070]">
                         {formatDate(tx.createdAt)}
                       </span>
                       <StatusBadge status={tx.status} />
@@ -334,11 +319,11 @@ export default function TransactionsPage() {
                       <div className="mt-1.5">
                         <button
                           onClick={() => handleCopyHash(tx.txHash!)}
-                          className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                          className="inline-flex items-center gap-1 font-mono text-[11px] text-[#707070] transition-colors hover:text-[#252531]"
                         >
                           TX: {truncateHash(tx.txHash)}
                           {copiedHash === tx.txHash ? (
-                            <Check className="size-3 text-green-400" />
+                            <Check className="size-3 text-green-600" />
                           ) : (
                             <Copy className="size-3" />
                           )}
@@ -352,41 +337,42 @@ export default function TransactionsPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-1 pt-2">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
+                  <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-[#dddddd] bg-white text-[#707070] transition-colors hover:bg-[#f8f9fc] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="size-4" />
-                  </Button>
+                  </button>
 
                   {getPageNumbers().map((page) => (
-                    <Button
+                    <button
                       key={page}
-                      variant={page === currentPage ? 'default' : 'outline'}
-                      size="sm"
-                      className="size-8 p-0 text-xs"
                       onClick={() => handlePageChange(page)}
+                      className={cn(
+                        'inline-flex size-8 items-center justify-center rounded-md text-xs font-medium transition-colors',
+                        page === currentPage
+                          ? 'bg-[#f4b53e] text-white'
+                          : 'border border-[#dddddd] bg-white text-[#707070] hover:bg-[#f8f9fc]'
+                      )}
                     >
                       {page}
-                    </Button>
+                    </button>
                   ))}
 
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
+                  <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={!transactionsHasMore && currentPage >= totalPages}
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-[#dddddd] bg-white text-[#707070] transition-colors hover:bg-[#f8f9fc] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronRight className="size-4" />
-                  </Button>
+                  </button>
                 </div>
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

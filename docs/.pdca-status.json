@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-24T11:41:17.423Z",
+  "lastUpdated": "2026-02-24T19:38:30.255Z",
   "activeFeatures": [
     "scripts",
     "backend",
@@ -118,7 +118,16 @@
     "quota_service.py",
     "rapidapi_client.py",
     "external-api",
-    "sports-monitor"
+    "sports-monitor",
+    "event-service.ts",
+    "wallet-service.ts",
+    "plugins",
+    "layout",
+    "prisma",
+    "sports-service.ts",
+    "minigame-service.ts",
+    "user-page",
+    "minigame"
   ],
   "primaryFeature": "scripts",
   "features": {
@@ -144,9 +153,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-17T14:11:27.559Z",
-        "lastUpdated": "2026-02-24T11:36:37.398Z"
+        "lastUpdated": "2026-02-24T19:16:32.327Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/main.py"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/config.ts"
     },
     "schemas": {
       "phase": "do",
@@ -183,9 +192,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-17T14:11:43.600Z",
-        "lastUpdated": "2026-02-24T11:38:30.485Z"
+        "lastUpdated": "2026-02-24T18:45:29.867Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/api/v1/bi.py"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/backend/app/api/v1/external_api.py"
     },
     "__init__.py": {
       "phase": "do",
@@ -261,9 +270,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-17T14:15:49.657Z",
-        "lastUpdated": "2026-02-24T11:39:20.978Z"
+        "lastUpdated": "2026-02-24T19:37:40.946Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/components/auth-guard.tsx"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/frontend/src/lib/constants.ts"
     },
     "stores": {
       "phase": "do",
@@ -274,9 +283,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-17T14:15:52.103Z",
-        "lastUpdated": "2026-02-23T12:51:09.203Z"
+        "lastUpdated": "2026-02-24T19:38:30.255Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/casino/frontend/src/stores/affiliate-store.ts"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/frontend/src/stores/sports-store.ts"
     },
     "login": {
       "phase": "do",
@@ -1054,9 +1063,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-19T11:13:01.591Z",
-        "lastUpdated": "2026-02-19T11:51:01.164Z"
+        "lastUpdated": "2026-02-24T19:07:12.701Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-site/backend/routes/api.php"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/routes/minigame.ts"
     },
     "Game": {
       "phase": "do",
@@ -1431,9 +1440,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-23T10:31:43.010Z",
-        "lastUpdated": "2026-02-23T10:31:53.708Z"
+        "lastUpdated": "2026-02-24T19:37:47.273Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/casino/frontend/src/app/(main)/sports/page.tsx"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/frontend/src/app/(main)/sports/layout.tsx"
     },
     "messages": {
       "phase": "do",
@@ -1548,9 +1557,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-23T14:47:08.306Z",
-        "lastUpdated": "2026-02-23T14:47:08.306Z"
+        "lastUpdated": "2026-02-24T19:36:07.377Z"
       },
-      "lastFile": "/Users/mr.joo/Desktop/casino/frontend/src/app/(main)/esports/page.tsx"
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/frontend/src/app/(main)/esports/page.tsx"
     },
     "spribe": {
       "phase": "do",
@@ -1642,6 +1651,123 @@
         "lastUpdated": "2026-02-24T11:41:17.423Z"
       },
       "lastFile": "/Users/mr.joo/Desktop/관리자페이지/frontend/src/app/dashboard/sports-monitor/page.tsx"
+    },
+    "event-service.ts": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T18:04:29.290Z",
+        "lastUpdated": "2026-02-24T18:05:23.948Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/services/event-service.ts"
+    },
+    "wallet-service.ts": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T18:10:48.115Z",
+        "lastUpdated": "2026-02-24T18:11:01.651Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/services/wallet-service.ts"
+    },
+    "plugins": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T18:11:33.536Z",
+        "lastUpdated": "2026-02-24T18:11:44.186Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/plugins/auth.ts"
+    },
+    "layout": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T18:16:19.383Z",
+        "lastUpdated": "2026-02-24T19:37:25.032Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/frontend/src/components/layout/mobile-nav.tsx"
+    },
+    "prisma": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T18:29:54.995Z",
+        "lastUpdated": "2026-02-24T18:31:01.185Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/prisma/seed.ts"
+    },
+    "sports-service.ts": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T18:45:45.003Z",
+        "lastUpdated": "2026-02-24T19:38:24.455Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/services/sports-service.ts"
+    },
+    "minigame-service.ts": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T19:07:02.045Z",
+        "lastUpdated": "2026-02-24T19:07:46.423Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/backend/src/services/minigame-service.ts"
+    },
+    "user-page": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T19:07:07.987Z",
+        "lastUpdated": "2026-02-24T19:07:16.656Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/shared/types/index.ts"
+    },
+    "minigame": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-24T19:09:00.712Z",
+        "lastUpdated": "2026-02-24T19:09:48.421Z"
+      },
+      "lastFile": "/Users/mr.joo/Desktop/관리자페이지/user-page/frontend/src/app/(main)/minigame/page.tsx"
     }
   },
   "pipeline": {
@@ -1652,7 +1778,7 @@
   "session": {
     "startedAt": "2026-02-17T13:41:04.691Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-24T11:41:17.423Z"
+    "lastActivity": "2026-02-24T19:38:30.255Z"
   },
   "history": [
     {
@@ -12386,6 +12512,570 @@
     {
       "timestamp": "2026-02-24T11:41:17.423Z",
       "feature": "sports-monitor",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:04:29.290Z",
+      "feature": "event-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:04:54.791Z",
+      "feature": "event-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:05:23.949Z",
+      "feature": "event-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:10:08.734Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:10:17.584Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:10:23.724Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:10:31.835Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:10:39.480Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:10:48.115Z",
+      "feature": "wallet-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:11:01.651Z",
+      "feature": "wallet-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:11:26.984Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:11:33.536Z",
+      "feature": "plugins",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:11:44.186Z",
+      "feature": "plugins",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:15:38.575Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:15:44.709Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:15:51.735Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:15:57.745Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:11.312Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:19.383Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:28.632Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:38.615Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:45.079Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:51.487Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:16:58.632Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:17:32.788Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:17:38.634Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:17:44.754Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:17:50.680Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:17:55.854Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:01.424Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:07.005Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:12.473Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:17.761Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:23.677Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:29.562Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:34.665Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:18:39.974Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:25:16.113Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:27:29.442Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:29:54.995Z",
+      "feature": "prisma",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:31:01.185Z",
+      "feature": "prisma",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:01.542Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:06.228Z",
+      "feature": "v1",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:20.614Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:21.969Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:23.720Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:25.122Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:26.677Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:27.847Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:28.977Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:29.867Z",
+      "feature": "v1",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:30.447Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:30.938Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:31.513Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:31.997Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:32.716Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:33.993Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:44.057Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:45.003Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:46.396Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:47.937Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:45:49.354Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:55:03.676Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:56:55.689Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:57:00.998Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:57:06.691Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T18:57:11.879Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:02.045Z",
+      "feature": "minigame-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:07.987Z",
+      "feature": "user-page",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:12.701Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:16.656Z",
+      "feature": "user-page",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:17.936Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:23.180Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:31.169Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:07:46.423Z",
+      "feature": "minigame-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:09:00.712Z",
+      "feature": "minigame",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:09:41.654Z",
+      "feature": "minigame",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:09:48.421Z",
+      "feature": "minigame",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:16:32.327Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:18:09.163Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:26:43.649Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:27:12.181Z",
+      "feature": "sports",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:27:59.809Z",
+      "feature": "esports",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:36:07.377Z",
+      "feature": "esports",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:36:29.763Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:36:37.010Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:36:50.944Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:36:56.382Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:37:16.473Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:37:25.032Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:37:40.946Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:37:47.273Z",
+      "feature": "sports",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:38:24.455Z",
+      "feature": "sports-service.ts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T19:38:30.255Z",
+      "feature": "stores",
       "phase": "do",
       "action": "updated"
     }

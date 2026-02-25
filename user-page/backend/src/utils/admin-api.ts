@@ -39,7 +39,7 @@ export class AdminApiClient {
           method,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.serviceToken}`,
+            'X-Service-Token': this.serviceToken,
             'X-Service-Name': 'user-page-backend',
           },
           body: body ? JSON.stringify(body) : undefined,
@@ -68,45 +68,51 @@ export class AdminApiClient {
 
   // Game-related proxy methods
   async getProviders() {
-    return this.request<{ data: unknown[] }>('/api/v1/external-api/casino/providers');
+    return this.request<{ data: unknown[] }>('/api/v1/user-proxy/casino/providers');
   }
 
   async getGamesByProvider(code: string) {
-    return this.request<{ data: unknown[] }>(`/api/v1/external-api/casino/games/${code}`);
+    return this.request<{ data: unknown[] }>(`/api/v1/user-proxy/casino/games/${code}`);
   }
 
   async launchGame(body: { userId: number; gameId: string; platform: number; homeUrl: string }) {
-    return this.request<{ data: { url: string } }>('/api/v1/external-api/casino/launch', {
+    return this.request<{ data: { url: string } }>('/api/v1/user-proxy/casino/launch', {
       method: 'POST',
-      body,
+      body: {
+        user_id: body.userId,
+        game_id: body.gameId,
+        platform: body.platform,
+        home_url: body.homeUrl,
+        currency: 'KRW',
+      },
     });
   }
 
   // Sports-related proxy methods
   async getLiveEvents(status = 'LIVE') {
-    return this.request<{ data: unknown[] }>('/api/v1/external-api/sports/events', {
+    return this.request<{ data: unknown[] }>('/api/v1/user-proxy/sports/events', {
       params: { status },
     });
   }
 
   async getEventOdds(eventId: number) {
-    return this.request<{ data: unknown[] }>(`/api/v1/external-api/sports/odds/${eventId}`);
+    return this.request<{ data: unknown[] }>(`/api/v1/user-proxy/sports/odds/${eventId}`);
   }
 
   async getSportsLive(sport: string) {
-    return this.request<{ data: unknown[] }>(`/api/v1/external-api/sports/live/${sport}`);
+    return this.request<{ data: unknown[] }>(`/api/v1/user-proxy/sports/live/${sport}`);
   }
 
   async getEnrichedEvents(sport: string) {
-    return this.request<{ data: unknown[] }>(`/api/v1/external-api/sports/enriched/${sport}`);
+    return this.request<{ data: unknown[] }>(`/api/v1/user-proxy/sports/enriched/${sport}`);
   }
 
   async getEsportsLive() {
-    return this.request<{ data: unknown[] }>('/api/v1/external-api/esports/live');
+    return this.request<{ data: unknown[] }>('/api/v1/user-proxy/esports/live');
   }
 
   async getEsportsCategories() {
-    return this.request<{ data: unknown[] }>('/api/v1/external-api/esports/categories');
+    return this.request<{ data: unknown[] }>('/api/v1/user-proxy/esports/categories');
   }
 
   // Notification methods

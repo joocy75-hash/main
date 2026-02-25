@@ -2,25 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Copy, Check, AlertTriangle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { COINS, DEFAULT_NETWORK } from '@/lib/constants';
 import { useWalletStore } from '@/stores/wallet-store';
@@ -36,15 +17,15 @@ const MIN_DEPOSIT: Record<string, number> = {
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variants: Record<string, { label: string; className: string }> = {
-    pending: { label: '대기중', className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-    approved: { label: '승인', className: 'bg-green-500/20 text-green-400 border-green-500/30' },
-    rejected: { label: '거부', className: 'bg-red-500/20 text-red-400 border-red-500/30' },
+    pending: { label: '대기중', className: 'bg-yellow-50 text-yellow-600 border border-yellow-200' },
+    approved: { label: '승인', className: 'bg-green-50 text-green-600 border border-green-200' },
+    rejected: { label: '거부', className: 'bg-red-50 text-red-500 border border-red-200' },
   };
   const v = variants[status] || variants.pending;
   return (
-    <Badge variant="outline" className={v.className}>
+    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', v.className)}>
       {v.label}
-    </Badge>
+    </span>
   );
 };
 
@@ -123,16 +104,17 @@ export default function DepositPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">입금</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-5">
+      {/* Deposit form card */}
+      <div className="rounded-lg bg-white shadow-sm">
+        <div className="border-b border-[#dddddd] px-5 py-4">
+          <h2 className="text-lg font-bold text-[#252531]">입금</h2>
+        </div>
+        <div className="flex flex-col gap-5 px-5 py-5">
           {/* Coin selection */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               코인 선택
-            </Label>
+            </label>
             <div className="flex flex-wrap gap-2">
               {COINS.map((coin) => (
                 <button
@@ -145,8 +127,8 @@ export default function DepositPage() {
                   className={cn(
                     'flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
                     selectedCoin === coin.type
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      ? 'border-[#f4b53e] bg-[#fef8e8] text-[#f4b53e]'
+                      : 'border-[#dddddd] bg-white text-[#707070] hover:bg-[#f8f9fc] hover:text-[#252531]'
                   )}
                 >
                   <span className="text-base">{coin.icon}</span>
@@ -158,21 +140,21 @@ export default function DepositPage() {
 
           {/* Network */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               네트워크
-            </Label>
-            <div className="rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm font-medium">
+            </label>
+            <div className="rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-2.5 text-sm font-medium text-[#252531]">
               {network}
             </div>
           </div>
 
           {/* Amount input */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               입금 금액
-            </Label>
+            </label>
             <div className="relative">
-              <Input
+              <input
                 type="number"
                 placeholder={`최소 ${minAmount}`}
                 value={amount}
@@ -180,39 +162,38 @@ export default function DepositPage() {
                   setAmount(e.target.value);
                   setError('');
                 }}
-                className="bg-card pr-16"
+                className="w-full rounded-lg border border-[#dddddd] bg-white px-3 py-2.5 pr-16 text-sm text-[#252531] placeholder:text-[#aaaaaa] focus:border-[#f4b53e] focus:outline-none focus:ring-1 focus:ring-[#f4b53e]"
                 min={0}
                 step="any"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#707070]">
                 {selectedCoin}
               </span>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-[#707070]">
               최소 입금액: {minAmount} {selectedCoin}
             </p>
           </div>
 
-          <Separator />
+          {/* Divider */}
+          <div className="border-t border-[#dddddd]" />
 
           {/* Deposit address */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               입금 주소
-            </Label>
+            </label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 overflow-hidden rounded-lg border border-border bg-secondary/50 px-3 py-2.5">
-                <p className="truncate font-mono text-sm">{depositAddress}</p>
+              <div className="flex-1 overflow-hidden rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-2.5">
+                <p className="truncate font-mono text-sm text-[#252531]">{depositAddress}</p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={handleCopy}
-                className="shrink-0 gap-1.5"
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[#dddddd] bg-white px-3 py-2 text-sm font-medium text-[#252531] transition-colors hover:bg-[#f8f9fc]"
               >
                 {copied ? (
                   <>
-                    <Check className="size-4 text-green-400" />
+                    <Check className="size-4 text-green-500" />
                     복사됨
                   </>
                 ) : (
@@ -221,15 +202,15 @@ export default function DepositPage() {
                     복사
                   </>
                 )}
-              </Button>
+              </button>
             </div>
 
             {/* QR code placeholder */}
             <div className="mt-3 flex justify-center">
-              <div className="flex size-40 items-center justify-center rounded-lg border-2 border-dashed border-border bg-secondary/30">
+              <div className="flex size-40 items-center justify-center rounded-lg border-2 border-dashed border-[#dddddd] bg-[#f8f9fc]">
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground">QR Code</p>
-                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  <p className="text-xs text-[#707070]">QR Code</p>
+                  <p className="mt-1 font-mono text-[10px] text-[#707070]">
                     {truncateHash(depositAddress)}
                   </p>
                 </div>
@@ -238,12 +219,12 @@ export default function DepositPage() {
           </div>
 
           {/* Warning box */}
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
+              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-500" />
               <div className="text-sm">
-                <p className="font-medium text-destructive">주의사항</p>
-                <ul className="mt-1 flex flex-col gap-1 text-destructive/80">
+                <p className="font-medium text-red-600">주의사항</p>
+                <ul className="mt-1 flex flex-col gap-1 text-red-500">
                   <li>{network} 네트워크로만 전송하세요</li>
                   <li>다른 네트워크로 전송 시 자산을 잃을 수 있습니다</li>
                   <li>최소 입금액: {minAmount} {selectedCoin}</li>
@@ -254,37 +235,40 @@ export default function DepositPage() {
 
           {/* Error message */}
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-red-500">{error}</p>
           )}
 
           {/* Submit button */}
-          <Button
-            size="lg"
+          <button
             onClick={handleSubmit}
             disabled={isSubmitting || !amount}
-            className="w-full"
+            className={cn(
+              'w-full rounded-lg px-4 py-3 text-sm font-bold text-white transition-opacity',
+              'bg-gradient-to-b from-[#ffd651] to-[#fe960e]',
+              (isSubmitting || !amount) ? 'cursor-not-allowed opacity-50' : 'hover:opacity-90'
+            )}
           >
             {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
+              <span className="inline-flex items-center justify-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
                 처리 중...
-              </>
+              </span>
             ) : (
               '입금 신청'
             )}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
-      {/* Recent deposits */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">최근 입금 내역</CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Recent deposits card */}
+      <div className="rounded-lg bg-white shadow-sm">
+        <div className="border-b border-[#dddddd] px-5 py-4">
+          <h2 className="text-base font-bold text-[#252531]">최근 입금 내역</h2>
+        </div>
+        <div className="px-5 py-4">
           {deposits.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#707070]">
                 입금 내역이 없습니다
               </p>
             </div>
@@ -292,38 +276,38 @@ export default function DepositPage() {
             <>
               {/* Desktop table */}
               <div className="hidden sm:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>일시</TableHead>
-                      <TableHead>코인</TableHead>
-                      <TableHead className="text-right">금액</TableHead>
-                      <TableHead>TX Hash</TableHead>
-                      <TableHead className="text-center">상태</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#dddddd] bg-[#f8f9fc]">
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">일시</th>
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">코인</th>
+                      <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">금액</th>
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">TX Hash</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-medium text-[#707070]">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {deposits.slice(0, 5).map((d: Deposit) => (
-                      <TableRow key={d.id}>
-                        <TableCell className="text-sm text-muted-foreground">
+                      <tr key={d.id} className="border-b border-[#dddddd] last:border-b-0">
+                        <td className="px-3 py-2.5 text-sm text-[#707070]">
                           {formatDate(d.createdAt)}
-                        </TableCell>
-                        <TableCell className="text-sm font-medium">
+                        </td>
+                        <td className="px-3 py-2.5 text-sm font-medium text-[#252531]">
                           {d.coinType}
-                        </TableCell>
-                        <TableCell className="text-right text-sm font-medium text-green-400">
+                        </td>
+                        <td className="px-3 py-2.5 text-right text-sm font-medium text-green-600">
                           +{parseFloat(d.amount).toLocaleString('ko-KR')}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs text-muted-foreground">
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-[#707070]">
                           {truncateHash(d.txHash || '')}
-                        </TableCell>
-                        <TableCell className="text-center">
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
                           <StatusBadge status={d.status} />
-                        </TableCell>
-                      </TableRow>
+                        </td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
 
               {/* Mobile card layout */}
@@ -331,18 +315,18 @@ export default function DepositPage() {
                 {deposits.slice(0, 5).map((d: Deposit) => (
                   <div
                     key={d.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 px-3 py-2.5"
+                    className="flex items-center justify-between rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-2.5"
                   >
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{d.coinType}</span>
+                        <span className="text-sm font-medium text-[#252531]">{d.coinType}</span>
                         <StatusBadge status={d.status} />
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-[#707070]">
                         {formatDate(d.createdAt)}
                       </span>
                     </div>
-                    <span className="text-sm font-semibold text-green-400">
+                    <span className="text-sm font-semibold text-green-600">
                       +{parseFloat(d.amount).toLocaleString('ko-KR')}
                     </span>
                   </div>
@@ -350,8 +334,8 @@ export default function DepositPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

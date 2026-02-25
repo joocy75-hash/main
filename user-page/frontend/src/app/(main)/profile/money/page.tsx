@@ -1,23 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
@@ -85,118 +68,125 @@ export default function MoneyPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">머니내역</CardTitle>
-        </CardHeader>
-      </Card>
+      <div className="bg-white rounded-lg px-5 py-4">
+        <h2 className="text-lg font-bold text-[#252531]">머니내역</h2>
+      </div>
 
       {/* Type filter */}
       <div className="flex gap-2 overflow-x-auto scrollbar-none">
         {TYPE_FILTERS.map((f) => (
-          <Button
+          <button
             key={f.value}
-            variant={typeFilter === f.value ? 'default' : 'secondary'}
-            size="sm"
             onClick={() => { setTypeFilter(f.value); setCurrentPage(1); }}
-            className="shrink-0"
+            className={cn(
+              'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
+              typeFilter === f.value
+                ? 'bg-[#f4b53e] text-white'
+                : 'bg-[#edeef3] text-[#707070] hover:bg-[#dddddd]'
+            )}
           >
             {f.label}
-          </Button>
+          </button>
         ))}
       </div>
 
       {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex flex-col gap-2 p-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : moneyLogs.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-12">
-              <span className="text-4xl">💰</span>
-              <p className="text-sm text-muted-foreground">머니내역이 없습니다</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-20">유형</TableHead>
-                    <TableHead>설명</TableHead>
-                    <TableHead className="text-right">금액</TableHead>
-                    <TableHead className="text-right">잔액</TableHead>
-                    <TableHead className="text-right">일시</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {moneyLogs.map((log) => {
-                    const amount = Number(log.amount);
-                    return (
-                      <TableRow key={log.id}>
-                        <TableCell>
-                          <Badge variant="secondary" className="text-[10px]">
-                            {TYPE_LABEL[log.type] || log.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm">{log.description}</TableCell>
-                        <TableCell className={cn(
-                          'text-right text-sm font-medium',
-                          amount > 0 ? 'text-green-400' : 'text-red-400'
-                        )}>
-                          {formatAmount(log.amount)}
-                        </TableCell>
-                        <TableCell className="text-right text-sm">
-                          {formatBalance(log.balanceAfter)}
-                        </TableCell>
-                        <TableCell className="text-right text-xs text-muted-foreground">
-                          {formatDateTime(log.createdAt)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-lg">
+        {isLoading ? (
+          <div className="flex flex-col gap-2 p-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-[#edeef3] rounded h-12 w-full" />
+            ))}
+          </div>
+        ) : moneyLogs.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-12">
+            <span className="text-4xl">💰</span>
+            <p className="text-sm text-[#707070]">머니내역이 없습니다</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#f8f9fc]">
+                  <th className="w-20 px-4 py-3 text-left text-[#707070] text-xs font-medium uppercase">유형</th>
+                  <th className="px-4 py-3 text-left text-[#707070] text-xs font-medium uppercase">설명</th>
+                  <th className="px-4 py-3 text-right text-[#707070] text-xs font-medium uppercase">금액</th>
+                  <th className="px-4 py-3 text-right text-[#707070] text-xs font-medium uppercase">잔액</th>
+                  <th className="px-4 py-3 text-right text-[#707070] text-xs font-medium uppercase">일시</th>
+                </tr>
+              </thead>
+              <tbody>
+                {moneyLogs.map((log) => {
+                  const amount = Number(log.amount);
+                  return (
+                    <tr key={log.id} className="border-b border-[#f0f0f0] hover:bg-[#f8f9fc] transition-colors">
+                      <td className="px-4 py-3">
+                        <span className="bg-[#edeef3] text-[#707070] text-[10px] px-2 py-0.5 rounded-full">
+                          {TYPE_LABEL[log.type] || log.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[#252531]">{log.description}</td>
+                      <td className={cn(
+                        'px-4 py-3 text-right text-sm font-medium',
+                        amount > 0 ? 'text-green-600' : 'text-red-500'
+                      )}>
+                        {formatAmount(log.amount)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-[#252531]">
+                        {formatBalance(log.balanceAfter)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs text-[#707070]">
+                        {formatDateTime(log.createdAt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => p - 1)}
+            className={cn(
+              'border border-[#dddddd] text-[#707070] text-sm w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[#f8f9fc] transition-colors',
+              currentPage <= 1 && 'opacity-40 cursor-not-allowed hover:bg-transparent'
+            )}
           >
-            이전
-          </Button>
+            ‹
+          </button>
           {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
             const page = i + 1;
             return (
-              <Button
+              <button
                 key={page}
-                variant={currentPage === page ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setCurrentPage(page)}
+                className={cn(
+                  'text-sm w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+                  currentPage === page
+                    ? 'bg-[#f4b53e] text-white'
+                    : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+                )}
               >
                 {page}
-              </Button>
+              </button>
             );
           })}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
+            className={cn(
+              'border border-[#dddddd] text-[#707070] text-sm w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[#f8f9fc] transition-colors',
+              currentPage >= totalPages && 'opacity-40 cursor-not-allowed hover:bg-transparent'
+            )}
           >
-            다음
-          </Button>
+            ›
+          </button>
         </div>
       )}
     </div>

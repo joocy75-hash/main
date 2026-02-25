@@ -2,14 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, Check, Gamepad2, Coins, Target, Trophy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 
@@ -58,88 +50,84 @@ const MissionCard = ({
   const isClaimed = mission.status === 'claimed';
 
   return (
-    <Card
+    <div
       className={cn(
-        'transition-all',
+        'rounded-lg bg-white p-4 shadow-sm',
         isClaimed && 'opacity-60'
       )}
     >
-      <CardContent className="flex flex-col gap-3 pt-4">
-        {/* Top row: icon, name, progress count */}
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              'flex size-10 items-center justify-center rounded-lg',
+              isClaimed
+                ? 'bg-green-50'
+                : isCompleted
+                  ? 'bg-amber-50'
+                  : 'bg-gray-100'
+            )}
+          >
+            <Icon
               className={cn(
-                'flex size-10 items-center justify-center rounded-lg',
+                'size-5',
                 isClaimed
-                  ? 'bg-green-500/10'
+                  ? 'text-green-500'
                   : isCompleted
-                    ? 'bg-yellow-500/10'
-                    : 'bg-secondary'
+                    ? 'text-[#f4b53e]'
+                    : 'text-gray-400'
               )}
-            >
-              <Icon
-                className={cn(
-                  'size-5',
-                  isClaimed
-                    ? 'text-green-400'
-                    : isCompleted
-                      ? 'text-yellow-400'
-                      : 'text-muted-foreground'
-                )}
-              />
-            </div>
-            <div>
-              <p className="text-sm font-medium">{mission.name}</p>
-              <p className="text-xs text-muted-foreground">{mission.description}</p>
-            </div>
+            />
           </div>
-          <span className="shrink-0 text-sm font-medium text-muted-foreground">
-            {mission.progress}/{mission.targetValue}
+          <div>
+            <p className="text-sm font-semibold text-[#252531]">{mission.name}</p>
+            <p className="text-xs text-[#707070]">{mission.description}</p>
+          </div>
+        </div>
+        <span className="shrink-0 text-sm font-medium text-[#707070]">
+          {mission.progress}/{mission.targetValue}
+        </span>
+      </div>
+
+      <div className="mt-3 flex flex-col gap-1">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div
+            className="h-full rounded-full bg-[#f4b53e] transition-all"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-[#707070]">{progressPercent}%</span>
+          <span className="font-semibold text-[#252531]">
+            보상: {Number(mission.rewardAmount).toLocaleString('ko-KR')}
+            {mission.rewardType === 'point' ? 'P' : '원'}
           </span>
         </div>
+      </div>
 
-        {/* Progress bar */}
-        <div className="flex flex-col gap-1">
-          <Progress
-            value={progressPercent}
-            className="h-2"
-          />
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">{progressPercent}%</span>
-            <span className="font-medium">
-              보상: {Number(mission.rewardAmount).toLocaleString('ko-KR')}
-              {mission.rewardType === 'point' ? 'P' : '원'}
-            </span>
+      <div className="mt-3 flex justify-end">
+        {isClaimed ? (
+          <div className="flex items-center gap-1.5 text-sm text-green-500">
+            <Check className="size-4" />
+            <span>수령완료</span>
           </div>
-        </div>
-
-        {/* Action button */}
-        <div className="flex justify-end">
-          {isClaimed ? (
-            <div className="flex items-center gap-1.5 text-sm text-green-400">
-              <Check className="size-4" />
-              <span>수령완료</span>
-            </div>
-          ) : isCompleted ? (
-            <Button
-              size="sm"
-              onClick={() => onClaim(mission.id)}
-              disabled={isClaiming}
-              className="bg-yellow-500 text-black hover:bg-yellow-400"
-            >
-              {isClaiming ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                '수령하기'
-              )}
-            </Button>
-          ) : (
-            <span className="text-sm text-muted-foreground">진행중</span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        ) : isCompleted ? (
+          <button
+            onClick={() => onClaim(mission.id)}
+            disabled={isClaiming}
+            className="rounded-full bg-gradient-to-b from-[#ffd651] to-[#fe960e] px-5 py-1.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {isClaiming ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              '수령하기'
+            )}
+          </button>
+        ) : (
+          <span className="text-sm text-[#999]">진행중</span>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -183,55 +171,57 @@ export default function MissionsPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">미션</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            미션을 완료하고 보상을 수령하세요
-          </p>
-        </CardContent>
-      </Card>
+      <div className="rounded-lg bg-white p-5 shadow-sm">
+        <h1 className="text-lg font-bold text-[#252531]">퀘스트</h1>
+        <p className="mt-1 text-sm text-[#707070]">
+          미션을 완료하고 보상을 수령하세요
+        </p>
+      </div>
 
-      {/* Tab selector */}
-      <div className="flex gap-2">
-        <Button
-          variant={missionTab === 'daily' ? 'default' : 'secondary'}
-          size="sm"
+      {/* Tab selector - kzkzb pill style */}
+      <div className="flex gap-2 rounded-lg bg-white p-2 shadow-sm">
+        <button
           onClick={() => setMissionTab('daily')}
-          className="flex-1"
+          className={cn(
+            'flex-1 rounded-2xl px-4 py-2 text-sm font-semibold transition-all',
+            missionTab === 'daily'
+              ? 'bg-[#f4b53e] text-white shadow-sm'
+              : 'text-[#707070] hover:bg-gray-50'
+          )}
         >
           일일 미션
-        </Button>
-        <Button
-          variant={missionTab === 'weekly' ? 'default' : 'secondary'}
-          size="sm"
+        </button>
+        <button
           onClick={() => setMissionTab('weekly')}
-          className="flex-1"
+          className={cn(
+            'flex-1 rounded-2xl px-4 py-2 text-sm font-semibold transition-all',
+            missionTab === 'weekly'
+              ? 'bg-[#f4b53e] text-white shadow-sm'
+              : 'text-[#707070] hover:bg-gray-50'
+          )}
         >
           주간 미션
-        </Button>
+        </button>
       </div>
 
       {/* Progress summary */}
-      <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
-        <span className="text-sm text-muted-foreground">
+      <div className="flex items-center justify-between rounded-lg bg-white px-5 py-3 shadow-sm">
+        <span className="text-sm text-[#707070]">
           {missionTab === 'daily' ? '일일' : '주간'} 미션 진행
         </span>
-        <span className="text-sm font-medium">
+        <span className="text-sm font-bold text-[#252531]">
           {completedCount} / {filteredMissions.length} 완료
         </span>
       </div>
 
       {/* Success/Error messages */}
       {claimSuccess && (
-        <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-center text-sm font-medium text-green-400">
+        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-600">
           {claimSuccess}
         </div>
       )}
       {claimError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-center text-sm text-destructive">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-600">
           {claimError}
         </div>
       )}
@@ -240,24 +230,22 @@ export default function MissionsPage() {
       {isLoading ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="flex flex-col gap-3 pt-4">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 animate-pulse rounded-lg bg-secondary" />
-                  <div className="flex flex-col gap-1.5">
-                    <div className="h-4 w-32 animate-pulse rounded bg-secondary" />
-                    <div className="h-3 w-48 animate-pulse rounded bg-secondary" />
-                  </div>
+            <div key={i} className="rounded-lg bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="size-10 animate-pulse rounded-lg bg-gray-100" />
+                <div className="flex flex-col gap-1.5">
+                  <div className="h-4 w-32 animate-pulse rounded bg-gray-100" />
+                  <div className="h-3 w-48 animate-pulse rounded bg-gray-100" />
                 </div>
-                <div className="h-2 animate-pulse rounded-full bg-secondary" />
-              </CardContent>
-            </Card>
+              </div>
+              <div className="mt-3 h-2 animate-pulse rounded-full bg-gray-100" />
+            </div>
           ))}
         </div>
       ) : filteredMissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-white py-12 text-center shadow-sm">
           <span className="text-3xl">🎯</span>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[#707070]">
             {missionTab === 'daily' ? '오늘의' : '이번 주'} 미션이 없습니다
           </p>
         </div>

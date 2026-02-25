@@ -1,21 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { useProfileStore } from '@/stores/profile-store';
 
 const formatDateTime = (dateStr: string) => {
@@ -44,56 +29,52 @@ export default function LoginHistoryPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">접속내역</CardTitle>
-        </CardHeader>
-      </Card>
+      <div className="bg-white rounded-lg px-5 py-4">
+        <h2 className="text-lg font-bold text-[#252531]">접속내역</h2>
+      </div>
 
       {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex flex-col gap-2 p-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : loginHistory.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-12">
-              <span className="text-4xl">🕐</span>
-              <p className="text-sm text-muted-foreground">접속내역이 없습니다</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>IP 주소</TableHead>
-                    <TableHead>기기</TableHead>
-                    <TableHead>OS</TableHead>
-                    <TableHead>브라우저</TableHead>
-                    <TableHead className="text-right">접속일시</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loginHistory.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell className="font-mono text-sm">{entry.ip}</TableCell>
-                      <TableCell className="text-sm">{entry.device}</TableCell>
-                      <TableCell className="text-sm">{entry.os}</TableCell>
-                      <TableCell className="text-sm">{entry.browser}</TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground">
-                        {formatDateTime(entry.createdAt)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-lg overflow-hidden">
+        {isLoading ? (
+          <div className="flex flex-col gap-2 p-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-[#edeef3] rounded h-12 w-full" />
+            ))}
+          </div>
+        ) : loginHistory.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-12">
+            <span className="text-4xl">🕐</span>
+            <p className="text-sm text-[#707070]">접속내역이 없습니다</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#f8f9fc]">
+                  <th className="px-4 py-3 text-xs font-medium text-[#707070] uppercase text-left">IP 주소</th>
+                  <th className="px-4 py-3 text-xs font-medium text-[#707070] uppercase text-left">기기</th>
+                  <th className="px-4 py-3 text-xs font-medium text-[#707070] uppercase text-left">OS</th>
+                  <th className="px-4 py-3 text-xs font-medium text-[#707070] uppercase text-left">브라우저</th>
+                  <th className="px-4 py-3 text-xs font-medium text-[#707070] uppercase text-right">접속일시</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loginHistory.map((entry) => (
+                  <tr key={entry.id} className="border-b border-[#f0f0f0] hover:bg-[#f8f9fc] transition-colors">
+                    <td className="px-4 py-3 font-mono text-sm text-[#252531]">{entry.ip}</td>
+                    <td className="px-4 py-3 text-sm text-[#252531]">{entry.device}</td>
+                    <td className="px-4 py-3 text-sm text-[#252531]">{entry.os}</td>
+                    <td className="px-4 py-3 text-sm text-[#252531]">{entry.browser}</td>
+                    <td className="px-4 py-3 text-xs text-[#707070] text-right">
+                      {formatDateTime(entry.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

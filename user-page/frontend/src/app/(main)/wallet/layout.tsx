@@ -21,7 +21,7 @@ export default function WalletLayout({
   return (
     <div className="flex flex-col gap-4">
       {/* Wallet sub-navigation */}
-      <nav className="flex gap-1 rounded-lg border border-border bg-card p-1">
+      <nav className="flex gap-1 rounded-lg border border-[#dddddd] bg-white p-1">
         {WALLET_TABS.map((tab) => {
           const isActive = pathname === tab.href;
           const Icon = tab.icon;
@@ -32,8 +32,8 @@ export default function WalletLayout({
               className={cn(
                 'flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                  ? 'bg-[#f4b53e] text-black'
+                  : 'text-[#707070] hover:bg-[#edeef3] hover:text-[#252531]'
               )}
             >
               <Icon className="size-4" />

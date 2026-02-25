@@ -2,25 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, ArrowRightLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 import { useWalletStore } from '@/stores/wallet-store';
@@ -29,14 +10,14 @@ const CONVERSION_RATE = 100; // 100P = 1 KRW
 const MIN_CONVERT = 1000; // Minimum 1,000P
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  attendance: { label: '출석', color: 'text-green-400' },
-  mission: { label: '미션', color: 'text-blue-400' },
-  spin: { label: '스핀', color: 'text-purple-400' },
-  convert: { label: '전환', color: 'text-yellow-400' },
-  admin_credit: { label: '지급', color: 'text-green-400' },
-  admin_debit: { label: '차감', color: 'text-red-400' },
-  payback: { label: '페이백', color: 'text-cyan-400' },
-  promotion: { label: '프로모션', color: 'text-orange-400' },
+  attendance: { label: '출석', color: 'text-green-600' },
+  mission: { label: '미션', color: 'text-blue-600' },
+  spin: { label: '스핀', color: 'text-purple-600' },
+  convert: { label: '전환', color: 'text-yellow-600' },
+  admin_credit: { label: '지급', color: 'text-green-600' },
+  admin_debit: { label: '차감', color: 'text-red-600' },
+  payback: { label: '페이백', color: 'text-cyan-600' },
+  promotion: { label: '프로모션', color: 'text-orange-600' },
 };
 
 export default function PointsPage() {
@@ -119,35 +100,35 @@ export default function PointsPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Balance card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">포인트</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="px-4 pt-4 pb-2">
+          <h2 className="text-lg font-bold text-[#252531]">포인트</h2>
+        </div>
+        <div className="px-4 pb-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">보유 포인트</p>
-            <p className="text-2xl font-bold text-yellow-400">
+            <p className="text-sm text-[#707070]">보유 포인트</p>
+            <p className="text-2xl font-bold text-[#f4b53e]">
               {Number(points).toLocaleString('ko-KR')} P
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Conversion card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="px-4 pt-4 pb-2">
+          <h2 className="text-base font-bold text-[#252531]">
             포인트 전환 ({CONVERSION_RATE}P = 1원)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+          </h2>
+        </div>
+        <div className="px-4 pb-4 flex flex-col gap-4">
           {/* Convert amount input */}
           <div>
-            <Label className="mb-2 block text-sm text-muted-foreground">
+            <label className="mb-2 block text-sm text-[#707070]">
               전환할 포인트
-            </Label>
+            </label>
             <div className="relative">
-              <Input
+              <input
                 type="number"
                 placeholder={`최소 ${MIN_CONVERT.toLocaleString('ko-KR')}`}
                 value={convertAmount}
@@ -155,11 +136,11 @@ export default function PointsPage() {
                   setConvertAmount(e.target.value);
                   setError('');
                 }}
-                className="bg-card pr-8"
+                className="w-full h-10 px-3 pr-8 bg-white border border-[#dddddd] rounded-lg text-sm text-[#252531] placeholder:text-[#707070] focus:outline-none focus:ring-2 focus:ring-[#f4b53e]/40 focus:border-[#f4b53e]"
                 min={0}
                 step={100}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#707070]">
                 P
               </span>
             </div>
@@ -168,55 +149,52 @@ export default function PointsPage() {
           {/* Quick amount buttons */}
           <div className="flex flex-wrap gap-2">
             {[1000, 5000, 10000, 50000].map((amt) => (
-              <Button
+              <button
                 key={amt}
-                variant="outline"
-                size="xs"
                 onClick={() => setConvertAmount(String(amt))}
+                className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors"
               >
                 {amt.toLocaleString('ko-KR')}P
-              </Button>
+              </button>
             ))}
-            <Button
-              variant="outline"
-              size="xs"
+            <button
               onClick={() => setConvertAmount(points)}
+              className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors"
             >
               전액
-            </Button>
+            </button>
           </div>
 
-          <Separator />
+          <hr className="border-[#dddddd]" />
 
           {/* Receive amount */}
-          <div className="flex items-center justify-between rounded-lg bg-secondary/30 px-4 py-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-between rounded-lg bg-[#f8f9fc] px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-[#707070]">
               <ArrowRightLeft className="size-4" />
               <span>받을 금액</span>
             </div>
-            <span className="text-lg font-bold">
+            <span className="text-lg font-bold text-[#252531]">
               {cashAmount.toLocaleString('ko-KR')}원
             </span>
           </div>
 
           {/* Error/Success messages */}
           {error && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-center text-sm text-destructive">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-600">
               {error}
             </div>
           )}
           {success && (
-            <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-center text-sm font-medium text-green-400">
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-600">
               {success}
             </div>
           )}
 
           {/* Convert button */}
-          <Button
-            size="lg"
+          <button
             onClick={handleConvert}
             disabled={isConvertingPoints || !convertAmount || cashAmount <= 0}
-            className="w-full"
+            className="w-full h-11 rounded-lg bg-gradient-to-b from-[#ffd651] to-[#fe960e] text-white font-bold text-sm shadow-sm hover:brightness-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isConvertingPoints ? (
               <>
@@ -226,94 +204,94 @@ export default function PointsPage() {
             ) : (
               '전환하기'
             )}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
       {/* Point history */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">포인트 내역</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="px-4 pt-4 pb-2">
+          <h2 className="text-base font-bold text-[#252531]">포인트 내역</h2>
+        </div>
+        <div className="px-4 pb-4">
           {!pointHistory || pointHistory.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
               <span className="text-2xl">💎</span>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#707070]">
                 포인트 내역이 없습니다
               </p>
             </div>
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden sm:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>일시</TableHead>
-                      <TableHead>유형</TableHead>
-                      <TableHead className="text-right">금액</TableHead>
-                      <TableHead className="text-right">잔여</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#dddddd]">
+                      <th className="text-left text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">일시</th>
+                      <th className="text-left text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">유형</th>
+                      <th className="text-right text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">금액</th>
+                      <th className="text-right text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">잔여</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {pointHistory.items.map((item) => {
-                      const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-muted-foreground' };
+                      const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-[#707070]' };
                       const isPositive = Number(item.amount) > 0;
                       return (
-                        <TableRow key={item.id}>
-                          <TableCell className="text-xs text-muted-foreground">
+                        <tr key={item.id} className="border-b border-[#dddddd] last:border-b-0 hover:bg-[#f8f9fc] transition-colors">
+                          <td className="px-3 py-2.5 text-xs text-[#707070]">
                             {formatDate(item.createdAt)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary" className={cn('text-xs', typeInfo.color)}>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <span className={cn('inline-block rounded-2xl bg-[#edeef3] px-2.5 py-0.5 text-xs font-medium', typeInfo.color)}>
                               {typeInfo.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className={cn(
-                            'text-right text-sm font-medium',
-                            isPositive ? 'text-green-400' : 'text-red-400'
+                            </span>
+                          </td>
+                          <td className={cn(
+                            'px-3 py-2.5 text-right text-sm font-medium',
+                            isPositive ? 'text-green-600' : 'text-red-500'
                           )}>
                             {isPositive ? '+' : ''}{Number(item.amount).toLocaleString('ko-KR')}
-                          </TableCell>
-                          <TableCell className="text-right text-sm text-muted-foreground">
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-sm text-[#707070]">
                             {Number(item.balance).toLocaleString('ko-KR')}
-                          </TableCell>
-                        </TableRow>
+                          </td>
+                        </tr>
                       );
                     })}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
 
               {/* Mobile card layout */}
               <div className="flex flex-col gap-2 sm:hidden">
                 {pointHistory.items.map((item) => {
-                  const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-muted-foreground' };
+                  const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-[#707070]' };
                   const isPositive = Number(item.amount) > 0;
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 px-3 py-2.5"
+                      className="flex items-center justify-between rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-2.5"
                     >
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className={cn('text-[10px]', typeInfo.color)}>
+                          <span className={cn('inline-block rounded-2xl bg-[#edeef3] px-2.5 py-0.5 text-[10px] font-medium', typeInfo.color)}>
                             {typeInfo.label}
-                          </Badge>
+                          </span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[10px] text-[#707070]">
                           {formatDate(item.createdAt)}
                         </span>
                       </div>
                       <div className="text-right">
                         <p className={cn(
                           'text-sm font-semibold',
-                          isPositive ? 'text-green-400' : 'text-red-400'
+                          isPositive ? 'text-green-600' : 'text-red-500'
                         )}>
                           {isPositive ? '+' : ''}{Number(item.amount).toLocaleString('ko-KR')}P
                         </p>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[10px] text-[#707070]">
                           잔여: {Number(item.balance).toLocaleString('ko-KR')}
                         </p>
                       </div>
@@ -325,31 +303,29 @@ export default function PointsPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-4 flex items-center justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="xs"
+                  <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
+                    className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     이전
-                  </Button>
-                  <span className="text-xs text-muted-foreground">
+                  </button>
+                  <span className="text-xs text-[#707070]">
                     {currentPage} / {totalPages}
                   </span>
-                  <Button
-                    variant="outline"
-                    size="xs"
+                  <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages}
+                    className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     다음
-                  </Button>
+                  </button>
                 </div>
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

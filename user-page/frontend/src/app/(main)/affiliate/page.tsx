@@ -2,29 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Copy, Share2, Users, DollarSign, TrendingUp } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
@@ -62,6 +39,7 @@ export default function AffiliatePage() {
   } = useProfileStore();
 
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
+  const [activeTab, setActiveTab] = useState<'members' | 'commissions'>('members');
 
   useEffect(() => {
     fetchProfile();
@@ -104,209 +82,213 @@ export default function AffiliatePage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <span>🤝</span> 추천/어필리에이트
-          </CardTitle>
-        </CardHeader>
-      </Card>
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-[#252531]">
+          <span>🤝</span> 추천/어필리에이트
+        </h2>
+      </div>
 
       {/* Referral code */}
-      <Card>
-        <CardContent className="flex flex-col gap-3 pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground">내 추천코드</p>
-              <p className="text-lg font-bold text-primary">{referralCode}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCopy(referralCode, 'code')}
-                className="gap-1"
-              >
-                <Copy className="size-3" />
-                {copied === 'code' ? '복사됨' : '복사'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="gap-1"
-              >
-                <Share2 className="size-3" />
-                공유
-              </Button>
-            </div>
+      <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-[#707070]">내 추천코드</p>
+            <p className="text-lg font-bold text-[#f4b53e]">{referralCode}</p>
           </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground">추천 링크</p>
-              <p className="truncate text-xs font-mono text-muted-foreground">
-                {referralLink}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleCopy(referralLink, 'link')}
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleCopy(referralCode, 'code')}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] bg-white text-[#707070] rounded-md hover:bg-[#f8f9fc] transition-colors"
             >
               <Copy className="size-3" />
-              {copied === 'link' ? '복사됨' : '복사'}
-            </Button>
+              {copied === 'code' ? '복사됨' : '복사'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] bg-white text-[#707070] rounded-md hover:bg-[#f8f9fc] transition-colors"
+            >
+              <Share2 className="size-3" />
+              공유
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="border-t border-[#dddddd]" />
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-[#707070]">추천 링크</p>
+            <p className="truncate text-xs font-mono text-[#707070]">
+              {referralLink}
+            </p>
+          </div>
+          <button
+            onClick={() => handleCopy(referralLink, 'link')}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] bg-white text-[#707070] rounded-md hover:bg-[#f8f9fc] transition-colors shrink-0"
+          >
+            <Copy className="size-3" />
+            {copied === 'link' ? '복사됨' : '복사'}
+          </button>
+        </div>
+      </div>
 
       {/* Dashboard stats */}
       <div className="grid grid-cols-3 gap-3">
-        <Card>
-          <CardContent className="flex flex-col items-center gap-1 pt-4">
-            <Users className="size-5 text-blue-400" />
-            <p className="text-xs text-muted-foreground">총 추천</p>
-            <p className="text-lg font-bold">{dashboard?.totalReferrals || 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex flex-col items-center gap-1 pt-4">
-            <DollarSign className="size-5 text-green-400" />
-            <p className="text-xs text-muted-foreground">이달 커미션</p>
-            <p className="text-lg font-bold">{formatAmount(dashboard?.thisMonthCommission || '0')}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex flex-col items-center gap-1 pt-4">
-            <TrendingUp className="size-5 text-yellow-400" />
-            <p className="text-xs text-muted-foreground">누적 커미션</p>
-            <p className="text-lg font-bold">{formatAmount(dashboard?.totalCommission || '0')}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center gap-1 p-4">
+          <Users className="size-5 text-blue-500" />
+          <p className="text-xs text-[#707070]">총 추천</p>
+          <p className="text-lg font-bold text-[#252531]">{dashboard?.totalReferrals || 0}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center gap-1 p-4">
+          <DollarSign className="size-5 text-green-500" />
+          <p className="text-xs text-[#707070]">이달 커미션</p>
+          <p className="text-lg font-bold text-[#252531]">{formatAmount(dashboard?.thisMonthCommission || '0')}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center gap-1 p-4">
+          <TrendingUp className="size-5 text-yellow-500" />
+          <p className="text-xs text-[#707070]">누적 커미션</p>
+          <p className="text-lg font-bold text-[#252531]">{formatAmount(dashboard?.totalCommission || '0')}</p>
+        </div>
       </div>
 
       {/* Rolling rates */}
       {dashboard?.rollingRates && dashboard.rollingRates.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">게임별 롤링 요율</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="p-4 pb-3">
+            <h3 className="text-base font-bold text-[#252531]">게임별 롤링 요율</h3>
+          </div>
+          <div className="px-4 pb-4">
             <div className="flex flex-wrap gap-2">
               {dashboard.rollingRates.map((rate) => (
                 <div
                   key={rate.category}
-                  className="flex items-center gap-1 rounded-md border border-border px-3 py-1.5"
+                  className="flex items-center gap-1 rounded-md border border-[#dddddd] px-3 py-1.5"
                 >
-                  <span className="text-sm">{rate.category}</span>
-                  <span className="text-sm font-bold text-primary">{rate.rate}%</span>
+                  <span className="text-sm text-[#252531]">{rate.category}</span>
+                  <span className="text-sm font-bold text-[#f4b53e]">{rate.rate}%</span>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Tabs: Members / Commission History */}
-      <Tabs defaultValue="members" className="w-full">
-        <TabsList className="w-full">
-          <TabsTrigger value="members" className="flex-1">추천회원</TabsTrigger>
-          <TabsTrigger value="commissions" className="flex-1">커미션내역</TabsTrigger>
-        </TabsList>
+      <div className="w-full">
+        {/* Tab triggers */}
+        <div className="flex rounded-lg overflow-hidden border border-[#dddddd]">
+          <button
+            onClick={() => setActiveTab('members')}
+            className={cn(
+              'flex-1 py-2.5 text-sm font-semibold transition-colors',
+              activeTab === 'members'
+                ? 'bg-[#f4b53e] text-white'
+                : 'bg-[#edeef3] text-[#707070] hover:bg-[#e4e5ea]'
+            )}
+          >
+            추천회원
+          </button>
+          <button
+            onClick={() => setActiveTab('commissions')}
+            className={cn(
+              'flex-1 py-2.5 text-sm font-semibold transition-colors',
+              activeTab === 'commissions'
+                ? 'bg-[#f4b53e] text-white'
+                : 'bg-[#edeef3] text-[#707070] hover:bg-[#e4e5ea]'
+            )}
+          >
+            커미션내역
+          </button>
+        </div>
 
-        <TabsContent value="members">
-          <Card>
-            <CardContent className="p-0">
-              {affiliateMembers.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-12">
-                  <span className="text-4xl">👤</span>
-                  <p className="text-sm text-muted-foreground">추천회원이 없습니다</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>아이디</TableHead>
-                        <TableHead>닉네임</TableHead>
-                        <TableHead className="text-right">총 베팅</TableHead>
-                        <TableHead className="text-right">커미션</TableHead>
-                        <TableHead className="text-right">가입일</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {affiliateMembers.map((member) => (
-                        <TableRow key={member.id}>
-                          <TableCell className="text-sm">{member.username}</TableCell>
-                          <TableCell className="text-sm">{member.nickname}</TableCell>
-                          <TableCell className="text-right text-sm">
-                            {formatAmount(member.totalBet)}
-                          </TableCell>
-                          <TableCell className="text-right text-sm text-green-400">
-                            {formatAmount(member.commission)}
-                          </TableCell>
-                          <TableCell className="text-right text-xs text-muted-foreground">
-                            {formatDate(member.joinedAt)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Tab content: Members */}
+        {activeTab === 'members' && (
+          <div className="bg-white rounded-lg shadow-sm mt-3">
+            {affiliateMembers.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-12">
+                <span className="text-4xl">👤</span>
+                <p className="text-sm text-[#707070]">추천회원이 없습니다</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#dddddd]">
+                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">아이디</th>
+                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">닉네임</th>
+                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">총 베팅</th>
+                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">커미션</th>
+                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">가입일</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {affiliateMembers.map((member) => (
+                      <tr key={member.id} className="border-b border-[#dddddd] last:border-b-0">
+                        <td className="text-sm text-[#252531] px-4 py-3">{member.username}</td>
+                        <td className="text-sm text-[#252531] px-4 py-3">{member.nickname}</td>
+                        <td className="text-right text-sm text-[#252531] px-4 py-3">
+                          {formatAmount(member.totalBet)}
+                        </td>
+                        <td className="text-right text-sm text-green-600 px-4 py-3">
+                          {formatAmount(member.commission)}
+                        </td>
+                        <td className="text-right text-xs text-[#707070] px-4 py-3">
+                          {formatDate(member.joinedAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
-        <TabsContent value="commissions">
-          <Card>
-            <CardContent className="p-0">
-              {commissionRecords.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-12">
-                  <span className="text-4xl">💰</span>
-                  <p className="text-sm text-muted-foreground">커미션내역이 없습니다</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>유형</TableHead>
-                        <TableHead>게임</TableHead>
-                        <TableHead>회원</TableHead>
-                        <TableHead className="text-right">금액</TableHead>
-                        <TableHead className="text-right">일시</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {commissionRecords.map((record) => (
-                        <TableRow key={record.id}>
-                          <TableCell>
-                            <Badge variant="secondary" className="text-[10px]">
-                              {record.type === 'rolling' ? '롤링' : '죽장'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm">{record.gameCategory}</TableCell>
-                          <TableCell className="text-sm">{record.fromUser}</TableCell>
-                          <TableCell className="text-right text-sm text-green-400">
-                            +{formatAmount(record.amount)}
-                          </TableCell>
-                          <TableCell className="text-right text-xs text-muted-foreground">
-                            {formatDateTime(record.createdAt)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {/* Tab content: Commissions */}
+        {activeTab === 'commissions' && (
+          <div className="bg-white rounded-lg shadow-sm mt-3">
+            {commissionRecords.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-12">
+                <span className="text-4xl">💰</span>
+                <p className="text-sm text-[#707070]">커미션내역이 없습니다</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#dddddd]">
+                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">유형</th>
+                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">게임</th>
+                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">회원</th>
+                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">금액</th>
+                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {commissionRecords.map((record) => (
+                      <tr key={record.id} className="border-b border-[#dddddd] last:border-b-0">
+                        <td className="px-4 py-3">
+                          <span className="inline-block text-[10px] font-medium bg-[#edeef3] text-[#707070] px-2 py-0.5 rounded">
+                            {record.type === 'rolling' ? '롤링' : '죽장'}
+                          </span>
+                        </td>
+                        <td className="text-sm text-[#252531] px-4 py-3">{record.gameCategory}</td>
+                        <td className="text-sm text-[#252531] px-4 py-3">{record.fromUser}</td>
+                        <td className="text-right text-sm text-green-600 px-4 py-3">
+                          +{formatAmount(record.amount)}
+                        </td>
+                        <td className="text-right text-xs text-[#707070] px-4 py-3">
+                          {formatDateTime(record.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

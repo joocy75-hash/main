@@ -7,12 +7,18 @@ import type {
   GameLaunchResponse,
 } from '../../../shared/types/game';
 
-interface PaginatedResponse<T> {
-  data: T[];
+// Backend wraps all responses in { success, data }
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+}
+
+interface BackendPaginated<T> {
+  items: T[];
   total: number;
   page: number;
   limit: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
 interface GameState {
@@ -65,8 +71,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       const params: Record<string, string> = {};
       if (category) params.category = category;
-      const data = await api.get<GameProvider[]>('/api/games/providers', params);
-      set({ providers: data });
+      const res = await api.get<ApiResponse<GameProvider[]>>('/api/games/providers', params);
+      set({ providers: res.data });
     } catch {
       set({ providers: [] });
     }
@@ -84,12 +90,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       if (selectedCategory) params.category = selectedCategory;
       if (searchQuery) params.q = searchQuery;
 
-      const data = await api.get<PaginatedResponse<Game>>('/api/games', params);
+      const res = await api.get<ApiResponse<BackendPaginated<Game>>>('/api/games/search', params);
+      const paginated = res.data;
       set({
-        games: data.data,
-        currentPage: data.page,
-        hasMore: data.hasMore,
-        totalGames: data.total,
+        games: paginated.items,
+        currentPage: paginated.page,
+        hasMore: paginated.page < paginated.totalPages,
+        totalGames: paginated.total,
         isLoading: false,
       });
     } catch {
@@ -112,11 +119,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       if (selectedCategory) params.category = selectedCategory;
       if (searchQuery) params.q = searchQuery;
 
-      const data = await api.get<PaginatedResponse<Game>>('/api/games', params);
+      const res = await api.get<ApiResponse<BackendPaginated<Game>>>('/api/games/search', params);
+      const paginated = res.data;
       set({
-        games: [...games, ...data.data],
-        currentPage: data.page,
-        hasMore: data.hasMore,
+        games: [...games, ...paginated.items],
+        currentPage: paginated.page,
+        hasMore: paginated.page < paginated.totalPages,
         isLoadingMore: false,
       });
     } catch {
@@ -134,12 +142,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       };
       if (category) params.category = category;
 
-      const data = await api.get<PaginatedResponse<Game>>('/api/games/search', params);
+      const res = await api.get<ApiResponse<BackendPaginated<Game>>>('/api/games/search', params);
+      const paginated = res.data;
       set({
-        games: data.data,
+        games: paginated.items,
         currentPage: 1,
-        hasMore: data.hasMore,
-        totalGames: data.total,
+        hasMore: paginated.page < paginated.totalPages,
+        totalGames: paginated.total,
         isLoading: false,
       });
     } catch {
@@ -149,8 +158,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   fetchPopularGames: async () => {
     try {
-      const data = await api.get<Game[]>('/api/games/popular');
-      set({ popularGames: data });
+      const res = await api.get<ApiResponse<Game[]>>('/api/games/popular');
+      set({ popularGames: res.data });
     } catch {
       set({ popularGames: [] });
     }
@@ -158,27 +167,27 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   fetchRecentGames: async () => {
     try {
-      const data = await api.get<Game[]>('/api/games/recent');
-      set({ recentGames: data });
+      const res = await api.get<ApiResponse<Game[]>>('/api/games/recent');
+      set({ recentGames: res.data });
     } catch {
       set({ recentGames: [] });
     }
   },
 
   launchGame: async (gameId, platform) => {
-    const data = await api.post<GameLaunchResponse>('/api/games/launch', {
+    const res = await api.post<ApiResponse<GameLaunchResponse>>('/api/games/launch', {
       gameId,
       platform,
     });
-    return data;
+    return res.data;
   },
 
   launchDemoGame: async (gameId, platform) => {
-    const data = await api.post<GameLaunchResponse>('/api/games/launch-demo', {
+    const res = await api.post<ApiResponse<GameLaunchResponse>>('/api/games/demo', {
       gameId,
       platform,
     });
-    return data;
+    return res.data;
   },
 
   setSelectedCategory: (category) => {

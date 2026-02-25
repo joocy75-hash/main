@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     RAPIDAPI_SPORT_QUOTA: int = 50
     RAPIDAPI_CASINO_QUOTA: int = 299
     RAPIDAPI_STREAM_QUOTA: int = 99
+    USER_PAGE_SERVICE_TOKEN: str = ""
 
     # DB connection pool
     DB_POOL_SIZE: int = 10
