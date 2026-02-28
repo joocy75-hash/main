@@ -1,5 +1,5 @@
-import { PrismaClient, Prisma, RewardType, MissionStatus } from '@prisma/client';
-import { randomBytes } from 'crypto';
+import { PrismaClient, Prisma, RewardType, MissionStatus, PointLogType } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import type { Redis } from 'ioredis';
 
 // ===== Types =====
@@ -114,9 +114,12 @@ export class EventService {
     userId: number,
     rewardType: RewardType,
     amount: Prisma.Decimal,
-    source: string,
+    source: PointLogType,
     description: string,
   ) {
+    // Lock user row to prevent concurrent balance corruption
+    await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`;
+
     if (rewardType === 'point') {
       const user = await tx.user.update({
         where: { id: userId },
@@ -127,11 +130,11 @@ export class EventService {
       await tx.pointLog.create({
         data: {
           userId,
-          type: source as any,
+          type: source,
           amount,
           pointsAfter: user.points,
           description,
-          referenceId: `${source}_${userId}_${Date.now()}_${randomBytes(4).toString('hex')}`,
+          referenceId: `${source}_${userId}_${randomUUID()}`,
         },
       });
     } else if (rewardType === 'cash') {
@@ -148,7 +151,7 @@ export class EventService {
           amount,
           balanceAfter: user.balance,
           description,
-          referenceId: `${source}_${userId}_${Date.now()}_${randomBytes(4).toString('hex')}`,
+          referenceId: `${source}_${userId}_${randomUUID()}`,
         },
       });
     } else if (rewardType === 'bonus') {
@@ -165,7 +168,7 @@ export class EventService {
           amount,
           balanceAfter: user.bonusBalance,
           description,
-          referenceId: `${source}_${userId}_${Date.now()}_${randomBytes(4).toString('hex')}`,
+          referenceId: `${source}_${userId}_${randomUUID()}`,
         },
       });
     }
@@ -629,11 +632,12 @@ export class EventService {
 
       // Calculate bonus based on recent deposit
       let bonusAmount = new Prisma.Decimal(0);
+      let usedDepositId: number | null = null;
       if (promo.bonusRate && promo.maxBonus) {
         const recentDeposit = await tx.deposit.findFirst({
           where: { userId, status: 'APPROVED' },
           orderBy: { createdAt: 'desc' },
-          select: { amount: true },
+          select: { id: true, amount: true },
         });
 
         // Validate minimum deposit requirement
@@ -647,16 +651,29 @@ export class EventService {
         }
 
         if (recentDeposit) {
+          // Prevent using same deposit for multiple promotions
+          const alreadyUsed = await tx.userPromotion.findFirst({
+            where: { userId, depositId: recentDeposit.id },
+          });
+          if (alreadyUsed) {
+            throw {
+              statusCode: 400,
+              message: '이 입금건은 이미 다른 프로모션에 사용되었습니다',
+            };
+          }
+
+          usedDepositId = recentDeposit.id;
           const calculated = recentDeposit.amount.mul(promo.bonusRate).div(100);
           bonusAmount = calculated.gt(promo.maxBonus) ? promo.maxBonus : calculated;
         }
       }
 
-      // Create UserPromotion
+      // Create UserPromotion with deposit link
       await tx.userPromotion.create({
         data: {
           userId,
           promotionId,
+          depositId: usedDepositId,
           bonusAmount,
           status: 'active',
         },
@@ -807,7 +824,7 @@ export class EventService {
       });
 
       // Create PointLog (deduction)
-      const conversionRef = `conversion_${userId}_${Date.now()}_${randomBytes(4).toString('hex')}`;
+      const conversionRef = `conversion_${userId}_${randomUUID()}`;
       await tx.pointLog.create({
         data: {
           userId,

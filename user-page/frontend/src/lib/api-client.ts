@@ -4,22 +4,19 @@ interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
 }
 
-// Auth state sync callbacks (registered by auth-store to avoid circular imports)
-let onAuthRefreshed: ((accessToken: string, refreshToken: string) => void) | null = null;
+// Auth state sync callback (registered by auth-store to avoid circular imports)
 let onAuthCleared: (() => void) | null = null;
 
 export function setAuthCallbacks(callbacks: {
-  onRefreshed: (accessToken: string, refreshToken: string) => void;
   onCleared: () => void;
 }) {
-  onAuthRefreshed = callbacks.onRefreshed;
   onAuthCleared = callbacks.onCleared;
 }
 
 // Mutex to prevent concurrent refresh requests
-let refreshPromise: Promise<string | null> | null = null;
+let refreshPromise: Promise<boolean> | null = null;
 
-async function tryRefresh(): Promise<string | null> {
+async function tryRefresh(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = doRefresh();
   try {
@@ -29,36 +26,22 @@ async function tryRefresh(): Promise<string | null> {
   }
 }
 
-async function doRefresh(): Promise<string | null> {
-  const refresh = localStorage.getItem('refreshToken');
-  if (!refresh) return null;
-
+async function doRefresh(): Promise<boolean> {
   try {
+    // Cookie is sent automatically via credentials: 'include'
     const res = await fetch(`${API_URL}/api/auth/refresh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: refresh }),
+      credentials: 'include',
     });
-    if (!res.ok) return null;
-    const data = await res.json();
-
-    localStorage.setItem('accessToken', data.data.accessToken);
-    localStorage.setItem('refreshToken', data.data.refreshToken);
-    onAuthRefreshed?.(data.data.accessToken, data.data.refreshToken);
-
-    return data.data.accessToken;
+    return res.ok;
   } catch {
-    return null;
+    return false;
   }
 }
 
 function clearAuth() {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
   onAuthCleared?.();
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
-  }
+  // AuthGuard handles redirect to /login when isAuthenticated becomes false
 }
 
 class ApiClient {
@@ -66,11 +49,6 @@ class ApiClient {
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-  }
-
-  private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('accessToken');
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -82,24 +60,19 @@ class ApiClient {
       url += `?${searchParams.toString()}`;
     }
 
-    const token = this.getToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...((init.headers as Record<string, string>) || {}),
     };
 
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    let response = await fetch(url, { ...init, headers });
+    // HttpOnly cookies are sent automatically via credentials: 'include'
+    let response = await fetch(url, { ...init, headers, credentials: 'include' });
 
     // Auto-refresh on 401
-    if (response.status === 401 && token) {
-      const newToken = await tryRefresh();
-      if (newToken) {
-        headers['Authorization'] = `Bearer ${newToken}`;
-        response = await fetch(url, { ...init, headers });
+    if (response.status === 401) {
+      const refreshed = await tryRefresh();
+      if (refreshed) {
+        response = await fetch(url, { ...init, headers, credentials: 'include' });
       } else {
         clearAuth();
         throw new Error('세션이 만료되었습니다');
@@ -107,12 +80,24 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || error.error || `HTTP ${response.status}`);
+      let errorMsg = `HTTP ${response.status}`;
+      try {
+        const errorBody = await response.json();
+        errorMsg = errorBody.message || errorBody.error || errorMsg;
+      } catch {
+        // Response body is not JSON
+      }
+      throw new Error(errorMsg);
     }
 
     if (response.status === 204) return {} as T;
-    return response.json();
+
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(`Invalid JSON response from ${path}`);
+    }
   }
 
   get<T>(path: string, params?: Record<string, string>): Promise<T> {

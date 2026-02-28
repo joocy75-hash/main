@@ -259,7 +259,7 @@ export default async function walletRoutes(fastify: FastifyInstance) {
           amount,
           password,
         );
-        return reply.send({ success: true, data });
+        return reply.code(201).send({ success: true, data });
       } catch (err: any) {
         const statusCode = err.statusCode || 500;
         if (statusCode >= 500) {

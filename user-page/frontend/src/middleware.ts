@@ -1,25 +1,23 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-const publicPaths = ['/', '/login', '/register', '/games'];
-const authPaths = ['/login', '/register'];
+const AUTH_PAGES = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('accessToken')?.value
-    || request.headers.get('authorization')?.replace('Bearer ', '');
+  const hasAccessToken = request.cookies.has('accessToken');
+  const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
 
-  // Check localStorage-based auth via a custom header isn't possible in middleware
-  // Use cookie-based check or just protect known paths
+  // Unauthenticated users trying to access protected routes → redirect to login
+  if (!hasAccessToken && !isAuthPage) {
+    const loginUrl = new URL('/login', request.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
-  // For paths that require auth
-  const isPublic = publicPaths.some(p => pathname === p) || pathname.startsWith('/games');
-  const isAuthPage = authPaths.some(p => pathname === p);
-
-  // If no token and accessing protected route, redirect to login
-  // Note: Since tokens are in localStorage (not cookies), middleware can't fully verify
-  // This provides a basic server-side redirect layer
-  // Client-side AuthGuard handles the actual token verification
+  // Authenticated users on auth pages → redirect to home
+  if (hasAccessToken && isAuthPage) {
+    const homeUrl = new URL('/', request.url);
+    return NextResponse.redirect(homeUrl);
+  }
 
   return NextResponse.next();
 }

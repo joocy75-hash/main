@@ -23,6 +23,10 @@ export default fp(async (fastify: FastifyInstance) => {
     sign: {
       algorithm: 'HS256',
     },
+    cookie: {
+      cookieName: 'accessToken',
+      signed: false,
+    },
   });
 
   const authenticate = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -40,7 +44,8 @@ export default fp(async (fastify: FastifyInstance) => {
 
       // Always check token blacklist after successful jwtVerify
       const authHeader = request.headers.authorization;
-      const token = authHeader?.replace('Bearer ', '') || '';
+      const token = authHeader?.replace('Bearer ', '') ||
+                    request.cookies?.accessToken || '';
       const tokenHash = hashToken(token);
       const isBlacklisted = await fastify.redis.get(`bl:${tokenHash}`);
       if (isBlacklisted) {

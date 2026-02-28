@@ -134,23 +134,23 @@ export class WalletService {
     address: string,
     label?: string,
   ) {
-    // Check max address limit
-    const count = await prisma.walletAddress.count({ where: { userId } });
-    if (count >= MAX_ADDRESSES_PER_USER) {
-      throw { statusCode: 400, message: `출금 주소는 최대 ${MAX_ADDRESSES_PER_USER}개까지 등록할 수 있습니다` };
-    }
+    // Atomic count+create to prevent race condition
+    return await prisma.$transaction(async (tx) => {
+      const count = await tx.walletAddress.count({ where: { userId } });
+      if (count >= MAX_ADDRESSES_PER_USER) {
+        throw { statusCode: 400, message: `출금 주소는 최대 ${MAX_ADDRESSES_PER_USER}개까지 등록할 수 있습니다` };
+      }
 
-    const walletAddress = await prisma.walletAddress.create({
-      data: {
-        userId,
-        coinType,
-        network,
-        address,
-        label: label || null,
-      },
+      return await tx.walletAddress.create({
+        data: {
+          userId,
+          coinType,
+          network,
+          address,
+          label: label || null,
+        },
+      });
     });
-
-    return walletAddress;
   }
 
   async deleteAddress(prisma: PrismaClient, userId: number, addressId: number) {
@@ -228,55 +228,47 @@ export class WalletService {
       };
     }
 
-    // 2. Verify password
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { passwordHash: true },
-    });
-
-    if (!user) {
-      throw { statusCode: 404, message: '사용자를 찾을 수 없습니다' };
-    }
-
-    const passwordValid = await compare(password, user.passwordHash);
-    if (!passwordValid) {
-      const attempts = await redis.incr(attemptsKey);
-      await redis.expire(attemptsKey, WITHDRAWAL_PW_LOCKOUT_SECONDS);
-      if (attempts >= WITHDRAWAL_PW_MAX_ATTEMPTS) {
-        await redis.set(lockKey, '1', 'EX', WITHDRAWAL_PW_LOCKOUT_SECONDS);
-        await redis.del(attemptsKey);
-        throw {
-          statusCode: 429,
-          message: '비밀번호 시도 횟수 초과. 15분 후 다시 시도해주세요',
-        };
-      }
-      throw {
-        statusCode: 401,
-        message: `비밀번호가 일치하지 않습니다 (${WITHDRAWAL_PW_MAX_ATTEMPTS - attempts}회 남음)`,
-      };
-    }
-
-    // Clear failed attempts on successful password
-    await redis.del(attemptsKey);
-
     // 2. Calculate fee
     const feeKey = `${coinType}_${network}`;
     const fee = WITHDRAWAL_FEES[feeKey] ?? 0;
     const totalAmount = amount + fee;
 
-    // 3. Atomic balance check and deduction with transaction
+    // 3. Atomic balance check, password verification, and deduction within transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Use raw query for SELECT FOR UPDATE equivalent
-      const users = await tx.$queryRaw<Array<{ id: number; balance: Prisma.Decimal }>>`
-        SELECT id, balance FROM users WHERE id = ${userId} FOR UPDATE
+      // Lock user row and fetch balance + passwordHash atomically
+      const users = await tx.$queryRaw<Array<{ id: number; balance: Prisma.Decimal; password_hash: string }>>`
+        SELECT id, balance, password_hash FROM users WHERE id = ${userId} FOR UPDATE
       `;
 
       if (!users || users.length === 0) {
         throw { statusCode: 404, message: '사용자를 찾을 수 없습니다' };
       }
 
-      const currentBalance = parseFloat(users[0].balance.toString());
-      if (currentBalance < totalAmount) {
+      // Verify password inside transaction (TOCTOU fix)
+      const passwordValid = await compare(password, users[0].password_hash);
+      if (!passwordValid) {
+        const attempts = await redis.incr(attemptsKey);
+        await redis.expire(attemptsKey, WITHDRAWAL_PW_LOCKOUT_SECONDS);
+        if (attempts >= WITHDRAWAL_PW_MAX_ATTEMPTS) {
+          await redis.set(lockKey, '1', 'EX', WITHDRAWAL_PW_LOCKOUT_SECONDS);
+          await redis.del(attemptsKey);
+          throw {
+            statusCode: 429,
+            message: '비밀번호 시도 횟수 초과. 15분 후 다시 시도해주세요',
+          };
+        }
+        throw {
+          statusCode: 401,
+          message: `비밀번호가 일치하지 않습니다 (${WITHDRAWAL_PW_MAX_ATTEMPTS - attempts}회 남음)`,
+        };
+      }
+
+      // Clear failed attempts on successful password
+      await redis.del(attemptsKey);
+
+      const currentBalance = new Prisma.Decimal(users[0].balance.toString());
+      const totalDecimal = new Prisma.Decimal(totalAmount);
+      if (currentBalance.lt(totalDecimal)) {
         throw { statusCode: 400, message: '잔액이 부족합니다' };
       }
 
@@ -369,16 +361,17 @@ export class WalletService {
 
     // type === 'all': fetch limited data from both tables + separate counts
     const offset = (page - 1) * limit;
+    const maxTake = Math.min(offset + limit, 500);
     const [deposits, withdrawals, depositCount, withdrawalCount] = await Promise.all([
       prisma.deposit.findMany({
         where: commonWhere,
         orderBy: { createdAt: 'desc' },
-        take: offset + limit,
+        take: maxTake,
       }),
       prisma.withdrawal.findMany({
         where: commonWhere,
         orderBy: { createdAt: 'desc' },
-        take: offset + limit,
+        take: maxTake,
       }),
       prisma.deposit.count({ where: commonWhere }),
       prisma.withdrawal.count({ where: commonWhere }),

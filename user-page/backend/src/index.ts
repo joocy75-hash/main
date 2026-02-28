@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
 import { config } from './config.js';
 
 // Plugins
@@ -26,6 +27,7 @@ const app = Fastify({
 
 // Register plugins (order matters)
 await app.register(corsPlugin);
+await app.register(cookie);
 await app.register(prismaPlugin);
 await app.register(redisPlugin);
 await app.register(authPlugin);

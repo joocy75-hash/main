@@ -4,8 +4,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuthStore } from '@/stores/auth-store';
+
+const loginSchema = z.object({
+  username: z.string()
+    .min(1, '아이디를 입력해주세요')
+    .min(4, '아이디는 4자 이상이어야 합니다'),
+  password: z.string()
+    .min(1, '비밀번호를 입력해주세요')
+    .min(8, '비밀번호는 8자 이상이어야 합니다'),
+});
 
 const LoginPage = () => {
   const router = useRouter();
@@ -37,12 +47,9 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
 
-    if (!username.trim()) {
-      setError('아이디를 입력해주세요');
-      return;
-    }
-    if (!password) {
-      setError('비밀번호를 입력해주세요');
+    const result = loginSchema.safeParse({ username: username.trim(), password });
+    if (!result.success) {
+      setError(result.error.errors[0].message);
       return;
     }
 
@@ -66,31 +73,31 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f1f2f7] px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-[#252531] px-4">
+      <div className="w-full max-w-md rounded-2xl bg-[#2c2d33] p-8 shadow-lg">
         <div className="mb-6 text-center">
           <h1 className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] bg-clip-text text-2xl font-bold tracking-tight text-transparent">
             Game Platform
           </h1>
-          <p className="mt-1 text-base text-[#707070]">
+          <p className="mt-1 text-base text-[#98a7b5]">
             로그인
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium text-[#252531]">
+            <label htmlFor="username" className="text-sm font-medium text-white">
               아이디
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#98a7b5]" />
               <input
                 id="username"
                 type="text"
                 placeholder="아이디를 입력하세요"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                className="h-11 w-full rounded-lg border border-[#3a3a4a] bg-[#252531] pl-10 pr-10 text-sm text-white placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                 autoComplete="username"
                 disabled={isSubmitting}
               />
@@ -98,25 +105,25 @@ const LoginPage = () => {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-[#252531]">
+            <label htmlFor="password" className="text-sm font-medium text-white">
               비밀번호
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#98a7b5]" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="비밀번호를 입력하세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                className="h-11 w-full rounded-lg border border-[#3a3a4a] bg-[#252531] pl-10 pr-10 text-sm text-white placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                 autoComplete="current-password"
                 disabled={isSubmitting}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] transition-colors hover:text-[#252531]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#98a7b5] transition-colors hover:text-white"
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -134,13 +141,13 @@ const LoginPage = () => {
               checked={rememberUsername}
               onCheckedChange={(checked) => setRememberUsername(checked === true)}
             />
-            <label htmlFor="remember" className="cursor-pointer text-sm font-normal text-[#252531]">
+            <label htmlFor="remember" className="cursor-pointer text-sm font-normal text-white">
               아이디 저장
             </label>
           </div>
 
           {error && (
-            <p className="text-sm text-red-500">{error}</p>
+            <p className="text-sm text-red-400">{error}</p>
           )}
 
           <button
@@ -158,11 +165,11 @@ const LoginPage = () => {
             )}
           </button>
 
-          <p className="text-center text-sm text-[#707070]">
+          <p className="text-center text-sm text-[#98a7b5]">
             계정이 없으신가요?{' '}
             <Link
               href="/register"
-              className="font-medium text-[#f4b53e] hover:underline"
+              className="font-medium text-[#feb614] hover:underline"
             >
               회원가입
             </Link>

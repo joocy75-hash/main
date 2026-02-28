@@ -2,6 +2,31 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { AuthService } from '../services/auth-service.js';
 import { authRateLimit } from '../middleware/rate-limit.js';
+import { config } from '../config.js';
+
+const COOKIE_BASE = {
+  httpOnly: config.cookie.httpOnly,
+  secure: config.cookie.secure,
+  sameSite: config.cookie.sameSite,
+  path: '/',
+} as const;
+
+function setAuthCookies(reply: FastifyReply, accessToken: string, refreshToken: string) {
+  reply.setCookie('accessToken', accessToken, {
+    ...COOKIE_BASE,
+    maxAge: 15 * 60, // 15 minutes
+  });
+  reply.setCookie('refreshToken', refreshToken, {
+    ...COOKIE_BASE,
+    path: '/api/auth',
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  });
+}
+
+function clearAuthCookies(reply: FastifyReply) {
+  reply.clearCookie('accessToken', { path: '/' });
+  reply.clearCookie('refreshToken', { path: '/api/auth' });
+}
 
 const registerSchema = z.object({
   username: z
@@ -29,10 +54,6 @@ const loginSchema = z.object({
   password: z.string().min(1, '비밀번호를 입력해주세요'),
 });
 
-const refreshSchema = z.object({
-  refreshToken: z.string().min(1, '리프레시 토큰이 필요합니다'),
-});
-
 const logoutSchema = z.object({
   refreshToken: z.string().optional(),
 });
@@ -53,9 +74,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await authService.register(parsed.data);
+      setAuthCookies(reply, result.accessToken, result.refreshToken);
       return reply.code(201).send({
         success: true,
-        data: result,
+        data: { user: result.user },
       });
     } catch (err: any) {
       const statusCode = err.statusCode || 500;
@@ -86,9 +108,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
         ip: request.ip,
         userAgent: request.headers['user-agent'] || '',
       });
+      setAuthCookies(reply, result.accessToken, result.refreshToken);
       return reply.code(200).send({
         success: true,
-        data: result,
+        data: { user: result.user },
       });
     } catch (err: any) {
       const statusCode = err.statusCode || 500;
@@ -103,10 +126,12 @@ export default async function authRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // POST /api/auth/refresh
+  // POST /api/auth/refresh - read refreshToken from cookie or body
   fastify.post('/api/auth/refresh', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parsed = refreshSchema.safeParse(request.body);
-    if (!parsed.success) {
+    const refreshToken = (request.cookies as Record<string, string>)?.refreshToken ||
+                         ((request.body as any)?.refreshToken as string) || '';
+
+    if (!refreshToken) {
       return reply.code(400).send({
         success: false,
         error: '리프레시 토큰이 필요합니다',
@@ -114,10 +139,11 @@ export default async function authRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const result = await authService.refresh(parsed.data.refreshToken);
+      const result = await authService.refresh(refreshToken);
+      setAuthCookies(reply, result.accessToken, result.refreshToken);
       return reply.code(200).send({
         success: true,
-        data: result,
+        data: {},
       });
     } catch (err: any) {
       const statusCode = err.statusCode || 500;
@@ -125,6 +151,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       if (statusCode >= 500) {
         fastify.log.error(err, 'Refresh error');
       }
+      clearAuthCookies(reply);
       return reply.code(statusCode).send({
         success: false,
         error: message,
@@ -138,19 +165,23 @@ export default async function authRoutes(fastify: FastifyInstance) {
     { preHandler: [fastify.authenticate] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const parsed = logoutSchema.safeParse(request.body);
+      const cookies = request.cookies as Record<string, string> | undefined;
 
-      const authHeader = request.headers.authorization;
-      const accessToken = authHeader ? authHeader.replace('Bearer ', '') : '';
-      const refreshToken = parsed.success ? (parsed.data.refreshToken || '') : '';
+      const accessToken = request.headers.authorization?.replace('Bearer ', '') ||
+                          cookies?.accessToken || '';
+      const refreshToken = cookies?.refreshToken ||
+                           (parsed.success ? (parsed.data.refreshToken || '') : '');
 
       try {
         await authService.logout(accessToken, refreshToken);
+        clearAuthCookies(reply);
         return reply.code(200).send({
           success: true,
           data: { message: '로그아웃 되었습니다' },
         });
       } catch (err: any) {
         fastify.log.error(err, 'Logout error');
+        clearAuthCookies(reply);
         return reply.code(500).send({
           success: false,
           error: '서버 오류가 발생했습니다',

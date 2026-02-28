@@ -46,11 +46,17 @@ export class AuthService {
     const passwordHash = await hash(input.password, BCRYPT_ROUNDS);
 
     // 2. Generate unique referral code (no DB consistency requirement)
+    const MAX_REFERRAL_CODE_ATTEMPTS = 10;
     let myReferralCode = generateReferralCode();
     let codeExists = await prisma.user.findUnique({
       where: { myReferralCode },
     });
+    let attempts = 0;
     while (codeExists) {
+      attempts++;
+      if (attempts >= MAX_REFERRAL_CODE_ATTEMPTS) {
+        throw { statusCode: 500, message: '추천코드 생성에 실패했습니다. 다시 시도해주세요' };
+      }
       myReferralCode = generateReferralCode();
       codeExists = await prisma.user.findUnique({
         where: { myReferralCode },

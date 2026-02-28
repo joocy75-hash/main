@@ -70,13 +70,14 @@ interface WalletState {
   points: string;
   bonusBalance: string;
   addresses: WalletAddress[];
-  deposits: Deposit[];
-  withdrawals: Withdrawal[];
+  deposits: Transaction[];
+  withdrawals: Transaction[];
   transactions: Transaction[];
   transactionsTotal: number;
   transactionsPage: number;
   transactionsHasMore: boolean;
   isLoading: boolean;
+  balanceError: string | null;
 
   fetchBalance: () => Promise<void>;
   fetchAddresses: () => Promise<void>;
@@ -101,6 +102,7 @@ export const useWalletStore = create<WalletState>((set) => ({
   transactionsPage: 1,
   transactionsHasMore: false,
   isLoading: false,
+  balanceError: null,
 
   fetchBalance: async () => {
     try {
@@ -109,9 +111,10 @@ export const useWalletStore = create<WalletState>((set) => ({
         balance: data.balance,
         points: data.points,
         bonusBalance: data.bonusBalance,
+        balanceError: null,
       });
     } catch {
-      // Ignore balance fetch errors
+      set({ balanceError: '잔액 조회에 실패했습니다' });
     }
   },
 
@@ -173,7 +176,7 @@ export const useWalletStore = create<WalletState>((set) => ({
         type: 'deposit',
         limit: '5',
       });
-      set({ deposits: data.data as unknown as Deposit[] });
+      set({ deposits: data.data });
     } catch {
       set({ deposits: [] });
     }
@@ -185,7 +188,7 @@ export const useWalletStore = create<WalletState>((set) => ({
         type: 'withdrawal',
         limit: '5',
       });
-      set({ withdrawals: data.data as unknown as Withdrawal[] });
+      set({ withdrawals: data.data });
     } catch {
       set({ withdrawals: [] });
     }
