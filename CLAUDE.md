@@ -84,6 +84,7 @@ cd backend && source .venv/bin/activate && python scripts/seed.py
 ## 알려진 이슈
 
 - 한글 경로(관리자페이지) → Turbopack 실패 → `--webpack` 필수
+- zsh 괄호 글로빙: Next.js `(auth)`, `(main)` 등 괄호 포함 경로는 git 명령에서 반드시 `"따옴표"` 감싸기 필요
 - PostgreSQL 포트: **5433** (기존 5432 충돌)
 - passlib + bcrypt 4.x 비호환 → bcrypt 직접 사용
 - 포트: Backend **8002**, Frontend **3001**

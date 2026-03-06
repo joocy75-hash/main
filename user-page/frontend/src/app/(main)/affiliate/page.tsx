@@ -77,92 +77,132 @@ export default function AffiliatePage() {
   const dashboard = affiliateDashboard;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {/* Header */}
-      <div className="bg-[#f5f5f7] rounded-lg p-4">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-[#252531]">
-          <span>🤝</span> 추천/어필리에이트
-        </h2>
+      <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] overflow-hidden">
+        <div className="border-b border-[#e2e8f0] px-5 py-4 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9]">
+          <h2 className="flex items-center gap-2 text-[18px] font-black text-[#1e293b] drop-shadow-sm">
+            <span className="text-xl">🤝</span> 추천 / 어필리에이트
+          </h2>
+          <p className="mt-1 text-[13px] font-bold text-[#64748b]">
+            친구를 초대하고 함께 플레이하며 평생 커미션을 받으세요.
+          </p>
+        </div>
       </div>
 
-      {/* Referral code */}
-      <div className="bg-[#f5f5f7] rounded-lg p-4 flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+      {/* Referral Link & Code Section */}
+      <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] p-5 flex flex-col gap-4">
+        {/* Referral code */}
+        <div className="flex items-center justify-between bg-gradient-to-br from-[#f8fafc] to-[#f1f5f9] border border-[#e2e8f0] p-4 rounded-xl shadow-[inset_0_2px_4px_rgba(255,255,255,1)]">
           <div>
-            <p className="text-xs text-[#6b7280]">내 추천코드</p>
-            <p className="text-lg font-bold text-[#feb614]">{referralCode}</p>
+            <p className="text-[12px] font-extrabold text-[#94a3b8] mb-0.5">내 추천코드</p>
+            <p className="text-[20px] font-black text-[#f59e0b] drop-shadow-sm tracking-widest">{referralCode}</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => handleCopy(referralCode, 'code')}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] bg-[#f0f0f2] text-[#6b7280] rounded-md hover:bg-[#f8f8fa] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-black bg-white border border-[#e2e8f0] text-[#64748b] rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
-              <Copy className="size-3" />
-              {copied === 'code' ? '복사됨' : '복사'}
+              {copied === 'code' ? (
+                <span className="text-[#10b981] flex items-center gap-1.5">
+                  <span className="text-[14px]">✔️</span> 복사됨
+                </span>
+              ) : (
+                <>
+                  <Copy className="size-4" /> 복사
+                </>
+              )}
             </button>
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] bg-[#f0f0f2] text-[#6b7280] rounded-md hover:bg-[#f8f8fa] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-black bg-gradient-to-b from-[#10b981] to-[#059669] border border-[#059669] text-white rounded-xl shadow-[inset_0_-2px_0_rgba(0,0,0,0.2),_0_2px_4px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 hover:shadow-[inset_0_-2px_0_rgba(0,0,0,0.2),_0_4px_8px_rgba(16,185,129,0.4)] transition-all"
             >
-              <Share2 className="size-3" />
-              공유
+              <Share2 className="size-4 drop-shadow-sm" /> 공유
             </button>
           </div>
         </div>
 
-        <div className="border-t border-[#e8e8e8]" />
+        {/* Divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-[#e2e8f0] to-transparent" />
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#6b7280]">추천 링크</p>
-            <p className="truncate text-xs font-mono text-[#6b7280]">
+        {/* Referral Link */}
+        <div className="flex items-center justify-between gap-3 bg-[#f8fafc] border border-dashed border-[#cbd5e1] p-3 rounded-xl">
+          <div className="flex-1 min-w-0 px-2">
+            <p className="text-[11px] font-extrabold text-[#94a3b8] mb-0.5">추천 링크</p>
+            <p className="truncate text-[13px] font-bold text-[#475569] select-all cursor-pointer bg-white px-2 py-1 rounded border border-[#e2e8f0] shadow-inner">
               {referralLink}
             </p>
           </div>
           <button
             onClick={() => handleCopy(referralLink, 'link')}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] bg-[#f0f0f2] text-[#6b7280] rounded-md hover:bg-[#f8f8fa] transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-black bg-white border border-[#e2e8f0] text-[#64748b] rounded-lg shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all shrink-0 h-[40px]"
           >
-            <Copy className="size-3" />
-            {copied === 'link' ? '복사됨' : '복사'}
+            {copied === 'link' ? (
+              <span className="text-[#10b981]">복사됨</span>
+            ) : (
+              <>
+                <Copy className="size-3.5" /> 복사
+              </>
+            )}
           </button>
         </div>
       </div>
 
       {/* Dashboard stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[#f5f5f7] rounded-lg flex flex-col items-center gap-1 p-4">
-          <Users className="size-5 text-blue-500" />
-          <p className="text-xs text-[#6b7280]">총 추천</p>
-          <p className="text-lg font-bold text-[#252531]">{dashboard?.totalReferrals || 0}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Stat Card 1 */}
+        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] flex flex-col items-center justify-center p-6 transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 size-20 rounded-full bg-blue-500/10 blur-xl pointer-events-none" />
+          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 shadow-[inset_0_2px_4px_rgba(255,255,255,1)] mb-3">
+            <Users className="size-6 text-blue-500 drop-shadow-sm" />
+          </div>
+          <p className="text-[13px] font-extrabold text-[#64748b] mb-1">총 추천 인원</p>
+          <p className="text-[24px] font-black text-[#1e293b]">{dashboard?.totalReferrals || 0}<span className="text-[15px] text-[#94a3b8] ml-1">명</span></p>
         </div>
-        <div className="bg-[#f5f5f7] rounded-lg flex flex-col items-center gap-1 p-4">
-          <DollarSign className="size-5 text-green-500" />
-          <p className="text-xs text-[#6b7280]">이달 커미션</p>
-          <p className="text-lg font-bold text-[#252531]">{formatAmount(dashboard?.thisMonthCommission || '0')}</p>
+
+        {/* Stat Card 2 */}
+        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] flex flex-col items-center justify-center p-6 transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 size-20 rounded-full bg-green-500/10 blur-xl pointer-events-none" />
+          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200 shadow-[inset_0_2px_4px_rgba(255,255,255,1)] mb-3">
+            <DollarSign className="size-6 text-green-500 drop-shadow-sm" />
+          </div>
+          <p className="text-[13px] font-extrabold text-[#64748b] mb-1">이달 커미션</p>
+          <p className="text-[24px] font-black text-[#1e293b]">
+            <span className="text-[#10b981] mr-1">+</span>{formatAmount(dashboard?.thisMonthCommission || '0')}
+          </p>
         </div>
-        <div className="bg-[#f5f5f7] rounded-lg flex flex-col items-center gap-1 p-4">
-          <TrendingUp className="size-5 text-yellow-500" />
-          <p className="text-xs text-[#6b7280]">누적 커미션</p>
-          <p className="text-lg font-bold text-[#252531]">{formatAmount(dashboard?.totalCommission || '0')}</p>
+
+        {/* Stat Card 3 */}
+        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] flex flex-col items-center justify-center p-6 transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 size-20 rounded-full bg-yellow-500/10 blur-xl pointer-events-none" />
+          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 shadow-[inset_0_2px_4px_rgba(255,255,255,1)] mb-3">
+            <TrendingUp className="size-6 text-yellow-500 drop-shadow-sm" />
+          </div>
+          <p className="text-[13px] font-extrabold text-[#64748b] mb-1">누적 커미션</p>
+          <p className="text-[24px] font-black text-[#1e293b]">
+            <span className="text-[#f59e0b] mr-1">T</span>{formatAmount(dashboard?.totalCommission || '0')}
+          </p>
         </div>
       </div>
 
       {/* Rolling rates */}
       {dashboard?.rollingRates && dashboard.rollingRates.length > 0 && (
-        <div className="bg-[#f5f5f7] rounded-lg">
-          <div className="p-4 pb-3">
-            <h3 className="text-base font-bold text-[#252531]">게임별 롤링 요율</h3>
+        <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] overflow-hidden">
+          <div className="border-b border-[#e2e8f0] px-5 py-4 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9]">
+            <h3 className="text-[15px] font-black text-[#1e293b] flex items-center gap-2">
+              <span className="text-[18px]">📊</span> 나의 게임별 롤링 요율
+            </h3>
           </div>
-          <div className="px-4 pb-4">
-            <div className="flex flex-wrap gap-2">
+          <div className="p-5 bg-[#fbfcfd]">
+            <div className="flex flex-wrap gap-3">
               {dashboard.rollingRates.map((rate) => (
                 <div
                   key={rate.category}
-                  className="flex items-center gap-1 rounded-md border border-[#e8e8e8] px-3 py-1.5"
+                  className="flex items-center gap-2 rounded-xl border border-[#cbd5e1] bg-white px-4 py-2.5 shadow-[0_2px_4px_rgba(0,0,0,0.02)] transition-transform hover:-translate-y-0.5"
                 >
-                  <span className="text-sm text-[#252531]">{rate.category}</span>
-                  <span className="text-sm font-bold text-[#feb614]">{rate.rate}%</span>
+                  <span className="text-[13px] font-black text-[#475569]">{rate.category}</span>
+                  <div className="w-px h-3 bg-[#e2e8f0]"></div>
+                  <span className="text-[15px] font-black text-[#f59e0b] drop-shadow-sm">{rate.rate}%</span>
                 </div>
               ))}
             </div>
@@ -170,72 +210,76 @@ export default function AffiliatePage() {
         </div>
       )}
 
-      {/* Tabs: Members / Commission History */}
-      <div className="w-full">
-        {/* Tab triggers */}
-        <div className="flex rounded-lg overflow-hidden border border-[#e8e8e8]">
-          <button
-            onClick={() => setActiveTab('members')}
-            className={cn(
-              'flex-1 py-2.5 text-sm font-semibold transition-colors',
-              activeTab === 'members'
-                ? 'bg-[#feb614] text-white'
-                : 'bg-[#e8e8e8] text-[#6b7280] hover:bg-[#f0f0f2]'
-            )}
-          >
-            추천회원
-          </button>
-          <button
-            onClick={() => setActiveTab('commissions')}
-            className={cn(
-              'flex-1 py-2.5 text-sm font-semibold transition-colors',
-              activeTab === 'commissions'
-                ? 'bg-[#feb614] text-white'
-                : 'bg-[#e8e8e8] text-[#6b7280] hover:bg-[#f0f0f2]'
-            )}
-          >
-            커미션내역
-          </button>
+      {/* Action Bar (Tabs & Table Wrapper) */}
+      <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] overflow-hidden flex flex-col">
+        {/* Tab triggers - 3D Pill Style */}
+        <div className="p-4 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0]">
+          <div className="flex gap-2 rounded-xl bg-[#e2e8f0]/50 p-1.5 border border-[#cbd5e1]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] sm:w-fit">
+            <button
+              onClick={() => setActiveTab('members')}
+              className={cn(
+                'min-w-[140px] px-6 py-2.5 text-[14px] font-black rounded-lg transition-all',
+                activeTab === 'members'
+                  ? 'bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-white shadow-[0_2px_4px_rgba(245,158,11,0.3),_inset_0_1px_1px_rgba(255,255,255,0.4)]'
+                  : 'text-[#64748b] hover:bg-white hover:text-[#1e293b] hover:shadow-sm'
+              )}
+            >
+              👫 추천 맺은 회원
+            </button>
+            <button
+              onClick={() => setActiveTab('commissions')}
+              className={cn(
+                'min-w-[140px] px-6 py-2.5 text-[14px] font-black rounded-lg transition-all',
+                activeTab === 'commissions'
+                  ? 'bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-white shadow-[0_2px_4px_rgba(245,158,11,0.3),_inset_0_1px_1px_rgba(255,255,255,0.4)]'
+                  : 'text-[#64748b] hover:bg-white hover:text-[#1e293b] hover:shadow-sm'
+              )}
+            >
+              💰 커미션 지급 내역
+            </button>
+          </div>
         </div>
 
         {/* Tab content: Members */}
         {activeTab === 'members' && (
-          <div className="bg-[#f5f5f7] rounded-lg mt-3">
+          <div className="p-5 bg-[#fbfcfd]">
             {affiliateMembers.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-12">
-                <span className="text-4xl">👤</span>
-                <p className="text-sm text-[#6b7280]">추천회원이 없습니다</p>
+              <div className="flex flex-col items-center justify-center gap-3 py-16 bg-[#f8fafc] rounded-xl border border-dashed border-[#cbd5e1]">
+                <span className="text-4xl opacity-50 grayscale">👤</span>
+                <p className="text-[14px] font-extrabold text-[#94a3b8]">현재 추천 맺은 회원이 없습니다</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#e8e8e8]">
-                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">아이디</th>
-                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">닉네임</th>
-                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">총 베팅</th>
-                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">커미션</th>
-                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">가입일</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {affiliateMembers.map((member) => (
-                      <tr key={member.id} className="border-b border-[#e8e8e8] last:border-b-0">
-                        <td className="text-sm text-[#252531] px-4 py-3">{member.username}</td>
-                        <td className="text-sm text-[#252531] px-4 py-3">{member.nickname}</td>
-                        <td className="text-right text-sm text-[#252531] px-4 py-3">
-                          {formatAmount(member.totalBet)}
-                        </td>
-                        <td className="text-right text-sm text-green-600 px-4 py-3">
-                          {formatAmount(member.commission)}
-                        </td>
-                        <td className="text-right text-xs text-[#6b7280] px-4 py-3">
-                          {formatDate(member.joinedAt)}
-                        </td>
+              <div className="rounded-xl border border-[#e2e8f0] overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[700px]">
+                    <thead>
+                      <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+                        <th className="text-left text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">아이디</th>
+                        <th className="text-left text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">닉네임</th>
+                        <th className="text-right text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">총 베팅</th>
+                        <th className="text-right text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">지급 커미션</th>
+                        <th className="text-right text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">가입일</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white">
+                      {affiliateMembers.map((member) => (
+                        <tr key={member.id} className="border-b border-[#e2e8f0] last:border-b-0 transition-colors hover:bg-[#f8fafc]">
+                          <td className="text-[14px] font-black text-[#1e293b] px-5 py-4">{member.username}</td>
+                          <td className="text-[13px] font-bold text-[#475569] px-5 py-4">{member.nickname}</td>
+                          <td className="text-right text-[14px] font-black text-[#475569] px-5 py-4">
+                            {formatAmount(member.totalBet)}
+                          </td>
+                          <td className="text-right text-[14px] font-black text-[#10b981] drop-shadow-sm px-5 py-4">
+                            + {formatAmount(member.commission)}
+                          </td>
+                          <td className="text-right text-[12px] font-bold text-[#94a3b8] px-5 py-4">
+                            {formatDate(member.joinedAt)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -243,44 +287,51 @@ export default function AffiliatePage() {
 
         {/* Tab content: Commissions */}
         {activeTab === 'commissions' && (
-          <div className="bg-[#f5f5f7] rounded-lg mt-3">
+          <div className="p-5 bg-[#fbfcfd]">
             {commissionRecords.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-12">
-                <span className="text-4xl">💰</span>
-                <p className="text-sm text-[#6b7280]">커미션내역이 없습니다</p>
+              <div className="flex flex-col items-center justify-center gap-3 py-16 bg-[#f8fafc] rounded-xl border border-dashed border-[#cbd5e1]">
+                <span className="text-4xl opacity-50 grayscale">🧾</span>
+                <p className="text-[14px] font-extrabold text-[#94a3b8]">커미션 지급 내역이 없습니다</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#e8e8e8]">
-                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">유형</th>
-                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">게임</th>
-                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">회원</th>
-                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">금액</th>
-                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">일시</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {commissionRecords.map((record) => (
-                      <tr key={record.id} className="border-b border-[#e8e8e8] last:border-b-0">
-                        <td className="px-4 py-3">
-                          <span className="inline-block text-[10px] font-medium bg-[#e8e8e8] text-[#6b7280] px-2 py-0.5 rounded">
-                            {record.type === 'rolling' ? '롤링' : '죽장'}
-                          </span>
-                        </td>
-                        <td className="text-sm text-[#252531] px-4 py-3">{record.gameCategory}</td>
-                        <td className="text-sm text-[#252531] px-4 py-3">{record.fromUser}</td>
-                        <td className="text-right text-sm text-green-600 px-4 py-3">
-                          +{formatAmount(record.amount)}
-                        </td>
-                        <td className="text-right text-xs text-[#6b7280] px-4 py-3">
-                          {formatDateTime(record.createdAt)}
-                        </td>
+              <div className="rounded-xl border border-[#e2e8f0] overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[700px]">
+                    <thead>
+                      <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+                        <th className="text-left text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">유형</th>
+                        <th className="text-left text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">게임</th>
+                        <th className="text-left text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">회원</th>
+                        <th className="text-right text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">지급 금액</th>
+                        <th className="text-right text-[12px] font-extrabold text-[#64748b] px-5 py-3.5">일시</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white">
+                      {commissionRecords.map((record) => (
+                        <tr key={record.id} className="border-b border-[#e2e8f0] last:border-b-0 transition-colors hover:bg-[#f8fafc]">
+                          <td className="px-5 py-4">
+                            <span className={cn(
+                              "inline-flex items-center text-[11px] font-black px-2.5 py-1 rounded-md shadow-sm border",
+                              record.type === 'rolling' 
+                                ? "bg-amber-50 text-[#f59e0b] border-amber-200"
+                                : "bg-blue-50 text-blue-600 border-blue-200"
+                            )}>
+                              {record.type === 'rolling' ? '롤링적립' : '루징적립'}
+                            </span>
+                          </td>
+                          <td className="text-[13px] font-black text-[#475569] px-5 py-4">{record.gameCategory}</td>
+                          <td className="text-[13px] font-bold text-[#475569] px-5 py-4">{record.fromUser}</td>
+                          <td className="text-right text-[14px] font-black text-[#10b981] drop-shadow-sm px-5 py-4">
+                            +{formatAmount(record.amount)}
+                          </td>
+                          <td className="text-right text-[12px] font-bold text-[#94a3b8] px-5 py-4">
+                            {formatDateTime(record.createdAt)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

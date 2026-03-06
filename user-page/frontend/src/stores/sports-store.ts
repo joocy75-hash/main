@@ -1,12 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api-client';
 
-// Backend wraps all responses in { success, data }
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-}
-
 interface Team {
   name: string;
   nameKo: string;
@@ -62,10 +56,10 @@ const MOCK_SPORT_CATEGORIES: SportCategory[] = [
 ];
 
 const MOCK_ESPORTS_CATEGORIES: EsportsCategory[] = [
-  { code: 'lol', name: 'League of Legends', nameKo: 'LoL', icon: '⚔️' },
-  { code: 'cs2', name: 'Counter-Strike', nameKo: 'CS2', icon: '🔫' },
-  { code: 'dota2', name: 'Dota 2', nameKo: '도타2', icon: '🛡️' },
-  { code: 'valorant', name: 'Valorant', nameKo: '발로란트', icon: '🎯' },
+  { code: 'lol', name: 'League of Legends', nameKo: 'LoL', icon: 'https://upload.wikimedia.org/wikipedia/commons/d/d8/League_of_Legends_2019_vector.svg' },
+  { code: 'cs2', name: 'Counter-Strike', nameKo: 'CS2', icon: 'https://upload.wikimedia.org/wikipedia/en/f/f6/CS2_icon.svg' },
+  { code: 'dota2', name: 'Dota 2', nameKo: '도타2', icon: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Dota_2_icon.svg' },
+  { code: 'valorant', name: 'Valorant', nameKo: '발로란트', icon: 'https://upload.wikimedia.org/wikipedia/commons/f/fc/Valorant_logo_-_pink_color_version.svg' },
 ];
 
 const MOCK_LIVE_EVENTS: SportEvent[] = [
@@ -207,8 +201,8 @@ export const useSportsStore = create<SportsState>((set, get) => ({
       const params: Record<string, string> = { status: currentStatus };
       if (currentSport && currentSport !== 'all') params.sport = currentSport;
 
-      const res = await api.get<ApiResponse<SportEvent[]>>('/api/sports/events', params);
-      set({ sportEvents: res.data, isLoading: false });
+      const res = await api.get<SportEvent[]>('/api/sports/events', params);
+      set({ sportEvents: res ?? [], isLoading: false });
     } catch {
       const { selectedStatus, selectedSport } = get();
       const st = status || selectedStatus;
@@ -221,8 +215,8 @@ export const useSportsStore = create<SportsState>((set, get) => ({
 
   fetchSportCategories: async () => {
     try {
-      const res = await api.get<ApiResponse<SportCategory[]>>('/api/sports/categories');
-      const categories = res.data;
+      const res = await api.get<SportCategory[]>('/api/sports/categories');
+      const categories = res ?? [];
       // Prepend "all" category if not present
       const hasAll = categories.some((c) => c.code === 'all');
       const withAll = hasAll
@@ -239,8 +233,8 @@ export const useSportsStore = create<SportsState>((set, get) => ({
     try {
       const params: Record<string, string> = {};
       if (game && game !== 'all') params.game = game;
-      const res = await api.get<ApiResponse<SportEvent[]>>('/api/esports/live', params);
-      set({ esportsEvents: res.data, isLoading: false });
+      const res = await api.get<SportEvent[]>('/api/esports/live', params);
+      set({ esportsEvents: res ?? [], isLoading: false });
     } catch {
       const currentGame = game || get().selectedEsportGame;
       const filtered = currentGame === 'all'
@@ -252,8 +246,8 @@ export const useSportsStore = create<SportsState>((set, get) => ({
 
   fetchEsportsCategories: async () => {
     try {
-      const res = await api.get<ApiResponse<EsportsCategory[]>>('/api/esports/categories');
-      set({ esportsCategories: res.data });
+      const res = await api.get<EsportsCategory[]>('/api/esports/categories');
+      set({ esportsCategories: res ?? [] });
     } catch {
       set({ esportsCategories: MOCK_ESPORTS_CATEGORIES });
     }

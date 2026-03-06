@@ -23,7 +23,8 @@ export const useMinigameStore = create<MinigameState>((set, get) => ({
   isLoading: false,
 
   fetchRounds: async () => {
-    set({ isLoading: true });
+    const { rounds } = get();
+    if (rounds.length === 0) set({ isLoading: true });
     try {
       const res = await api.get<BepickRound[]>('/api/minigame/rounds', {
         game: get().selectedGame,
@@ -31,7 +32,7 @@ export const useMinigameStore = create<MinigameState>((set, get) => ({
       });
       set({ rounds: Array.isArray(res) ? res : [], isLoading: false });
     } catch {
-      set({ rounds: [], isLoading: false });
+      set({ isLoading: false });
     }
   },
 

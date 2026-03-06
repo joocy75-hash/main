@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback, memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,8 +15,8 @@ const DISPLAY_ROUNDS = 30;
 const BET_LIMITS = { MIN: 5_000, MAX: 7_000_000, WIN_MAX: 20_000_000 } as const;
 
 const IFRAME_URLS: Record<string, string> = {
-  powerball: "https://ntry.com/scores/eos_powerball/live.php",
-  ladder: "https://ntry.com/scores/power_ladder/live.php",
+  powerball: "https://bepick.net/live/eosball5m",
+  ladder: "https://bepick.net/live/powerladder",
 };
 
 // --- Label helpers ---
@@ -75,6 +75,71 @@ function useCountdown() {
   };
 }
 
+/* ───────────────── Isolated clock components (prevent parent re-render) ───────────────── */
+function ClockDisplay() {
+  const [clock, setClock] = useState({ date: "", time: "" });
+
+  useEffect(() => {
+    setClock(fmtNow());
+    const t = setInterval(() => setClock(fmtNow()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (!clock.date) return null;
+
+  return (
+    <div className="text-[12px] text-[#64748b] font-bold">
+      <div>{clock.date}</div>
+      <div className="text-[#3b82f6] font-black text-[15px] tracking-tight">
+        {clock.time}
+      </div>
+    </div>
+  );
+}
+
+function CountdownBadge({ secondsLeft }: { secondsLeft: number }) {
+  const isClosed = secondsLeft <= 10;
+
+  return (
+    <>
+      <div className="flex gap-2">
+        {isClosed ? (
+          <Badge className="bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white border-0 shadow-[inset_0_-1px_0_rgba(0,0,0,0.2),_0_1px_3px_rgba(245,158,11,0.4)] px-2 py-0.5 text-[11px] font-bold">
+            마감
+          </Badge>
+        ) : (
+          <Badge className="bg-gradient-to-r from-[#ef4444] to-[#dc2626] text-white border-0 shadow-[inset_0_-1px_0_rgba(0,0,0,0.2),_0_1px_3px_rgba(239,68,68,0.4)] px-2 py-0.5 text-[11px] font-bold animate-pulse">
+            <span className="relative flex size-1.5 mr-1.5">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex size-1.5 rounded-full bg-white"></span>
+            </span>
+            LIVE 베팅
+          </Badge>
+        )}
+      </div>
+    </>
+  );
+}
+
+function CountdownTimer({ round, minutes, seconds }: { round: number | null; minutes: number; seconds: number }) {
+
+  return (
+    <div className="flex justify-between items-center bg-[#f1f5f9] p-2 rounded-lg border border-[#e2e8f0] shadow-inner font-extrabold text-[#475569] text-[13px] mb-4">
+      <span>
+        {round ? `${round.toLocaleString()}회차` : "---"} 마감까지
+      </span>
+      <span className="text-[#3b82f6] text-[15px] tabular-nums font-black drop-shadow-sm bg-white px-2 py-0.5 rounded border border-[#bfdbfe]">
+        {String(minutes).padStart(2, "0")}:
+        {String(seconds).padStart(2, "0")}
+      </span>
+    </div>
+  );
+}
+
+/* ───────────────── Stable style objects (prevent re-render allocation) ───────────────── */
+const VIDEO_CONTAINER_STYLE = { height: "clamp(500px, 70vh, 800px)" } as const;
+const IFRAME_NO_SCROLL_STYLE = { overflow: "hidden", touchAction: "none" } as const;
+
 /* ───────────────── Game Video Component ───────────────── */
 function GameVideoPlayer({ game }: { game: string }) {
   const [iframeStatus, setIframeStatus] = useState<
@@ -97,7 +162,7 @@ function GameVideoPlayer({ game }: { game: string }) {
   }, [iframeStatus, game]);
 
   return (
-    <div className="w-full bg-[#111] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#222] overflow-hidden relative" style={{ height: "clamp(500px, 70vh, 800px)" }}>
+    <div className="w-full bg-[#111] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#222] overflow-hidden relative" style={VIDEO_CONTAINER_STYLE}>
       {iframeStatus === "loading" && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#111] text-white/60 gap-3">
           <div className="size-10 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
@@ -127,20 +192,25 @@ function GameVideoPlayer({ game }: { game: string }) {
         </div>
       )}
 
-      <iframe
-        ref={iframeRef}
-        key={game}
-        src={iframeUrl}
-        className={cn(
-          "w-full h-full border-none absolute inset-0 transition-opacity duration-300",
-          iframeStatus === "loaded" ? "opacity-100" : "opacity-0",
-        )}
-        style={{ overflow: "hidden" }}
-        title="게임영상"
-        allowFullScreen
-        onLoad={() => setIframeStatus("loaded")}
-        onError={() => setIframeStatus("error")}
-      />
+      <div className="absolute inset-0" style={IFRAME_NO_SCROLL_STYLE}>
+        <iframe
+          ref={iframeRef}
+          key={game}
+          src={iframeUrl}
+          className={cn(
+            "border-none transition-opacity duration-300",
+            iframeStatus === "loaded" ? "opacity-100" : "opacity-0",
+          )}
+          style={{ width: "100%", height: "100%", overflow: "hidden" }}
+          title="게임영상"
+          allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          referrerPolicy="no-referrer"
+          scrolling="no"
+          onLoad={() => setIframeStatus("loaded")}
+          onError={() => setIframeStatus("error")}
+        />
+      </div>
     </div>
   );
 }
@@ -179,7 +249,7 @@ interface BetOptionProps {
   onClick: () => void;
 }
 
-function BetOption({
+const BetOption = memo(function BetOption({
   label,
   sublabel,
   odds,
@@ -225,7 +295,7 @@ function BetOption({
       </span>
     </button>
   );
-}
+});
 
 /* ───────────────── Betting Panel (Matching Bet Slip style) ───────────────── */
 interface BetSelection {
@@ -241,19 +311,15 @@ function BettingPanel({
   game: string;
   currentRound: BepickRound | null;
 }) {
-  const { minutes, seconds, secondsLeft } = useCountdown();
   const [selections, setSelections] = useState<BetSelection[]>([]);
   const [betAmount, setBetAmount] = useState("");
-  const [clock, setClock] = useState({ date: "", time: "" });
   const { user: authUser } = useAuthStore();
   const [slipTab, setSlipTab] = useState<"cart" | "history">("cart");
   const [mounted, setMounted] = useState(false);
+  const { minutes, seconds, secondsLeft } = useCountdown();
 
   useEffect(() => {
     setMounted(true);
-    setClock(fmtNow());
-    const t = setInterval(() => setClock(fmtNow()), 1000);
-    return () => clearInterval(t);
   }, []);
 
   if (!mounted) {
@@ -266,28 +332,23 @@ function BettingPanel({
     );
   }
 
-  const isClosed = secondsLeft <= 10;
-
-  const toggleSelection = (market: string, option: string, odds: string) => {
+  const toggleSelection = useCallback((market: string, option: string, odds: string) => {
     setSelections((prev) => {
       const exists = prev.find(
         (s) => s.market === market && s.option === option,
       );
-      if (exists)
-        return prev.filter(
-          (s) => !(s.market === market && s.option === option),
-        );
-
-      const withoutMarket = prev.filter((s) => s.market !== market);
-      return [...withoutMarket, { market, option, odds }];
+      if (exists) return [];
+      return [{ market, option, odds }];
     });
-  };
+  }, []);
 
-  const isSelected = (market: string, option: string) =>
-    selections.some((s) => s.market === market && s.option === option);
+  const isSelected = useCallback((market: string, option: string) =>
+    selections.some((s) => s.market === market && s.option === option),
+  [selections]);
 
-  const removeBet = (m: string, o: string) =>
-    setSelections((p) => p.filter((s) => !(s.market === m && s.option === o)));
+  const removeBet = useCallback((m: string, o: string) =>
+    setSelections((p) => p.filter((s) => !(s.market === m && s.option === o))),
+  []);
 
   const totalOdds =
     selections.length > 0
@@ -322,35 +383,10 @@ function BettingPanel({
           <div className="text-[15px] font-black text-[#1e293b] flex items-center gap-1.5 drop-shadow-sm">
             <span className="text-xl">🎯</span> 베팅 선택
           </div>
-          <div className="flex gap-2">
-            {isClosed ? (
-              <Badge className="bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white border-0 shadow-[inset_0_-1px_0_rgba(0,0,0,0.2),_0_1px_3px_rgba(245,158,11,0.4)] px-2 py-0.5 text-[11px] font-bold">
-                마감
-              </Badge>
-            ) : (
-              <Badge className="bg-gradient-to-r from-[#ef4444] to-[#dc2626] text-white border-0 shadow-[inset_0_-1px_0_rgba(0,0,0,0.2),_0_1px_3px_rgba(239,68,68,0.4)] px-2 py-0.5 text-[11px] font-bold animate-pulse">
-                <span className="relative flex size-1.5 mr-1.5">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex size-1.5 rounded-full bg-white"></span>
-                </span>
-                LIVE 베팅
-              </Badge>
-            )}
-          </div>
+          <CountdownBadge secondsLeft={secondsLeft} />
         </div>
 
-        <div className="flex justify-between items-center bg-[#f1f5f9] p-2 rounded-lg border border-[#e2e8f0] shadow-inner font-extrabold text-[#475569] text-[13px] mb-4">
-          <span>
-            {currentRound
-              ? `${currentRound.AllRound.toLocaleString()}회차`
-              : "---"}{" "}
-            마감까지
-          </span>
-          <span className="text-[#3b82f6] text-[15px] tabular-nums font-black drop-shadow-sm bg-white px-2 py-0.5 rounded border border-[#bfdbfe]">
-            {String(minutes).padStart(2, "0")}:
-            {String(seconds).padStart(2, "0")}
-          </span>
-        </div>
+        <CountdownTimer round={currentRound?.AllRound ?? null} minutes={minutes} seconds={seconds} />
 
         {game === "powerball" ? (
           <>
@@ -463,14 +499,14 @@ function BettingPanel({
               "출발",
               <div className="border border-[#d1d7e0] rounded-lg bg-gradient-to-b from-[#f8fafc] to-[#eef2f6] shadow-sm p-1 flex gap-1">
                 <BetOption
-                  label="좌 (Left)"
+                  label="좌"
                   odds="1.95"
                   selected={isSelected("pl_lr", "좌")}
                   onClick={() => toggleSelection("pl_lr", "좌", "1.95")}
                 />
                 <div className="w-[1px] bg-[#cbd5e1]" />
                 <BetOption
-                  label="우 (Right)"
+                  label="우"
                   odds="1.95"
                   selected={isSelected("pl_lr", "우")}
                   onClick={() => toggleSelection("pl_lr", "우", "1.95")}
@@ -499,14 +535,14 @@ function BettingPanel({
               "홀짝",
               <div className="border border-[#d1d7e0] rounded-lg bg-gradient-to-b from-[#f8fafc] to-[#eef2f6] shadow-sm p-1 flex gap-1">
                 <BetOption
-                  label="홀 (Odd)"
+                  label="홀"
                   odds="1.95"
                   selected={isSelected("pl_oe", "홀")}
                   onClick={() => toggleSelection("pl_oe", "홀", "1.95")}
                 />
                 <div className="w-[1px] bg-[#cbd5e1]" />
                 <BetOption
-                  label="짝 (Even)"
+                  label="짝"
                   odds="1.95"
                   selected={isSelected("pl_oe", "짝")}
                   onClick={() => toggleSelection("pl_oe", "짝", "1.95")}
@@ -520,12 +556,7 @@ function BettingPanel({
       {/* ── Actual Bet Slip ── */}
       <div className="bg-white border-0 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] overflow-hidden ring-1 ring-[#e5e9f0]">
         <div className="flex justify-between items-center px-4 py-[10px] bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] shadow-[inset_0_1px_0_white]">
-          <div className="text-[12px] text-[#64748b] font-bold">
-            <div>{clock.date}</div>
-            <div className="text-[#3b82f6] font-black text-[15px] tracking-tight">
-              {clock.time}
-            </div>
-          </div>
+          <ClockDisplay />
           <div className="flex gap-[6px]">
             <button
               onClick={() => setSelections([])}
@@ -646,7 +677,7 @@ function BettingPanel({
           </div>
 
           <div className="flex justify-between items-center py-[10px] my-[10px] border-t border-b border-[#e2e8f0] bg-gradient-to-r from-[#fef2f2] to-white px-2 rounded-md">
-            <span className="font-extrabold text-[#7f1d1d]">배당률합계</span>
+            <span className="font-extrabold text-[#7f1d1d]">배당률</span>
             <span className="text-[18px] font-black text-[#ef4444] drop-shadow-sm">
               {totalOdds > 0 ? totalOdds.toFixed(2) : "1.00"}
             </span>
@@ -723,7 +754,7 @@ function BettingPanel({
 }
 
 /* ───────────────── LIVE RESULT DISPLAYS ───────────────── */
-function PowerBallLiveResult({
+const PowerBallLiveResult = memo(function PowerBallLiveResult({
   currentRound,
 }: {
   currentRound: BepickRound | null;
@@ -816,9 +847,9 @@ function PowerBallLiveResult({
       </div>
     </div>
   );
-}
+});
 
-function PowerLadderLiveResult({
+const PowerLadderLiveResult = memo(function PowerLadderLiveResult({
   currentRound,
 }: {
   currentRound: BepickRound | null;
@@ -871,10 +902,10 @@ function PowerLadderLiveResult({
       </div>
     </div>
   );
-}
+});
 
 /* ───────────────── HISTORY TABLE ───────────────── */
-function ResultsTable({
+const ResultsTable = memo(function ResultsTable({
   rounds,
   game,
 }: {
@@ -1018,7 +1049,7 @@ function ResultsTable({
       </table>
     </div>
   );
-}
+});
 
 /* ───────────────── STATS PANEL ───────────────── */
 function StatBar({
@@ -1049,7 +1080,7 @@ function StatBar({
   );
 }
 
-function StatsPanel({ rounds, game }: { rounds: BepickRound[]; game: string }) {
+const StatsPanel = memo(function StatsPanel({ rounds, game }: { rounds: BepickRound[]; game: string }) {
   const safeRounds = Array.isArray(rounds) ? rounds : [];
 
   const stats = useMemo(() => {
@@ -1169,7 +1200,7 @@ function StatsPanel({ rounds, game }: { rounds: BepickRound[]; game: string }) {
       ))}
     </div>
   );
-}
+});
 
 /* ───────────────── ROOT PAGE EXPORT ───────────────── */
 export default function MinigamePage() {
@@ -1255,7 +1286,7 @@ export default function MinigamePage() {
             </Tabs>
           </div>
 
-          {!isLoading ? (
+          {!isLoading || rounds.length > 0 ? (
             <>
               {/* Game Video Container */}
               <GameVideoPlayer game={selectedGame} />

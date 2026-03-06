@@ -4,120 +4,14 @@ import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { useSportsStore, SportEvent } from '@/stores/sports-store';
 import { useAuthStore } from '@/stores/auth-store';
+import {
+  SPORT_ICONS,
+  getFlagAndName,
+  type Bet,
+} from '@/lib/sports-constants';
 
 /* ───────────────── Constants ───────────────── */
 const BET_LIMITS = { MIN: 5_000, MAX: 7_000_000, WIN_MAX: 20_000_000 } as const;
-
-const SPORT_ICONS: Record<string, string> = {
-  football: '⚽', basketball: '🏀', hockey: '🏒', baseball: '⚾',
-};
-
-const COUNTRY_FLAG_MAP: Record<string, string> = {
-  '콜롬비아':'🇨🇴', 'Colombia':'🇨🇴',
-  '과테말라':'🇬🇹', 'Guatemala':'🇬🇹',
-  '라리가':'🇪🇸', '스페인':'🇪🇸', 'Spain':'🇪🇸',
-  '프리미어리그':'🇬🇧', '잉글랜드':'🇬🇧', 'England':'🇬🇧',
-  '챔피언스':'🇪🇺', 'Europe':'🇪🇺', '유럽':'🇪🇺',
-  'NBA':'🇺🇸', 'NHL':'🇺🇸', 'MLB':'🇺🇸', 'NFL':'🇺🇸', 'MLS':'🇺🇸', '미국':'🇺🇸', 'USA':'🇺🇸',
-  'LCK':'🇰🇷', '한국':'🇰🇷', '대한민국':'🇰🇷', 'Korea':'🇰🇷', 'KBO':'🇰🇷', 'K리그':'🇰🇷',
-  '브라질':'🇧🇷', 'Brazil':'🇧🇷',
-  '아르헨티나':'🇦🇷', 'Argentina':'🇦🇷',
-  '이탈리아':'🇮🇹', 'Italy':'🇮🇹',
-  '독일':'🇩🇪', 'Germany':'🇩🇪',
-  '프랑스':'🇫🇷', 'France':'🇫🇷',
-  '일본':'🇯🇵', 'Japan':'🇯🇵', 'NPB':'🇯🇵',
-  '중국':'🇨🇳', 'China':'🇨🇳',
-  '포르투갈':'🇵🇹', 'Portugal':'🇵🇹',
-  '네덜란드':'🇳🇱', 'Netherlands':'🇳🇱',
-  '터키':'🇹🇷', 'Turkey':'🇹🇷', 'Türkiye':'🇹🇷',
-  '벨기에':'🇧🇪', 'Belgium':'🇧🇪',
-  '스위스':'🇨🇭', 'Switzerland':'🇨🇭',
-  '오스트리아':'🇦🇹', 'Austria':'🇦🇹',
-  '스코틀랜드':'🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  '러시아':'🇷🇺', 'Russia':'🇷🇺',
-  '우크라이나':'🇺🇦', 'Ukraine':'🇺🇦',
-  '멕시코':'🇲🇽', 'Mexico':'🇲🇽',
-  '호주':'🇦🇺', 'Australia':'🇦🇺',
-  '사우디':'🇸🇦', 'Saudi':'🇸🇦',
-  '그리스':'🇬🇷', 'Greece':'🇬🇷',
-  '덴마크':'🇩🇰', 'Denmark':'🇩🇰',
-  '스웨덴':'🇸🇪', 'Sweden':'🇸🇪',
-  '노르웨이':'🇳🇴', 'Norway':'🇳🇴',
-  '폴란드':'🇵🇱', 'Poland':'🇵🇱',
-  '체코':'🇨🇿', 'Czech':'🇨🇿',
-  '크로아티아':'🇭🇷', 'Croatia':'🇭🇷',
-  '세르비아':'🇷🇸', 'Serbia':'🇷🇸',
-  '루마니아':'🇷🇴', 'Romania':'🇷🇴',
-  '캐나다':'🇨🇦', 'Canada':'🇨🇦',
-  '칠레':'🇨🇱', 'Chile':'🇨🇱',
-  '파라과이':'🇵🇾', 'Paraguay':'🇵🇾',
-  '우루과이':'🇺🇾', 'Uruguay':'🇺🇾',
-  '페루':'🇵🇪', 'Peru':'🇵🇪',
-  '에콰도르':'🇪🇨', 'Ecuador':'🇪🇨',
-  '이란':'🇮🇷', 'Iran':'🇮🇷',
-  '인도':'🇮🇳', 'India':'🇮🇳',
-  '태국':'🇹🇭', 'Thailand':'🇹🇭',
-  '베트남':'🇻🇳', 'Vietnam':'🇻🇳',
-  '인도네시아':'🇮🇩', 'Indonesia':'🇮🇩',
-  '이집트':'🇪🇬', 'Egypt':'🇪🇬',
-  '남아공':'🇿🇦', 'South Africa':'🇿🇦',
-  '모로코':'🇲🇦', 'Morocco':'🇲🇦',
-  '나이지리아':'🇳🇬', 'Nigeria':'🇳🇬',
-  '국제':'🌍', 'World':'🌍', 'International':'🌍',
-};
-
-const LEAGUE_TRANSLATIONS: Record<string, string> = {
-  'Premier League': '프리미어리그',
-  'La Liga': '라리가',
-  'Bundesliga': '분데스리가',
-  'Serie A': '세리에 A',
-  'Ligue 1': '리그 1',
-  'Champions League': '챔피언스리그',
-  'Europa League': '유로파리그',
-  'Europa Conference League': '컨퍼런스리그',
-  'FA Cup': 'FA컵',
-  'Copa del Rey': '코파 델 레이',
-  'DFB Pokal': 'DFB 포칼',
-  'Coppa Italia': '코파 이탈리아',
-  'Coupe de France': '쿠프 드 프랑스',
-  'EFL Championship': 'EFL 챔피언십',
-  'EFL Cup': 'EFL컵',
-  'Eredivisie': '에레디비시',
-  'Primeira Liga': '프리메이라리가',
-  'Super Lig': '쉬페르리그',
-  'Scottish Premiership': '스코티시 프리미어십',
-  'Pro League': '프로리그',
-  'Super League': '슈퍼리그',
-  'Bundesliga 2': '분데스리가 2',
-  'Serie B': '세리에 B',
-  'Ligue 2': '리그 2',
-  'Segunda Division': '세군다',
-  'J1 League': 'J1리그',
-  'J2 League': 'J2리그',
-  'K League 1': 'K리그1',
-  'K League 2': 'K리그2',
-  'A-League': 'A리그',
-  'MLS': 'MLS',
-  'Liga MX': '리가 MX',
-  'Copa Libertadores': '코파 리베르타도레스',
-  'Copa Sudamericana': '코파 수다메리카나',
-  'Copa do Brasil': '코파 두 브라질',
-  'Brasileirão Série A': '브라질레이랑',
-  'Argentine Primera': '아르헨티나 프리메라',
-  'World Cup Qualifiers': '월드컵 예선',
-  'UEFA Nations League': 'UEFA 네이션스리그',
-  'International Friendly': '국제 친선경기',
-  'AFC Champions League': 'AFC 챔피언스리그',
-  'NBA': 'NBA',
-  'NHL': 'NHL',
-  'MLB': 'MLB',
-  'NFL': 'NFL',
-  'KBO': 'KBO',
-  'NPB': 'NPB',
-  'KBL': 'KBL',
-  'ATP': 'ATP 투어',
-  'WTA': 'WTA 투어',
-};
 
 /* ───────────────── Helpers ───────────────── */
 
@@ -129,49 +23,13 @@ const fmtDateShort = (iso: string) => {
 
 const fmtNow = () => {
   const n = new Date();
-  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const days = ['\uC77C', '\uC6D4', '\uD654', '\uC218', '\uBAA9', '\uAE08', '\uD1A0'];
   const pad = (v: number) => String(v).padStart(2, '0');
   return {
     date: `${n.getFullYear()}-${pad(n.getMonth() + 1)}-${pad(n.getDate())} (${days[n.getDay()]})`,
     time: `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`,
   };
 };
-
-/* ───────────────── Types ───────────────── */
-
-interface Bet {
-  eventId: number; type: string; label: string; odds: number;
-  home: string; away: string; league: string;
-}
-
-/* ───────────────── League Flag/Name Resolution ───────────────── */
-
-function findFlag(text: string): string | null {
-  for (const [key, value] of Object.entries(COUNTRY_FLAG_MAP)) {
-    if (text.toLowerCase().includes(key.toLowerCase())) return value;
-  }
-  return null;
-}
-
-function getFlagAndName(lg: string, ev?: SportEvent): { flag: string; displayName: string } {
-  let cleanedName = lg;
-  let countryStr = '';
-
-  const match = lg.match(/(.*?)\s*\((.*?)\)$/);
-  if (match) {
-    cleanedName = match[1].trim();
-    countryStr = match[2].trim();
-  }
-
-  const flag =
-    (ev?.countryName && findFlag(ev.countryName)) ||
-    (countryStr && findFlag(countryStr)) ||
-    findFlag(cleanedName) ||
-    '🌐';
-
-  const displayName = LEAGUE_TRANSLATIONS[cleanedName] || cleanedName;
-  return { flag, displayName };
-}
 
 /* ═══════════════════════════════════════════════════════
    COMPONENT

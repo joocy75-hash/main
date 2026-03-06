@@ -1,193 +1,623 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { useSportsStore } from '@/stores/sports-store';
+import { useSportsStore, SportEvent } from '@/stores/sports-store';
+import { useAuthStore } from '@/stores/auth-store';
+import {
+  getFlagAndName,
+  type Bet,
+} from '@/lib/sports-constants';
 
-const formatTime = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${month}/${day} ${hours}:${minutes}`;
+/* ───────────────── Constants ───────────────── */
+const BET_LIMITS = { MIN: 5_000, MAX: 7_000_000, WIN_MAX: 20_000_000 } as const;
+
+/* ───────────────── Helpers ───────────────── */
+
+const fmtDateShort = (iso: string) => {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+const fmtNow = () => {
+  const n = new Date();
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const pad = (v: number) => String(v).padStart(2, '0');
+  return {
+    date: `${n.getFullYear()}-${pad(n.getMonth() + 1)}-${pad(n.getDate())} (${days[n.getDay()]})`,
+    time: `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`,
+  };
+};
+
+/* ═══════════════════════════════════════════════════════
+   COMPONENT
+   ═══════════════════════════════════════════════════════ */
+
 export default function EsportsPage() {
-  const {
-    esportsEvents,
-    esportsCategories,
-    selectedEsportGame,
-    isLoading,
-    fetchEsportsEvents,
-    fetchEsportsCategories,
-    setSelectedEsportGame,
+  const { 
+    selectedEsportGame, setSelectedEsportGame,
+    esportsEvents, fetchEsportsEvents,
+    esportsCategories, fetchEsportsCategories
   } = useSportsStore();
+
+  const [betSlip, setBetSlip] = useState<Bet[]>([]);
+  const [betAmount, setBetAmount] = useState('');
+  const [slipTab, setSlipTab] = useState<'cart' | 'history'>('cart');
+  const [clock, setClock] = useState(fmtNow());
+  const [mobileSlipOpen, setMobileSlipOpen] = useState(false);
+  const { user: authUser } = useAuthStore();
+
+  useEffect(() => { const t = setInterval(() => setClock(fmtNow()), 1000); return () => clearInterval(t); }, []);
 
   useEffect(() => {
     fetchEsportsCategories();
     fetchEsportsEvents();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-refresh every 30s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchEsportsEvents();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [fetchEsportsEvents]);
+  }, [fetchEsportsCategories, fetchEsportsEvents]);
 
   // Refetch when game filter changes
   useEffect(() => {
     fetchEsportsEvents(selectedEsportGame);
-  }, [selectedEsportGame]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedEsportGame, fetchEsportsEvents]);
 
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchEsportsEvents(selectedEsportGame);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [selectedEsportGame, fetchEsportsEvents]);
+
+  /* ── Grouping ── */
+  const grouped = useMemo(() => {
+    const m: Record<string, SportEvent[]> = {};
+    esportsEvents.forEach(e => { (m[e.leagueKo || e.league] ??= []).push(e); });
+    return m;
+  }, [esportsEvents]);
+
+  /* ── Bet logic ── */
+  const toggleBet = (b: Bet) => setBetSlip(p => p.find(s => s.eventId === b.eventId && s.type === b.type) ? p.filter(s => !(s.eventId === b.eventId && s.type === b.type)) : [...p, b]);
+  const isSel = (eid: number, t: string) => betSlip.some(s => s.eventId === eid && s.type === t);
+  const removeBet = (eid: number, t: string) => setBetSlip(p => p.filter(s => !(s.eventId === eid && s.type === t)));
+  const totalOdds = betSlip.length > 0 ? betSlip.reduce((a, s) => a * s.odds, 1) : 0;
+  const amt = parseFloat(betAmount.replace(/,/g, '')) || 0;
+  const payout = Math.floor(amt * totalOdds);
+
+  const formatNum = (v: string) => {
+    const num = parseFloat(v.replace(/,/g, '')) || 0;
+    return num === 0 ? '' : num.toLocaleString();
+  };
+
+  /* ═══════════════ RENDER ═══════════════ */
   return (
-    <div className="flex flex-col gap-4">
-      {/* Header */}
-      <div className="bg-white rounded-lg px-5 py-4">
-        <h2 className="text-lg font-bold text-[#252531] flex items-center gap-2">
-          <span>🎮</span> e스포츠
-        </h2>
-      </div>
+    <div className="min-h-screen bg-[#f4f6f9] text-[#333] font-sans pb-20 lg:pb-10 flex border-t border-[#ddd]">
+      {/* Container simulating the main width of the site */}
+      <div className="flex-1 max-w-[1300px] mx-auto flex gap-4 mt-0 px-2 pt-2 lg:pt-4">
+        
+        {/* ═════════ LEFT: TABLE ═════════ */}
+        <div className="flex-1 min-w-0">
+          
+          {/* ── Sport Icons Grid ── */}
+          <div className="flex gap-2 overflow-x-auto pb-4 pt-2 px-2 scrollbar-hide">
+            
+            <button
+                  onClick={() => setSelectedEsportGame('all')}
+                  className={cn(
+                    'shrink-0 w-[64px] lg:w-[78px] h-[80px] lg:h-[96px] rounded-xl flex flex-col items-center justify-between py-2 transition-all transform hover:-translate-y-1 relative overflow-hidden',
+                    selectedEsportGame === 'all'
+                      ? 'bg-gradient-to-b from-[#475569] to-[#1e293b] border-none text-white shadow-[inset_0_-4px_0_rgba(0,0,0,0.2),_inset_0_3px_5px_rgba(255,255,255,0.6),_0_5px_10px_rgba(15,23,42,0.5)]'
+                      : 'bg-gradient-to-b from-[#ffffff] to-[#e4e9f0] border-none text-[#444] shadow-[inset_0_-4px_0_rgba(180,186,195,0.4),_inset_0_3px_5px_rgba(255,255,255,0.9),_0_4px_6px_rgba(0,0,0,0.06)] hover:shadow-[inset_0_-4px_0_rgba(180,186,195,0.4),_inset_0_3px_5px_rgba(255,255,255,0.9),_0_6px_10px_rgba(0,0,0,0.1)]'
+                  )}
+                >
+                  {/* Icon Circle */}
+                  <div className={cn(
+                    'w-[38px] h-[38px] lg:w-[46px] lg:h-[46px] rounded-full flex items-center justify-center text-xl lg:text-2xl z-10 transition-all',
+                    selectedEsportGame === 'all' 
+                      ? 'bg-gradient-to-br from-white/30 to-white/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] ring-1 ring-white/30' 
+                      : 'bg-gradient-to-br from-[#ffffff] to-[#f0f3f6] shadow-[inset_0_3px_6px_rgba(0,0,0,0.05),_0_2px_4px_rgba(0,0,0,0.08)] ring-1 ring-[#e2e7ec]'
+                  )}>
+                    🎮
+                  </div>
+                  
+                  {/* Label */}
+                  <span className={cn('text-[12px] font-extrabold z-10 mt-[2px] drop-shadow-sm', selectedEsportGame === 'all' ? 'text-white' : 'text-[#5b6571]')}>전체</span>
+            </button>
 
-      {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-none">
-        <button
-          onClick={() => setSelectedEsportGame('all')}
-          className={cn(
-            'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
-            selectedEsportGame === 'all'
-              ? 'bg-[#feb614] text-white'
-              : 'border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa]'
-          )}
-        >
-          전체
-        </button>
-        {esportsCategories.map((cat) => (
-          <button
-            key={cat.code}
-            onClick={() => setSelectedEsportGame(cat.code)}
-            className={cn(
-              'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors flex items-center gap-1',
-              selectedEsportGame === cat.code
-                ? 'bg-[#feb614] text-white'
-                : 'border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa]'
-            )}
-          >
-            <span>{cat.icon}</span>
-            <span>{cat.nameKo}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Events list */}
-      <div className="flex flex-col gap-3">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-lg border border-[#e8e8e8] p-4">
-              <div className="mb-2 h-5 w-32 rounded bg-[#e8e8e8] animate-pulse" />
-              <div className="mb-2 h-8 w-full rounded bg-[#e8e8e8] animate-pulse" />
-              <div className="h-6 w-48 rounded bg-[#e8e8e8] animate-pulse" />
-            </div>
-          ))
-        ) : esportsEvents.length === 0 ? (
-          <div className="bg-white rounded-lg border border-[#e8e8e8] flex flex-col items-center gap-2 py-12">
-            <span className="text-4xl">🎮</span>
-            <p className="text-sm text-[#6b7280]">
-              현재 진행 중이거나 예정된 e스포츠 경기가 없습니다
-            </p>
+            {esportsCategories.map(sp => {
+              const on = selectedEsportGame === sp.code;
+              return (
+                <button
+                  key={sp.code}
+                  onClick={() => setSelectedEsportGame(sp.code)}
+                  className={cn(
+                    'shrink-0 w-[64px] lg:w-[78px] h-[80px] lg:h-[96px] rounded-xl flex flex-col items-center justify-between py-2 transition-all transform hover:-translate-y-1 relative overflow-hidden',
+                    on
+                      ? 'bg-gradient-to-b from-[#475569] to-[#1e293b] border-none text-white shadow-[inset_0_-4px_0_rgba(0,0,0,0.2),_inset_0_3px_5px_rgba(255,255,255,0.6),_0_5px_10px_rgba(15,23,42,0.5)]'
+                      : 'bg-gradient-to-b from-[#ffffff] to-[#e4e9f0] border-none text-[#444] shadow-[inset_0_-4px_0_rgba(180,186,195,0.4),_inset_0_3px_5px_rgba(255,255,255,0.9),_0_4px_6px_rgba(0,0,0,0.06)] hover:shadow-[inset_0_-4px_0_rgba(180,186,195,0.4),_inset_0_3px_5px_rgba(255,255,255,0.9),_0_6px_10px_rgba(0,0,0,0.1)]'
+                  )}
+                >
+                  {/* Icon Circle */}
+                  <div className={cn(
+                    'w-[38px] h-[38px] lg:w-[46px] lg:h-[46px] rounded-full flex items-center justify-center text-xl lg:text-2xl z-10 transition-all',
+                    on 
+                      ? 'bg-gradient-to-br from-white/30 to-white/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] ring-1 ring-white/30' 
+                      : 'bg-gradient-to-br from-[#ffffff] to-[#f0f3f6] shadow-[inset_0_3px_6px_rgba(0,0,0,0.05),_0_2px_4px_rgba(0,0,0,0.08)] ring-1 ring-[#e2e7ec]'
+                  )}>
+                    {sp.icon.startsWith('http') || sp.icon.startsWith('/') ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={sp.icon} alt={sp.nameKo} className="w-[60%] h-[60%] object-contain drop-shadow-sm" />
+                    ) : (
+                      sp.icon
+                    )}
+                  </div>
+                  
+                  {/* Label */}
+                  <span className={cn('text-[12px] font-extrabold z-10 mt-[2px] drop-shadow-sm', on ? 'text-white' : 'text-[#5b6571]')}>{sp.nameKo || sp.name}</span>
+                </button>
+              );
+            })}
           </div>
-        ) : (
-          esportsEvents.map((event) => (
-            <div
-              key={event.id}
-              className="bg-white rounded-lg border border-[#e8e8e8] p-4 hover:border-[#feb614] transition-colors shadow-sm"
-            >
-              {/* Game, tournament, and status */}
-              <div className="mb-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {event.status === 'LIVE' && (
-                    <span className="relative flex size-2">
-                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-75" />
-                      <span className="relative inline-flex size-2 rounded-full bg-red-500" />
-                    </span>
-                  )}
-                  {event.status === 'LIVE' ? (
-                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">
-                      LIVE
-                    </span>
-                  ) : (
-                    <span className="bg-[#e8e8e8] text-[#6b7280] text-[10px] px-2 py-0.5 rounded-full">
-                      예정
-                    </span>
-                  )}
-                  <span className="text-xs text-[#6b7280]">
-                    {event.leagueKo}
-                  </span>
-                </div>
-                {event.period && (
-                  <span className="border border-[#e8e8e8] text-[#6b7280] text-[10px] px-2 py-0.5 rounded-full">
-                    {event.period}
-                  </span>
-                )}
-              </div>
 
-              {/* Teams and score */}
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {event.homeTeam.logo && (
-                        <img src={event.homeTeam.logo} alt="" className="size-5 object-contain" />
-                      )}
-                      <span className="text-sm font-medium text-[#252531]">{event.homeTeam.nameKo}</span>
-                    </div>
-                    {event.homeTeam.score !== undefined && (
-                      <span className={cn(
-                        'text-lg font-bold',
-                        event.status === 'LIVE' ? 'text-[#feb614]' : 'text-[#252531]'
-                      )}>
-                        {event.homeTeam.score}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {event.awayTeam.logo && (
-                        <img src={event.awayTeam.logo} alt="" className="size-5 object-contain" />
-                      )}
-                      <span className="text-sm font-medium text-[#252531]">{event.awayTeam.nameKo}</span>
-                    </div>
-                    {event.awayTeam.score !== undefined && (
-                      <span className={cn(
-                        'text-lg font-bold',
-                        event.status === 'LIVE' ? 'text-[#feb614]' : 'text-[#252531]'
-                      )}>
-                        {event.awayTeam.score}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+          <div className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#e5e9f0] text-[#444] overflow-hidden">
+              
+            {/* ── Header Columns ── */}
+            <div className="hidden lg:flex bg-gradient-to-b from-[#fafbfc] to-[#f0f3f6] border-b border-[#e2e6eb] py-[10px] text-[12px] shadow-[inset_0_1px_0_white]">
+              <div className="w-[100px] text-center font-extrabold text-[#6b7583]">경기일시</div>
+              <div className="w-[80px] text-center font-extrabold text-[#6b7583]">상태</div>
+              <div className="flex-[3] text-center font-extrabold text-[#6b7583]">승(홈)</div>
+              <div className="flex-[1] min-w-[60px] max-w-[70px] text-center font-extrabold text-[#6b7583]">무</div>
+              <div className="flex-[3] text-center font-extrabold text-[#6b7583]">패(원정)</div>
+              <div className="w-[90px] text-center font-extrabold text-[#6b7583]">정보</div>
+            </div>
 
-              {/* Elapsed info for live */}
-              {event.status === 'LIVE' && event.elapsed && (
-                <p className="mb-3 text-xs text-[#6b7280]">
-                  {event.elapsed}
-                </p>
+            {/* ── Filter Bar ── */}
+            <div className="flex items-center justify-between px-4 border-b border-[#e5e9f0] pb-3 mb-[12px] pt-3 bg-gradient-to-b from-white to-[#fcfcfd]">
+              <div className="flex items-center gap-2 bg-[#f4f6f9] px-3 py-1.5 rounded-lg shadow-inner border border-[#e8eaef]">
+                <span className="text-[18px]">📁</span>
+                <span className="text-[14px] font-extrabold text-[#4a5568]">e스포츠 라이브/예정</span>
+              </div>
+              <div className="flex gap-[8px]">
+                <button className="h-[32px] border-none bg-gradient-to-b from-white to-[#f0f3f6] px-3 text-[12px] font-bold rounded-lg flex items-center gap-1.5 text-[#5b6571] shadow-[inset_0_-2px_0_rgba(0,0,0,0.05),_0_2px_4px_rgba(0,0,0,0.05)] ring-1 ring-[#d1d7e0] hover:to-[#e4e9ef]">
+                  🌐 리그 선택 <span className="text-[9px] text-[#8995a5] ml-1">▼</span>
+                </button>
+              </div>
+            </div>
+
+            {/* ── League Sections ── */}
+            <div className="px-3 pb-4">
+              {Object.keys(grouped).length === 0 && (
+                <div className="bg-[#f8fafc] rounded-lg border border-[#e2e8f0] flex flex-col items-center gap-2 py-12">
+                  <span className="text-4xl">🎮</span>
+                  <p className="text-sm text-[#6b7280]">
+                    현재 진행 중이거나 예정된 e스포츠 경기가 없습니다
+                  </p>
+                </div>
               )}
 
-              {/* Start time for scheduled */}
-              {event.status === 'SCHEDULED' && (
-                <p className="mb-3 text-xs text-[#6b7280]">
-                  시작 시간: {formatTime(event.startTime)}
-                </p>
+              {Object.entries(grouped).map(([league, events]) => {
+                const { flag, displayName } = getFlagAndName(league, events[0]);
+                const icon = '\uD83C\uDFAE'; // esports icon
+                const leagueLogo = events[0].leagueLogo;
+                const countryFlag = events[0].countryFlag;
+
+                return (
+                  <div key={league} className="mb-5 bg-white rounded-xl border border-[#e5e9f0] shadow-sm overflow-hidden">
+                    {/* League Header - Glossy 3D Blue */}
+                    <div className="relative bg-gradient-to-r from-[#334155] via-[#475569] to-[#f1f5f9] h-[38px] flex items-center overflow-hidden border-b border-[#1e293b]">
+                       {/* Gloss highlight */}
+                      <div className="absolute inset-0 h-[50%] bg-gradient-to-b from-white/30 to-transparent"></div>
+                      <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[#0f172a] to-[#334155] flex items-center px-3 lg:px-4 text-white text-[13px] lg:text-[14px] font-extrabold gap-2 min-w-0 lg:min-w-[320px] max-w-[85%] lg:max-w-none shadow-[4px_0_10px_rgba(0,0,0,0.2)]"
+                          style={{ clipPath: 'polygon(0 0, 100% 0, calc(100% - 25px) 100%, 0 100%)', zIndex: 1 }}>
+                        
+                        <div className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] flex items-center gap-2">
+                          {/* 3D League Badge */}
+                          <div className="size-[22px] rounded-full bg-gradient-to-b from-white to-[#e2e8f0] border border-white/50 flex items-center justify-center text-[12px] shadow-[inset_0_-2px_0_rgba(0,0,0,0.2),_0_2px_4px_rgba(0,0,0,0.3)] shrink-0 overflow-hidden text-[#475569]">
+                            <LeagueBadge leagueLogo={leagueLogo} countryFlag={countryFlag} flag={flag} />
+                          </div>
+                          
+                          {/* League Name Block */}
+                          <span className="bg-white/10 px-2.5 py-0.5 rounded flex items-center gap-1.5 border border-white/20 shadow-[inset_0_1px_3px_rgba(255,255,255,0.1)]">
+                            <span className="text-[12px] opacity-90">{icon}</span> 
+                            <span className="tracking-wide text-[13.5px] truncate max-w-[200px]">{displayName}</span>
+                          </span>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Matches */}
+                    <div className="px-2 py-2 bg-[#fbfcfd]">
+                      {events.map((ev: SportEvent, idx: number) => {
+                        const o = ev.odds || { h: '1.90', d: 'VS', a: '1.90' };
+                        const locked = o.h === '🔒';
+                        const noDraw = o.d === 'VS';
+                        const home = ev.homeTeam.nameKo || ev.homeTeam.name;
+                        const away = ev.awayTeam.nameKo || ev.awayTeam.name;
+                        const [datePart, timePart] = fmtDateShort(ev.startTime).split(' ');
+                        const isLive = ev.status === 'LIVE';
+
+                        return (
+                          <div key={ev.id} className={cn("flex flex-col lg:flex-row lg:items-center py-[10px]", idx !== events.length -1 && "border-b border-[#edf1f5]")}>
+                            {/* Mobile: Compact date row */}
+                            <div className="flex lg:hidden items-center gap-2 px-3 pb-2 text-[11px] text-[#6b7583] font-bold">
+                              <span>{datePart}</span>
+                              <span className="text-[#1e293b]">{timePart}</span>
+                              {isLive && (
+                                <span className="flex items-center justify-center text-[10px] tracking-tighter bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded font-extrabold shadow-sm">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse mr-1" />
+                                  LIVE
+                                </span>
+                              )}
+                              <span className="ml-auto text-[10px] bg-white border border-[#e2e8f0] px-1.5 py-0.5 rounded font-extrabold text-[#2d3748]">{ev.elapsed || '예정'}</span>
+                            </div>
+                            {/* Desktop: Left Date/Type */}
+                            <div className="hidden lg:flex w-[184px] justify-between px-3 items-center shrink-0">
+                              <div className="text-[11.5px] text-[#6b7583] leading-[16px] font-bold tracking-tight">
+                                {datePart}<br/>
+                                <span className="text-[#1e293b] text-[13px]">{timePart}</span>
+                              </div>
+                              <div className="flex flex-col items-center justify-center gap-[4px] min-w-[50px]">
+                                {isLive ? (
+                                  <div className="text-[10px] text-center bg-red-50 border border-red-200 px-2 py-[2px] rounded-md shadow-[0_1px_2px_rgba(0,0,0,0.05)] w-full">
+                                    <div className="font-extrabold text-red-600 flex items-center justify-center gap-[4px]">
+                                      <span className="w-1 h-1 rounded-full bg-red-500 animate-ping" />
+                                      LIVE
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-[10px] text-center bg-white border border-[#e2e8f0] px-2 py-[2px] rounded-md shadow-[0_1px_2px_rgba(0,0,0,0.05)] w-full">
+                                    <div className="font-extrabold text-[#2d3748]">예정</div>
+                                  </div>
+                                )}
+                                {ev.period && (
+                                  <div className="text-[9px] text-[#718096] bg-white font-bold tracking-tighter border border-[#edf2f7] px-[6px] py-[1px] rounded shadow-sm whitespace-nowrap">
+                                    {ev.period}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Middle: Odds Block 3D Container */}
+                            <div className="flex-1 flex mx-2 lg:mx-0 lg:max-w-[700px] border border-[#d1d7e0] rounded-xl bg-gradient-to-b from-[#f8fafc] to-[#eef2f6] h-[48px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02),_0_2px_5px_rgba(0,0,0,0.04)] p-[2px] items-center">
+                              {/* Home Team */}
+                              <div className="flex-[3] flex items-center px-2 lg:px-4 gap-1.5 lg:gap-2.5 text-[12px] lg:text-[13.5px] text-[#2d3748] font-extrabold tracking-tight justify-start overflow-hidden relative group">
+                                <div className="size-5 lg:size-7 rounded-full bg-gradient-to-b from-white to-[#e2e8f0] border border-[#cbd5e1] flex items-center justify-center text-[10px] lg:text-[12px] font-black shadow-[inset_0_-2px_0_rgba(0,0,0,0.1),_0_2px_4px_rgba(0,0,0,0.05)] shrink-0 overflow-hidden text-[#475569]">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  {ev.homeTeam.logo ? <img src={ev.homeTeam.logo} alt="" className="w-full h-full object-contain p-0.5" /> : home.substring(0,1)}
+                                </div>
+                                <span className={cn("truncate", isLive && "text-[#64748b] group-hover:text-[#1e293b] transition-colors")}>{home}</span>
+                                {isLive && ev.homeTeam.score !== undefined && (
+                                  <span className="absolute right-2 lg:right-4 font-black text-[15px] lg:text-[16px] text-[#1e293b] drop-shadow-sm">{ev.homeTeam.score}</span>
+                                )}
+                              </div>
+                              
+                              {/* Odds Home */}
+                              <OddsButton 
+                                value={o.h} locked={locked} selected={isSel(ev.id, 'h')} 
+                                onClick={() => !locked && toggleBet({ eventId: ev.id, league: displayName, type: 'h', label: '승(홈)', odds: +o.h, home, away })} 
+                              />
+                              
+                              <div className="w-[2px] h-[70%] bg-gradient-to-b from-transparent via-[#cbd5e1] to-transparent mx-1"></div>
+
+                              {/* Odds Draw / Versus */}
+                              {noDraw ? (
+                                <div className="flex-[1] min-w-[40px] lg:min-w-[60px] max-w-[70px] flex items-center justify-center bg-transparent text-[13px] lg:text-[14px] font-black text-[#94a3b8] drop-shadow-sm h-full">VS</div>
+                              ) : (
+                                <OddsButton 
+                                  value={o.d} locked={locked} selected={isSel(ev.id, 'd')}
+                                  onClick={() => !locked && toggleBet({ eventId: ev.id, league: displayName, type: 'd', label: '무', odds: +o.d, home, away })} 
+                                />
+                              )}
+
+                              <div className="w-[2px] h-[70%] bg-gradient-to-b from-transparent via-[#cbd5e1] to-transparent mx-1"></div>
+
+                              {/* Odds Away */}
+                              <OddsButton 
+                                value={o.a} locked={locked} selected={isSel(ev.id, 'a')}
+                                onClick={() => !locked && toggleBet({ eventId: ev.id, league: displayName, type: 'a', label: '패(원정)', odds: +o.a, home, away })} 
+                              />
+
+                              {/* Away Team */}
+                              <div className="flex-[3] flex items-center px-2 lg:px-4 gap-1.5 lg:gap-2.5 text-[12px] lg:text-[13.5px] text-[#2d3748] font-extrabold tracking-tight justify-end overflow-hidden relative group">
+                                {isLive && ev.awayTeam.score !== undefined && (
+                                  <span className="absolute left-2 lg:left-4 font-black text-[15px] lg:text-[16px] text-[#1e293b] drop-shadow-sm">{ev.awayTeam.score}</span>
+                                )}
+                                <span className={cn("truncate text-right", isLive && "text-[#64748b] group-hover:text-[#1e293b] transition-colors")}>{away}</span>
+                                <div className="size-5 lg:size-7 rounded-full bg-gradient-to-b from-white to-[#e2e8f0] border border-[#cbd5e1] flex items-center justify-center text-[10px] lg:text-[12px] font-black shadow-[inset_0_-2px_0_rgba(0,0,0,0.1),_0_2px_4px_rgba(0,0,0,0.05)] shrink-0 overflow-hidden text-[#475569]">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  {ev.awayTeam.logo ? <img src={ev.awayTeam.logo} alt="" className="w-full h-full object-contain p-0.5" /> : away.substring(0,1)}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Right: +더보기 / Live Streaming */}
+                            <div className="w-[90px] shrink-0 hidden lg:flex justify-between items-center pl-3 pr-1">
+                               {isLive ? (
+                                 <button className="w-full h-[32px] bg-gradient-to-b from-[#ef4444] to-[#b91c1c] rounded-lg flex items-center justify-center text-white text-[12px] font-black shadow-[inset_0_-2px_0_rgba(0,0,0,0.3),_inset_0_2px_2px_rgba(255,255,255,0.3),_0_2px_4px_rgba(239,68,68,0.4)] transform hover:-translate-y-[1px] transition-transform ring-1 ring-[#fca5a5]/30 gap-1.5" title="실시간 중계 보기">
+                                   <div className="flex items-center gap-[2px]">
+                                     <span className="w-1 h-3 bg-white/90 rounded-sm animate-[bounce_1s_infinite_0s]"></span>
+                                     <span className="w-1 h-2 bg-white/90 rounded-sm animate-[bounce_1s_infinite_0.1s]"></span>
+                                     <span className="w-1 h-4 bg-white/90 rounded-sm animate-[bounce_1s_infinite_0.2s]"></span>
+                                   </div>
+                                   방송중
+                                 </button>
+                               ) : (
+                                 <button className="bg-gradient-to-b from-[#6b7583] to-[#4a5568] text-white text-[11px] font-bold px-[10px] py-[8px] rounded-lg shadow-[inset_0_-3px_0_rgba(0,0,0,0.3),_inset_0_2px_2px_rgba(255,255,255,0.2),_0_2px_4px_rgba(0,0,0,0.15)] hover:from-[#5b6571] hover:to-[#3a4454] transform hover:translate-y-[1px] hover:shadow-[inset_0_-2px_0_rgba(0,0,0,0.3),_inset_0_2px_2px_rgba(255,255,255,0.2),_0_1px_2px_rgba(0,0,0,0.15)] transition-all mx-auto">
+                                   + 더보기
+                                 </button>
+                               )}
+                            </div>
+
+                            {/* Mobile Live Streaming Tag */}
+                            {isLive && (
+                                <button className="lg:hidden absolute right-4 mt-2 px-2.5 h-[26px] bg-gradient-to-b from-[#ef4444] to-[#b91c1c] rounded flex items-center justify-center text-white text-[10px] font-black shadow-[inset_0_-2px_0_rgba(0,0,0,0.2),_0_2px_4px_rgba(239,68,68,0.4)] z-10 gap-1.5">
+                                  <div className="flex items-center gap-[2px]">
+                                    <span className="w-[3px] h-[8px] bg-white/90 rounded-[1px] animate-[bounce_1s_infinite_0s]"></span>
+                                    <span className="w-[3px] h-[6px] bg-white/90 rounded-[1px] animate-[bounce_1s_infinite_0.1s]"></span>
+                                    <span className="w-[3px] h-[10px] bg-white/90 rounded-[1px] animate-[bounce_1s_infinite_0.2s]"></span>
+                                  </div>
+                                  LIVE
+                                </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        </div>
+
+        {/* ═════════ RIGHT: BET SLIP ═════════ */}
+        <div className="w-[300px] shrink-0 hidden lg:block">
+          <div className="bg-white border-0 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] sticky top-[80px] overflow-hidden ring-1 ring-[#e5e9f0]">
+            {/* Header */}
+            <div className="flex justify-between items-center px-4 py-[10px] bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] shadow-[inset_0_1px_0_white]">
+              <div className="text-[12px] text-[#64748b] font-bold">
+                 <div>{clock.date}</div>
+                 <div className="text-[#1e293b] font-black text-[15px] tracking-tight">{clock.time}</div>
+              </div>
+              <div className="flex gap-[6px]">
+                <button onClick={() => setBetSlip([])} className="w-[34px] h-[34px] flex items-center justify-center bg-gradient-to-b from-white to-[#f1f5f9] rounded-lg text-[#64748b] hover:text-[#ef4444] text-[15px] shadow-[inset_0_-2px_0_rgba(0,0,0,0.05),_0_2px_4px_rgba(0,0,0,0.05)] ring-1 ring-[#e2e8f0] transform hover:-translate-y-[1px] transition-all">🗑️</button>
+                <button className="w-[34px] h-[34px] flex items-center justify-center bg-gradient-to-b from-white to-[#f1f5f9] rounded-lg text-[#64748b] hover:text-[#1e293b] text-[15px] shadow-[inset_0_-2px_0_rgba(0,0,0,0.05),_0_2px_4px_rgba(0,0,0,0.05)] ring-1 ring-[#e2e8f0] transform hover:-translate-y-[1px] transition-all">🔄</button>
+              </div>
+            </div>
+            
+            {/* Tabs */}
+            <div className="flex border-b border-[#cbd5e1] overflow-visible z-10 relative bg-[#f8fafc] p-1 gap-1">
+              <button onClick={() => setSlipTab('cart')} className={cn("flex-[1.2] py-[12px] text-[14px] font-black flex items-center justify-center gap-[6px] relative rounded-md transition-all", slipTab === 'cart' ? 'bg-gradient-to-b from-[#475569] to-[#1e293b] text-white shadow-[inset_0_-3px_0_rgba(0,0,0,0.2),_0_3px_6px_rgba(15,23,42,0.3)]' : 'bg-transparent text-[#64748b] hover:bg-[#e2e8f0] hover:shadow-inner')}>
+                🛒 베팅카트 
+                <span className={cn("text-white text-[10px] font-bold rounded-full w-[20px] h-[20px] flex items-center justify-center shadow-sm", slipTab === 'cart' ? 'bg-[#ff5c5c] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]' : 'bg-[#94a3b8]')}>{betSlip.length}</span>
+              </button>
+              <button onClick={() => setSlipTab('history')} className={cn("flex-1 py-[12px] text-[14px] font-black flex items-center justify-center gap-[6px] relative rounded-md transition-all", slipTab === 'history' ? 'bg-gradient-to-b from-[#475569] to-[#1e293b] text-white shadow-[inset_0_-3px_0_rgba(0,0,0,0.2),_0_3px_6px_rgba(15,23,42,0.3)]' : 'bg-transparent text-[#64748b] hover:bg-[#e2e8f0] hover:shadow-inner')}>
+                📋 베팅내역 
+                <span className={cn("text-white text-[10px] font-bold rounded-full w-[20px] h-[20px] flex items-center justify-center shadow-sm", slipTab === 'history' ? 'bg-[#ff5c5c] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]' : 'bg-[#94a3b8]')}>0</span>
+              </button>
+            </div>
+            
+            {/* Slips */}
+            <div className="bg-[#f1f5f9] text-center text-[13px] font-bold text-[#94a3b8] border-b border-[#e2e8f0] shadow-inner">
+              {betSlip.length === 0 ? (
+                <div className="py-8">베팅을 선택하세요.</div>
+              ) : (
+                <div className="flex flex-col gap-[3px] max-h-[220px] overflow-y-auto p-1.5 scrollbar-hide">
+                  {betSlip.map(b => (
+                    <div key={`${b.eventId}-${b.type}`} className="bg-white rounded-lg text-left p-[10px] border border-[#e2e8f0] shadow-[0_2px_4px_rgba(0,0,0,0.03)] relative">
+                      <button onClick={() => removeBet(b.eventId, b.type)} className="absolute top-2 right-2 text-[#cbd5e1] hover:text-[#ef4444] text-[18px] font-black h-6 w-6 flex items-center justify-center rounded-full hover:bg-[#fee2e2] transition-colors">×</button>
+                      <div className="text-[11.5px] text-[#64748b] font-extrabold pr-4 tracking-tight">{b.league}</div>
+                      <div className="text-[12.5px] font-black text-[#1e293b] mt-1.5">{b.home} <span className="text-[#94a3b8] font-bold mx-1">vs</span> {b.away}</div>
+                      <div className="flex justify-between items-end mt-2.5">
+                        <span className="text-[#1e293b] font-extrabold text-[12.5px] bg-[#f1f5f9] px-2 py-0.5 rounded border border-[#cbd5e1]">{b.label}</span>
+                        <span className="text-[#ef4444] font-black text-[15px]">{b.odds.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          ))
-        )}
+            
+            {/* Stats Area */}
+            <div className="p-4 bg-white text-[#475569] font-bold space-y-[12px] text-[13px]">
+               <div className="flex justify-between items-center pb-[10px] border-b border-[#e2e8f0] border-dashed">
+                 <span className="text-[#64748b]">보유금액</span>
+                 <span className="text-[18px] font-black text-[#1e293b] drop-shadow-sm">{Number(authUser?.balance || 0).toLocaleString()} <span className="text-[13px] text-[#94a3b8]">원</span></span>
+               </div>
+               
+               <div className="space-y-[8px] text-[12.5px]">
+                 <div className="flex justify-between items-center">
+                   <span className="text-[#94a3b8] font-medium">베팅 최소금액</span>
+                   <span className="text-[#ef4444] font-extrabold">{BET_LIMITS.MIN.toLocaleString()}</span>
+                 </div>
+                 <div className="flex justify-between items-center">
+                   <span className="text-[#94a3b8] font-medium">베팅 최대금액</span>
+                   <span className="font-extrabold text-[#334155]">{BET_LIMITS.MAX.toLocaleString()}</span>
+                 </div>
+                 <div className="flex justify-between items-center">
+                   <span className="text-[#94a3b8] font-medium">적중 최대금액</span>
+                   <span className="font-extrabold text-[#334155]">{BET_LIMITS.WIN_MAX.toLocaleString()}</span>
+                 </div>
+               </div>
+
+               <div className="flex justify-between items-center py-[12px] my-[10px] border-t border-b border-[#e2e8f0] bg-gradient-to-r from-[#fef2f2] to-white px-2 rounded-md">
+                 <span className="font-extrabold text-[#7f1d1d]">배당률합계</span>
+                 <span className="text-[18px] font-black text-[#ef4444] drop-shadow-sm">{totalOdds > 0 ? totalOdds.toFixed(2) : '1.00'}</span>
+               </div>
+
+               <div className="flex justify-between items-center bg-[#f8fafc] p-2 rounded-lg border border-[#e2e8f0] shadow-inner">
+                 <span className="text-[#64748b] font-extrabold ml-1">베팅금액</span>
+                 <input 
+                   type="text" 
+                   value={betAmount === '' ? '' : formatNum(betAmount)}
+                   onChange={(e) => {
+                     const val = e.target.value.replace(/[^0-9]/g, '');
+                     setBetAmount(val);
+                   }}
+                   className="w-[130px] h-[34px] bg-white border border-[#cbd5e1] rounded-md text-right px-3 text-[#ef4444] font-black text-[15px] focus:outline-none focus:ring-2 focus:ring-[#475569] focus:border-transparent transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" 
+                   placeholder="0" 
+                 />
+               </div>
+
+               <div className="flex justify-between items-center px-1">
+                 <span className="text-[#64748b] font-extrabold">적중예상금액</span>
+                 <span className="text-[18px] font-black text-[#1e293b] drop-shadow-sm">{payout > 0 ? formatNum(payout.toString()) : '0'}</span>
+               </div>
+
+               {/* Add Amount Buttons */}
+               <div className="pt-3">
+                 <div className="grid grid-cols-3 gap-[6px] mb-[6px]">
+                   {[5000, 10000, 50000, 100000, 500000, 1000000].map((v) => (
+                     <button 
+                       key={v}
+                       onClick={() => setBetAmount((amt + v).toString())}
+                       className="h-[36px] bg-gradient-to-b from-white to-[#f1f5f9] border-none ring-1 ring-[#cbd5e1] text-[#475569] text-[13px] font-black rounded-lg shadow-[inset_0_-2px_0_rgba(0,0,0,0.05),_0_2px_3px_rgba(0,0,0,0.05)] hover:from-[#f8fafc] hover:to-[#e2e8f0] transform hover:-translate-y-[1px] transition-all"
+                     >{v.toLocaleString()}</button>
+                   ))}
+                 </div>
+                 <div className="grid grid-cols-3 gap-[6px]">
+                   <button onClick={() => setBetAmount(Math.floor(amt/2).toString())} className="h-[38px] bg-gradient-to-b from-[#64748b] to-[#334155] border-none text-white text-[13px] font-black rounded-lg shadow-[inset_0_-3px_0_rgba(0,0,0,0.3),_inset_0_2px_2px_rgba(255,255,255,0.2),_0_3px_5px_rgba(0,0,0,0.2)] hover:from-[#475569] hover:to-[#1e293b] transform hover:-translate-y-[1px] transition-all">하프</button>
+                   <button onClick={() => setBetAmount(BET_LIMITS.MAX.toString())} className="h-[38px] bg-gradient-to-b from-[#64748b] to-[#334155] border-none text-white text-[13px] font-black rounded-lg shadow-[inset_0_-3px_0_rgba(0,0,0,0.3),_inset_0_2px_2px_rgba(255,255,255,0.2),_0_3px_5px_rgba(0,0,0,0.2)] hover:from-[#475569] hover:to-[#1e293b] transform hover:-translate-y-[1px] transition-all">최대</button>
+                   <button onClick={() => setBetAmount('')} className="h-[38px] bg-gradient-to-b from-[#94a3b8] to-[#475569] border-none text-white text-[13px] font-black rounded-lg shadow-[inset_0_-3px_0_rgba(0,0,0,0.3),_inset_0_2px_2px_rgba(255,255,255,0.2),_0_3px_5px_rgba(0,0,0,0.2)] hover:from-[#cbd5e1] hover:to-[#64748b] transform hover:-translate-y-[1px] transition-all">정정</button>
+                 </div>
+               </div>
+
+               <button className="w-full mt-4 h-[52px] bg-gradient-to-b from-[#475569] to-[#1e293b] hover:from-[#64748b] hover:to-[#0f172a] border-none text-white text-[17px] font-black rounded-xl shadow-[inset_0_-4px_0_rgba(0,0,0,0.2),_inset_0_3px_5px_rgba(255,255,255,0.4),_0_8px_12px_rgba(15,23,42,0.3)] transform hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-[inset_0_0px_0_rgba(0,0,0,0),_0_2px_4px_rgba(15,23,42,0.3)] transition-all flex items-center justify-center gap-2">
+                 <div className="w-[24px] h-[24px] bg-white/20 rounded-full flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">🛒</div>
+                 베팅하기
+               </button>
+            </div>
+          </div>
+        </div>
+
       </div>
+
+      {/* ═════════ MOBILE: Floating Bet Slip ═════════ */}
+      {/* FAB */}
+      <button
+        onClick={() => setMobileSlipOpen(!mobileSlipOpen)}
+        className="fixed bottom-20 right-4 z-50 lg:hidden w-[56px] h-[56px] rounded-full bg-gradient-to-b from-[#475569] to-[#1e293b] text-white shadow-[0_4px_12px_rgba(15,23,42,0.5)] flex items-center justify-center text-2xl active:scale-95 transition-transform"
+      >
+        🛒
+        {betSlip.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-[#ff5c5c] text-white text-[10px] font-black rounded-full w-[20px] h-[20px] flex items-center justify-center shadow-sm">{betSlip.length}</span>
+        )}
+      </button>
+
+      {/* Mobile Bet Slip Overlay */}
+      {mobileSlipOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileSlipOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 max-h-[80vh] bg-white rounded-t-2xl overflow-y-auto shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
+            {/* Handle bar */}
+            <div className="flex justify-center pt-2 pb-1">
+              <div className="w-10 h-1 bg-[#d1d7e0] rounded-full" />
+            </div>
+            {/* Header */}
+            <div className="flex justify-between items-center px-4 py-2 border-b border-[#e2e8f0]">
+              <span className="font-black text-[15px] text-[#1e293b]">🛒 베팅카트 ({betSlip.length})</span>
+              <div className="flex gap-2">
+                <button onClick={() => setBetSlip([])} className="text-[#94a3b8] hover:text-[#ef4444] text-lg">🗑️</button>
+                <button onClick={() => setMobileSlipOpen(false)} className="text-[#94a3b8] hover:text-[#1e293b] text-lg font-black">✕</button>
+              </div>
+            </div>
+            {/* Slips */}
+            <div className="p-3">
+              {betSlip.length === 0 ? (
+                <div className="py-8 text-center text-[13px] font-bold text-[#94a3b8]">베팅을 선택하세요.</div>
+              ) : (
+                <div className="flex flex-col gap-2 mb-3">
+                  {betSlip.map(b => (
+                    <div key={`m-${b.eventId}-${b.type}`} className="bg-[#f8fafc] rounded-lg p-3 border border-[#e2e8f0] relative">
+                      <button onClick={() => removeBet(b.eventId, b.type)} className="absolute top-2 right-2 text-[#cbd5e1] hover:text-[#ef4444] text-[16px] font-black">×</button>
+                      <div className="text-[11px] text-[#64748b] font-extrabold">{b.league}</div>
+                      <div className="text-[12px] font-black text-[#1e293b] mt-1">{b.home} <span className="text-[#94a3b8] mx-1">vs</span> {b.away}</div>
+                      <div className="flex justify-between items-end mt-2">
+                        <span className="text-[#1e293b] font-extrabold text-[12px] bg-[#f1f5f9] px-2 py-0.5 rounded border border-[#cbd5e1]">{b.label}</span>
+                        <span className="text-[#ef4444] font-black text-[14px]">{b.odds.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Stats + Bet */}
+            <div className="px-4 pb-6 space-y-3 border-t border-[#e2e8f0] pt-3">
+              <div className="flex justify-between items-center text-[13px]">
+                <span className="text-[#64748b] font-extrabold">배당률합계</span>
+                <span className="text-[16px] font-black text-[#ef4444]">{totalOdds > 0 ? totalOdds.toFixed(2) : '1.00'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-[#f8fafc] p-2 rounded-lg border border-[#e2e8f0]">
+                <span className="text-[#64748b] font-extrabold text-[13px] ml-1">베팅금액</span>
+                <input
+                  type="text"
+                  value={betAmount === '' ? '' : formatNum(betAmount)}
+                  onChange={(e) => setBetAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                  className="w-[120px] h-[34px] bg-white border border-[#cbd5e1] rounded-md text-right px-3 text-[#ef4444] font-black text-[15px] focus:outline-none focus:ring-2 focus:ring-[#475569]"
+                  placeholder="0"
+                />
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[5000, 10000, 50000, 100000].map((v) => (
+                  <button key={v} onClick={() => setBetAmount((amt + v).toString())} className="h-[32px] bg-[#f1f5f9] text-[#475569] text-[12px] font-bold rounded-lg border border-[#e2e8f0]">{(v/1000)}K</button>
+                ))}
+              </div>
+              <div className="flex justify-between items-center text-[13px]">
+                <span className="text-[#64748b] font-extrabold">적중예상금액</span>
+                <span className="text-[16px] font-black text-[#1e293b]">{payout > 0 ? formatNum(payout.toString()) : '0'}</span>
+              </div>
+              <button className="w-full h-[48px] bg-gradient-to-b from-[#475569] to-[#1e293b] text-white text-[16px] font-black rounded-xl shadow-[0_4px_12px_rgba(15,23,42,0.3)] active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+                🛒 베팅하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+/* ═══════════════ Sub-Components ═══════════════ */
+
+interface OddsButtonProps {
+  value: string;
+  locked: boolean;
+  selected: boolean;
+  onClick: () => void;
+}
+
+function LeagueBadge({ leagueLogo, countryFlag, flag }: { leagueLogo?: string; countryFlag?: string; flag: string }) {
+  if (leagueLogo) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={leagueLogo} alt="" className="w-full h-full object-contain p-[1px] bg-white" />;
+  }
+  if (countryFlag) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={countryFlag} alt="" className="w-full h-full object-cover" />;
+  }
+  return <span className="drop-shadow-sm">{flag}</span>;
+}
+
+function OddsButton({ value, locked, selected, onClick }: OddsButtonProps) {
+  if (locked) {
+    return (
+      <div className="flex-[1] min-w-[40px] lg:min-w-[60px] max-w-[70px] flex items-center justify-center bg-transparent text-[#94a3b8] text-[15px] drop-shadow-sm">
+        🔒
+      </div>
+    );
+  }
+  return (
+    <button 
+      onClick={onClick}
+      className={cn(
+        "flex-[1] min-w-[40px] lg:min-w-[60px] max-w-[70px] flex items-center justify-center text-[13px] lg:text-[14px] font-black transition-all rounded-lg mx-0.5",
+        selected 
+          ? "bg-gradient-to-b from-[#475569] to-[#1e293b] text-white shadow-[inset_0_-3px_0_rgba(0,0,0,0.2),_inset_0_2px_3px_rgba(255,255,255,0.4),_0_3px_5px_rgba(15,23,42,0.4)] transform -translate-y-[1px]" 
+          : "bg-transparent text-[#475569] hover:bg-white hover:shadow-[0_2px_5px_rgba(0,0,0,0.06),_inset_0_-2px_0_rgba(0,0,0,0.02)] ring-1 ring-transparent hover:ring-[#e2e8f0]"
+      )}
+    >
+      {value}
+    </button>
   );
 }

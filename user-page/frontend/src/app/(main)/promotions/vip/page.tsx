@@ -13,7 +13,6 @@ import {
   Star,
   Cake,
 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 
@@ -87,7 +86,7 @@ export default function VipPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLevel(vipInfo.currentLevel);
     }
-  }, [vipInfo?.currentLevel]);
+  }, [vipInfo?.currentLevel, selectedLevel]);
 
   const levels = vipLevels.length > 0 ? vipLevels : FALLBACK_VIP_LEVELS;
   const currentLevel = vipInfo?.currentLevel || 1;
@@ -101,39 +100,59 @@ export default function VipPage() {
     });
   };
 
-  const selectedVip = VIP_DISPLAY[selectedLevel] || VIP_DISPLAY[1];
   const benefitValues = BENEFIT_VALUES[selectedLevel] || BENEFIT_VALUES[1];
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* VIP Header */}
-      <div className="rounded-lg bg-[#f5f5f7] p-5">
+    <div className="flex flex-col gap-5">
+      {/* VIP Tracker & Carousel */}
+      <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] overflow-hidden">
         {/* User info */}
-        <div className="mb-4">
-          <p className="text-lg font-bold">VIP</p>
-          <p className="text-xs text-[#6b7280]">
-            현재 등급: {VIP_DISPLAY[currentLevel]?.nameKo || 'Bronze'} (VIP {currentLevel})
-          </p>
+        <div className="border-b border-[#e2e8f0] px-5 py-5 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="size-12 rounded-full border border-white bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] flex items-center justify-center shadow-[0_4px_10px_rgba(0,0,0,0.1),_inset_0_2px_4px_rgba(255,255,255,1)] text-3xl drop-shadow-md">
+              {VIP_DISPLAY[currentLevel]?.icon || '🥉'}
+            </div>
+            <div>
+              <p className="text-[13px] font-extrabold text-[#64748b] mb-0.5">내 VIP 등급</p>
+              <h2 className="text-xl font-black text-[#1e293b] flex items-center gap-2">
+                VIP {currentLevel} <span className="text-[#f59e0b] drop-shadow-sm text-sm">({VIP_DISPLAY[currentLevel]?.nameKo || '브론즈'})</span>
+              </h2>
+            </div>
+          </div>
+          {currentLevel < 10 && (
+            <div className="flex flex-col gap-1.5 w-full sm:w-1/3 min-w-[200px] bg-white rounded-xl p-3 border border-[#e2e8f0] shadow-sm">
+              <div className="flex items-center justify-between text-[11px] font-extrabold text-[#64748b]">
+                <span>다음 등급: VIP {currentLevel + 1}</span>
+                <span className="text-[#f59e0b]">{vipInfo?.progress || 0}%</span>
+              </div>
+              <div className="h-2.5 w-full rounded-full bg-[#f1f5f9] shadow-inner overflow-hidden border border-[#e2e8f0]">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#ffd651] to-[#f59e0b] rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]" 
+                  style={{ width: `${vipInfo?.progress || 0}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* VIP Level Carousel */}
-        <div className="relative">
+        <div className="relative bg-[#fbfcfd] py-6 px-4">
           <button
             onClick={() => scrollCarousel('left')}
-            className="absolute -left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#f5f5f7]/80 shadow-md backdrop-blur-sm transition-colors hover:bg-[#f5f5f7]"
+            className="absolute left-2 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-[0_4px_10px_rgba(0,0,0,0.1),_inset_0_2px_2px_rgba(255,255,255,1)] border border-[#e2e8f0] text-[#64748b] transition-all hover:text-[#1e293b] hover:scale-105"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-5 ml-0.5" />
           </button>
           <button
             onClick={() => scrollCarousel('right')}
-            className="absolute -right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#f5f5f7]/80 shadow-md backdrop-blur-sm transition-colors hover:bg-[#f5f5f7]"
+            className="absolute right-2 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-[0_4px_10px_rgba(0,0,0,0.1),_inset_0_2px_2px_rgba(255,255,255,1)] border border-[#e2e8f0] text-[#64748b] transition-all hover:text-[#1e293b] hover:scale-105"
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-5 mr-0.5" />
           </button>
 
           <div
             ref={carouselRef}
-            className="flex gap-3 overflow-x-auto px-2 pb-2 scrollbar-hide"
+            className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide snap-x"
           >
             {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
               const vip = VIP_DISPLAY[level] || VIP_DISPLAY[1];
@@ -146,31 +165,31 @@ export default function VipPage() {
                   key={level}
                   onClick={() => setSelectedLevel(level)}
                   className={cn(
-                    'relative flex min-w-[140px] shrink-0 flex-col items-start gap-1 rounded-xl p-4 transition-all',
+                    'relative flex min-w-[140px] shrink-0 flex-col items-center gap-2 rounded-2xl p-5 transition-all snap-center',
                     isActive
-                      ? `bg-gradient-to-br ${vip.gradient} text-white shadow-lg`
+                      ? `bg-gradient-to-br ${vip.gradient} text-white shadow-[0_10px_20px_rgba(0,0,0,0.2),_inset_0_2px_4px_rgba(255,255,255,0.3)] transform -translate-y-1 border border-white/20`
                       : isSelected
-                        ? 'border-2 border-[#feb614] bg-[#e8e8e8]'
-                        : 'border border-[#e8e8e8] bg-[#e8e8e8]/50 hover:bg-[#f0f0f2]',
-                    isLocked && !isSelected && 'opacity-60'
+                        ? 'border-2 border-[#f59e0b] bg-yellow-50/50 shadow-md transform -translate-y-0.5'
+                        : 'border border-[#e2e8f0] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-md hover:-translate-y-0.5',
+                    isLocked && !isSelected && 'opacity-60 grayscale-[0.3]'
                   )}
                 >
-                  <span className="text-2xl">{vip.icon}</span>
+                  <span className="text-3xl drop-shadow-md mb-1 transition-transform hover:scale-110">{vip.icon}</span>
                   <span className={cn(
-                    'text-lg font-bold',
-                    isActive ? 'text-white' : ''
+                    'text-[16px] font-black tracking-wide',
+                    isActive ? 'text-white drop-shadow-sm' : 'text-[#1e293b]'
                   )}>
                     VIP {level}
                   </span>
                   <span className={cn(
-                    'text-xs',
-                    isActive ? 'text-white/80' : 'text-[#6b7280]'
+                    'text-[12px] font-bold rounded-full px-2.5 py-0.5',
+                    isActive ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'
                   )}>
                     {vip.nameKo}
                   </span>
                   {isActive && (
-                    <div className="absolute right-2 top-2">
-                      <Check className="size-4 text-white" />
+                    <div className="absolute -right-2 -top-2 size-6 rounded-full bg-[#10b981] border-2 border-white flex items-center justify-center shadow-md">
+                      <Check className="size-3.5 text-white stroke-[3]" />
                     </div>
                   )}
                 </button>
@@ -180,162 +199,170 @@ export default function VipPage() {
         </div>
 
         {/* Upgrade Requirements */}
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
-            <div>
-              <p className="text-sm">승급 누적 입금 (30일)</p>
-              <p className="text-xs text-[#6b7280]">
-                달성: 0 / {levels[selectedLevel - 1]?.requiredBet ? Number(levels[selectedLevel - 1].requiredBet).toLocaleString('ko-KR') : '0'}
-              </p>
+        <div className="border-t border-[#e2e8f0] p-5 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9]">
+          <h3 className="mb-4 text-[14px] font-black text-[#1e293b] flex items-center gap-2">
+            <span className="text-lg">🎯</span> 승급 및 유지 조건
+          </h3>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="flex items-center justify-between rounded-xl bg-white border border-[#e2e8f0] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md">
+              <div>
+                <p className="text-[13px] font-extrabold text-[#1e293b]">승급 누적 입금 <span className="text-[#94a3b8] font-bold">(30일)</span></p>
+                <p className="text-[12px] font-bold text-[#64748b] mt-0.5">
+                  <span className="text-[#f59e0b]">0</span> / {levels[selectedLevel - 1]?.requiredBet ? Number(levels[selectedLevel - 1].requiredBet).toLocaleString('ko-KR') : '0'}
+                </p>
+              </div>
+              <span className={cn(
+                'rounded-lg px-2.5 py-1 text-[11px] font-black shadow-sm',
+                currentLevel >= selectedLevel
+                  ? 'bg-gradient-to-b from-green-50 to-green-100 text-green-700 border border-green-200'
+                  : 'bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] text-[#64748b] border border-[#e2e8f0]'
+              )}>
+                {currentLevel >= selectedLevel ? '달성 완료' : '미달성'}
+              </span>
             </div>
-            <span className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-semibold',
-              currentLevel >= selectedLevel
-                ? 'bg-green-100 text-green-700'
-                : 'bg-[#e8e8e8] text-[#6b7280]'
-            )}>
-              {currentLevel >= selectedLevel ? '달성' : '미달성'}
-            </span>
-          </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
-            <div>
-              <p className="text-sm">승급 턴오버 (30일)</p>
-              <p className="text-xs text-[#6b7280]">
-                달성: 0 / {levels[selectedLevel - 1]?.requiredBet ? Number(levels[selectedLevel - 1].requiredBet).toLocaleString('ko-KR') : '0'}
-              </p>
+            <div className="flex items-center justify-between rounded-xl bg-white border border-[#e2e8f0] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md">
+              <div>
+                <p className="text-[13px] font-extrabold text-[#1e293b]">승급 턴오버 <span className="text-[#94a3b8] font-bold">(30일)</span></p>
+                <p className="text-[12px] font-bold text-[#64748b] mt-0.5">
+                  <span className="text-[#f59e0b]">0</span> / {levels[selectedLevel - 1]?.requiredBet ? Number(levels[selectedLevel - 1].requiredBet).toLocaleString('ko-KR') : '0'}
+                </p>
+              </div>
+              <span className={cn(
+                'rounded-lg px-2.5 py-1 text-[11px] font-black shadow-sm',
+                currentLevel >= selectedLevel
+                  ? 'bg-gradient-to-b from-green-50 to-green-100 text-green-700 border border-green-200'
+                  : 'bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] text-[#64748b] border border-[#e2e8f0]'
+              )}>
+                {currentLevel >= selectedLevel ? '달성 완료' : '미달성'}
+              </span>
             </div>
-            <span className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-semibold',
-              currentLevel >= selectedLevel
-                ? 'bg-green-100 text-green-700'
-                : 'bg-[#e8e8e8] text-[#6b7280]'
-            )}>
-              {currentLevel >= selectedLevel ? '달성' : '미달성'}
-            </span>
-          </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
-            <div>
-              <p className="text-sm">유지 누적 입금 (90일)</p>
-              <p className="text-xs text-[#6b7280]">유지 조건</p>
+            <div className="flex items-center justify-between rounded-xl bg-white border border-[#e2e8f0] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md">
+              <div>
+                <p className="text-[13px] font-extrabold text-[#1e293b]">유지 누적 입금 <span className="text-[#94a3b8] font-bold">(90일)</span></p>
+                <p className="text-[12px] font-bold text-[#64748b] mt-0.5">유지 조건</p>
+              </div>
+              <span className={cn(
+                'rounded-lg px-2.5 py-1 text-[11px] font-black shadow-sm',
+                currentLevel >= selectedLevel
+                  ? 'bg-gradient-to-b from-green-50 to-green-100 text-green-700 border border-green-200'
+                  : 'bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] text-[#64748b] border border-[#e2e8f0]'
+              )}>
+                {currentLevel >= selectedLevel ? '달성 완료' : '미달성'}
+              </span>
             </div>
-            <span className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-semibold',
-              currentLevel >= selectedLevel
-                ? 'bg-green-100 text-green-700'
-                : 'bg-[#e8e8e8] text-[#6b7280]'
-            )}>
-              {currentLevel >= selectedLevel ? '달성' : '미달성'}
-            </span>
-          </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
-            <div>
-              <p className="text-sm">유지 가입 일수 (90일)</p>
-              <p className="text-xs text-[#6b7280]">유지 조건</p>
+            <div className="flex items-center justify-between rounded-xl bg-white border border-[#e2e8f0] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md">
+              <div>
+                <p className="text-[13px] font-extrabold text-[#1e293b]">유지 베팅 조건 <span className="text-[#94a3b8] font-bold">(90일)</span></p>
+                <p className="text-[12px] font-bold text-[#64748b] mt-0.5">유지 조건</p>
+              </div>
+              <span className={cn(
+                'rounded-lg px-2.5 py-1 text-[11px] font-black shadow-sm',
+                currentLevel >= selectedLevel
+                  ? 'bg-gradient-to-b from-green-50 to-green-100 text-green-700 border border-green-200'
+                  : 'bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] text-[#64748b] border border-[#e2e8f0]'
+              )}>
+                {currentLevel >= selectedLevel ? '달성 완료' : '미달성'}
+              </span>
             </div>
-            <span className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-semibold',
-              currentLevel >= selectedLevel
-                ? 'bg-green-100 text-green-700'
-                : 'bg-[#e8e8e8] text-[#6b7280]'
-            )}>
-              {currentLevel >= selectedLevel ? '달성' : '미달성'}
-            </span>
           </div>
         </div>
-
-        {/* Progress bar */}
-        {currentLevel < 10 && (
-          <div className="mt-4">
-            <div className="mb-1 flex items-center justify-between text-xs text-[#6b7280]">
-              <span>VIP {currentLevel} → VIP {currentLevel + 1}</span>
-              <span>{vipInfo?.progress || 0}%</span>
-            </div>
-            <Progress value={vipInfo?.progress || 0} className="h-2" />
-          </div>
-        )}
       </div>
 
       {/* VIP Exclusive Benefits */}
-      <div className="rounded-lg bg-[#f5f5f7] p-5">
-        <h3 className="mb-4 text-base font-semibold">
-          VIP{selectedLevel} Exclusive
-        </h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-          {VIP_BENEFITS.map((benefit) => {
-            const Icon = benefit.icon;
-            const value = benefitValues[benefit.key] || '-';
-            return (
-              <div
-                key={benefit.key}
-                className="flex flex-col items-center gap-2 rounded-xl border border-[#e8e8e8] bg-[#e8e8e8]/30 p-4 text-center"
-              >
-                <div className="flex size-10 items-center justify-center rounded-full bg-[#feb614]/10">
-                  <Icon className="size-5 text-[#feb614]" />
+      <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] overflow-hidden">
+        <div className="border-b border-[#e2e8f0] px-5 py-4 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9]">
+          <h3 className="text-[15px] font-black text-[#1e293b] flex items-center gap-2">
+            <span className="text-[18px]">💎</span> VIP {selectedLevel} Exclusive Benefits
+          </h3>
+        </div>
+        <div className="p-5 bg-[#fbfcfd]">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+            {VIP_BENEFITS.map((benefit) => {
+              const Icon = benefit.icon;
+              const value = benefitValues[benefit.key] || '-';
+              return (
+                <div
+                  key={benefit.key}
+                  className="flex flex-col items-center gap-2.5 rounded-xl border border-[#cbd5e1] bg-gradient-to-b from-white to-[#f8fafc] p-4 text-center shadow-[0_2px_4px_rgba(0,0,0,0.02),_inset_0_-2px_0_rgba(0,0,0,0.02)] hover:shadow-md hover:-translate-y-0.5 transition-all"
+                >
+                  <div className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-[#fef3c7] to-[#fde68a] border border-[#fcd34d] shadow-[inset_0_2px_4px_rgba(255,255,255,1)]">
+                    <Icon className="size-5 text-[#f59e0b] drop-shadow-sm" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[11px] font-extrabold text-[#64748b] leading-tight mt-1">{benefit.label}</p>
+                    <p className="text-[14px] font-black text-[#f59e0b] drop-shadow-sm">{value}</p>
+                  </div>
                 </div>
-                <p className="text-xs text-[#6b7280] leading-tight">{benefit.label}</p>
-                <p className="text-sm font-bold text-[#feb614]">{value}</p>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* All VIP Levels Comparison */}
-      <div className="rounded-lg bg-[#f5f5f7] p-5">
-        <h3 className="mb-4 text-base font-semibold">전체 VIP 등급 비교</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] text-sm">
-            <thead>
-              <tr className="border-b border-[#e8e8e8]">
-                <th className="px-3 py-2.5 text-left text-xs font-medium text-[#6b7280]">등급</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">필요 베팅</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">캐시백</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">일일 보너스</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">주간 보너스</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">월간 보너스</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">생일 보너스</th>
-              </tr>
-            </thead>
-            <tbody>
-              {levels.map((level) => {
-                const display = VIP_DISPLAY[level.level] || VIP_DISPLAY[1];
-                const isCurrent = level.level === currentLevel;
-                const values = BENEFIT_VALUES[level.level] || BENEFIT_VALUES[1];
-                return (
-                  <tr
-                    key={level.level}
-                    className={cn(
-                      'border-b border-[#e8e8e8]/50 transition-colors hover:bg-[#f0f0f2]/50',
-                      isCurrent && 'bg-[#feb614]/5'
-                    )}
-                  >
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <span>{display.icon}</span>
-                        <span className={cn('font-medium', isCurrent && display.textColor)}>
-                          VIP {level.level}
-                        </span>
-                        {isCurrent && (
-                          <span className="rounded bg-[#feb614]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#feb614]">현재</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2.5 text-right">
-                      {Number(level.requiredBet).toLocaleString('ko-KR')}
-                    </td>
-                    <td className="px-3 py-2.5 text-right font-medium text-[#feb614]">{level.cashbackRate}%</td>
-                    <td className="px-3 py-2.5 text-right">{values.dailyBonus}</td>
-                    <td className="px-3 py-2.5 text-right">{values.weeklyBonus}</td>
-                    <td className="px-3 py-2.5 text-right">{values.monthlyBonus}</td>
-                    <td className="px-3 py-2.5 text-right">{values.birthdayBonus}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#e2e8f0] overflow-hidden">
+        <div className="border-b border-[#e2e8f0] px-5 py-4 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9]">
+          <h3 className="text-[15px] font-black text-[#1e293b] flex items-center gap-2">
+            <span className="text-[18px]">📊</span> 전체 VIP 등급 비교
+          </h3>
+        </div>
+        <div className="overflow-x-auto bg-[#fbfcfd] p-5">
+          <div className="rounded-xl border border-[#e2e8f0] overflow-hidden shadow-sm">
+            <table className="w-full min-w-[700px] text-sm">
+              <thead>
+                <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+                  <th className="px-4 py-3 text-left text-[12px] font-extrabold text-[#64748b]">등급</th>
+                  <th className="px-4 py-3 text-right text-[12px] font-extrabold text-[#64748b]">필요 베팅</th>
+                  <th className="px-4 py-3 text-right text-[12px] font-extrabold text-[#64748b]">캐시백</th>
+                  <th className="px-4 py-3 text-right text-[12px] font-extrabold text-[#64748b]">일일 보너스</th>
+                  <th className="px-4 py-3 text-right text-[12px] font-extrabold text-[#64748b]">주간 보너스</th>
+                  <th className="px-4 py-3 text-right text-[12px] font-extrabold text-[#64748b]">월간 보너스</th>
+                  <th className="px-4 py-3 text-right text-[12px] font-extrabold text-[#64748b]">생일 보너스</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {levels.map((level) => {
+                  const display = VIP_DISPLAY[level.level] || VIP_DISPLAY[1];
+                  const isCurrent = level.level === currentLevel;
+                  const values = BENEFIT_VALUES[level.level] || BENEFIT_VALUES[1];
+                  return (
+                    <tr
+                      key={level.level}
+                      className={cn(
+                        'border-b border-[#e2e8f0] transition-colors hover:bg-[#f8fafc]',
+                        isCurrent && 'bg-amber-50/50 relative'
+                      )}
+                    >
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xl drop-shadow-sm">{display.icon}</span>
+                          <span className={cn('font-black text-[13px]', isCurrent ? 'text-[#f59e0b]' : 'text-[#334155]')}>
+                            VIP {level.level}
+                          </span>
+                          {isCurrent && (
+                            <span className="rounded-md bg-gradient-to-r from-[#f59e0b] to-[#d97706] px-2 py-0.5 text-[10px] font-black text-white shadow-sm">
+                              현재
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-bold text-[#475569]">
+                        {Number(level.requiredBet).toLocaleString('ko-KR')}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-black text-[#f59e0b] drop-shadow-sm">{level.cashbackRate}%</td>
+                      <td className="px-4 py-3.5 text-right font-bold text-[#475569]">{values.dailyBonus}</td>
+                      <td className="px-4 py-3.5 text-right font-bold text-[#475569]">{values.weeklyBonus}</td>
+                      <td className="px-4 py-3.5 text-right font-bold text-[#475569]">{values.monthlyBonus}</td>
+                      <td className="px-4 py-3.5 text-right font-bold text-[#475569]">{values.birthdayBonus}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
