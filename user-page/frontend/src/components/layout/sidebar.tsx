@@ -5,6 +5,15 @@ import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
+/* --- Types --- */
+
+interface GameItem {
+  name: string;
+  href: string;
+  icon: string;
+  hasSubmenu?: boolean;
+}
+
 /* --- Bottom Nav Items (Figma sidebar bottom section) --- */
 
 const BOTTOM_NAV_ITEMS: GameItem[] = [
@@ -17,27 +26,16 @@ const BOTTOM_NAV_ITEMS: GameItem[] = [
 
 /* --- Game Category Items --- */
 
-interface GameItem {
-  name: string;
-  href: string;
-  icon: string;
-  hasSubmenu?: boolean;
-}
-
 const GAME_ITEMS: GameItem[] = [
-  { name: 'Local Games', href: '/games', icon: '/images/category-icons/local_games.webp', hasSubmenu: true },
-  { name: 'New Releases', href: '/games?sort=new', icon: '/images/category-icons/new_releases.webp' },
-  { name: 'Hot Games', href: '/games?sort=hot', icon: '/images/category-icons/hot_games.webp' },
-  { name: 'Slots', href: '/games?category=slot', icon: '/images/category-icons/slots.webp' },
-  { name: 'Live Casino', href: '/games?category=casino', icon: '/images/category-icons/live_casino.webp', hasSubmenu: true },
-  { name: 'Sports', href: '/sports', icon: '/images/category-icons/sports.webp', hasSubmenu: true },
-  { name: 'Fishing', href: '/games?category=shooting', icon: '/images/category-icons/fishing.webp' },
-  { name: 'Card Game', href: '/games?category=holdem', icon: '/images/category-icons/card_game.webp' },
-  { name: 'Lottery', href: '/games?category=coin', icon: '/images/category-icons/lottery.webp' },
-  { name: 'ESports', href: '/esports', icon: '/images/category-icons/esports.webp' },
-  { name: '3D', href: '/games?category=mini_game', icon: '/images/category-icons/3d.webp' },
-  { name: 'Arcade', href: '/games?sort=arcade', icon: '/images/category-icons/arcade.webp' },
-  { name: 'Marble', href: '/minigame', icon: '/images/category-icons/marble.webp' },
+  { name: '라이브 카지노', href: '/games?category=casino', icon: '/images/category-icons/live_casino.webp', hasSubmenu: true },
+  { name: '슬롯', href: '/games?category=slot', icon: '/images/category-icons/slots.webp', hasSubmenu: true },
+  { name: '스프라이브', href: '/games?category=spribe', icon: '/images/providers/spribe.webp' },
+  { name: '스포츠', href: '/sports', icon: '/images/category-icons/sports.webp', hasSubmenu: true },
+  { name: '라이브스포츠', href: '/sports/live', icon: '/images/category-icons/sports.webp' },
+  { name: 'E스포츠', href: '/esports', icon: '/images/category-icons/esports.webp' },
+  { name: '홀덤', href: '/games?category=holdem', icon: '/images/category-icons/card_game.webp' },
+  { name: '미니게임', href: '/minigame', icon: '/images/category-icons/marble.webp' },
+  { name: '가상게임', href: '/games?category=virtual', icon: '/images/category-icons/arcade.webp' },
 ];
 
 /* --- Sidebar Component --- */
@@ -47,11 +45,18 @@ export const Sidebar = ({ className }: { className?: string }) => {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
   const sort = searchParams.get('sort');
-  const fullUrl = category ? `${pathname}?category=${category}` : sort ? `${pathname}?sort=${sort}` : pathname;
+
+  let fullUrl = pathname;
+  if (category) {
+    fullUrl = `${pathname}?category=${category}`;
+  } else if (sort) {
+    fullUrl = `${pathname}?sort=${sort}`;
+  }
 
   const isActive = (href: string) => {
     if (href.includes('?')) return fullUrl === href;
     if (href === '/games') return pathname === '/games' && !category && !sort;
+    if (href === '/sports') return pathname === '/sports';
     return pathname.startsWith(href) && href !== '/';
   };
 

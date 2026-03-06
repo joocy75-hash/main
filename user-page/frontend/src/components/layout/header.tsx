@@ -22,6 +22,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn, formatUSDT } from '@/lib/utils';
@@ -84,7 +85,9 @@ export const Header = ({ className }: { className?: string }) => {
                 <Menu className="size-6" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[280px] bg-white p-0" />
+            <SheetContent side="left" className="w-[280px] bg-white p-0">
+              <SheetTitle className="sr-only">메뉴</SheetTitle>
+            </SheetContent>
           </Sheet>
 
           <Link href="/" className="flex shrink-0 items-center">

@@ -132,12 +132,7 @@ export default function MainLobbyPage() {
     load();
   }, [fetchPopularGames]);
 
-  const handlePlay = useCallback((game: Game) => {
-    setSelectedGame(game);
-    setLaunchModalOpen(true);
-  }, []);
-
-  const handleDemo = useCallback((game: Game) => {
+  const handleGameSelect = useCallback((game: Game) => {
     setSelectedGame(game);
     setLaunchModalOpen(true);
   }, []);
@@ -344,8 +339,8 @@ export default function MainLobbyPage() {
                   key={game.id}
                   game={game}
                   isAuthenticated={isAuthenticated}
-                  onPlay={handlePlay}
-                  onDemo={handleDemo}
+                  onPlay={handleGameSelect}
+                  onDemo={handleGameSelect}
                 />
               ))}
             </div>
@@ -439,25 +434,25 @@ export default function MainLobbyPage() {
           </div>
 
           <div className="overflow-hidden rounded-[12px] border border-[#e8e8e8] bg-white">
-            <div className="grid grid-cols-5 gap-2 border-b border-[#dadde6] bg-white px-4 py-3 text-[14px] font-bold text-[#31373d]">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 border-b border-[#dadde6] bg-white px-3 sm:px-4 py-3 text-[13px] sm:text-[14px] font-bold text-[#31373d]">
               <span>Event</span>
-              <span>Player</span>
+              <span className="hidden sm:block">Player</span>
               <span className="text-right">Bet amount</span>
-              <span className="text-right">Multiplier</span>
+              <span className="hidden sm:block text-right">Multiplier</span>
               <span className="text-right">Profit</span>
             </div>
             {LATEST_BETS.map((bet, i) => (
               <div
                 key={i}
                 className={cn(
-                  'grid grid-cols-5 gap-2 px-4 py-3 text-[15px] transition-colors hover:bg-[#f5f5f7]/50 border-b border-[#dadde6]',
+                  'grid grid-cols-3 sm:grid-cols-5 gap-2 px-3 sm:px-4 py-3 text-[13px] sm:text-[15px] transition-colors hover:bg-[#f5f5f7]/50 border-b border-[#dadde6]',
                   i % 2 === 0 ? 'bg-transparent' : 'bg-[#f9f9fb]'
                 )}
               >
                 <span className="truncate font-normal text-[#31373d]">{bet.game}</span>
-                <span className="text-[#31373d]">{bet.player}</span>
+                <span className="hidden sm:block text-[#31373d]">{bet.player}</span>
                 <span className="text-right font-semibold text-[#31373d]">{bet.bet}</span>
-                <span className="text-right font-normal text-[#31373d]">{bet.multi}</span>
+                <span className="hidden sm:block text-right font-normal text-[#31373d]">{bet.multi}</span>
                 <span className={cn('text-right font-normal', bet.win ? 'text-[#158718]' : 'text-[#ff4848]')}>
                   {bet.profit}
                 </span>
