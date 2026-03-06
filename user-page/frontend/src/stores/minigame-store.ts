@@ -2,11 +2,6 @@ import { create } from 'zustand';
 import { api } from '@/lib/api-client';
 import type { BepickRound, MinigameType } from '../../../shared/types/minigame';
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-}
-
 interface MinigameState {
   rounds: BepickRound[];
   currentRound: BepickRound | null;
@@ -30,11 +25,11 @@ export const useMinigameStore = create<MinigameState>((set, get) => ({
   fetchRounds: async () => {
     set({ isLoading: true });
     try {
-      const res = await api.get<ApiResponse<BepickRound[]>>('/api/minigame/rounds', {
+      const res = await api.get<BepickRound[]>('/api/minigame/rounds', {
         game: get().selectedGame,
         limit: '30',
       });
-      set({ rounds: res.data, isLoading: false });
+      set({ rounds: Array.isArray(res) ? res : [], isLoading: false });
     } catch {
       set({ rounds: [], isLoading: false });
     }
@@ -42,10 +37,10 @@ export const useMinigameStore = create<MinigameState>((set, get) => ({
 
   fetchCurrentRound: async () => {
     try {
-      const res = await api.get<ApiResponse<BepickRound>>('/api/minigame/current', {
+      const res = await api.get<BepickRound>('/api/minigame/current', {
         game: get().selectedGame,
       });
-      set({ currentRound: res.data });
+      set({ currentRound: res ?? null });
     } catch {
       // keep previous state on fetch error
     }
@@ -53,8 +48,8 @@ export const useMinigameStore = create<MinigameState>((set, get) => ({
 
   fetchGameTypes: async () => {
     try {
-      const res = await api.get<ApiResponse<MinigameType[]>>('/api/minigame/types');
-      set({ gameTypes: res.data });
+      const res = await api.get<MinigameType[]>('/api/minigame/types');
+      set({ gameTypes: Array.isArray(res) ? res : [] });
     } catch {
       set({ gameTypes: [] });
     }

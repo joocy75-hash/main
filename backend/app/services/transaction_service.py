@@ -6,6 +6,7 @@ from decimal import Decimal
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.money_log import MoneyLog
 from app.models.transaction import Transaction
 from app.models.user import User
 
@@ -36,6 +37,7 @@ async def create_deposit(
         memo=memo,
     )
     session.add(tx)
+    await session.flush()
     return tx
 
 
@@ -66,6 +68,7 @@ async def create_withdrawal(
         memo=memo,
     )
     session.add(tx)
+    await session.flush()
     return tx
 
 
@@ -99,8 +102,20 @@ async def approve_transaction(session: AsyncSession, tx_id: int, admin_id: int) 
     tx.processed_at = datetime.now(timezone.utc)
     user.updated_at = datetime.now(timezone.utc)
 
+    money_log = MoneyLog(
+        user_id=tx.user_id,
+        type=f"{tx.type}_{tx.action}",
+        amount=tx.amount if tx.action == "credit" else -tx.amount,
+        balance_before=tx.balance_before,
+        balance_after=tx.balance_after,
+        description=tx.memo,
+        reference_type="transaction",
+        reference_id=str(tx.id),
+    )
+
     session.add(tx)
     session.add(user)
+    session.add(money_log)
     return tx
 
 

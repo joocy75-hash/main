@@ -46,10 +46,17 @@ class BulkMessageSend(BaseModel):
     content: str
 
 
+ALLOWED_POINT_TYPES = {
+    "admin_adjustment", "admin_grant", "admin_revoke",
+    "event_reward", "attendance", "mission", "spin",
+    "payback", "promotion", "referral",
+}
+
+
 class BulkPointGrant(BaseModel):
-    user_ids: list[int]
+    user_ids: list[int] = Field(max_length=500)
     amount: Decimal = Field(max_digits=18, decimal_places=2)
-    type: str = Field(max_length=30)
+    type: str = Field(max_length=30, pattern=r"^[a-z_]+$")
     reason: str = Field(max_length=500)
 
 

@@ -6,20 +6,20 @@
 ## Authentication
 
 ```
-API Key: 17f6229311msh4d59759f1dcb20cp14a69djsnc2220d97ece0
+API Key: ${RAPIDAPI_KEY}
 ```
 
 All requests require these headers:
 
 ```
-x-rapidapi-key: 17f6229311msh4d59759f1dcb20cp14a69djsnc2220d97ece0
+x-rapidapi-key: ${RAPIDAPI_KEY}
 x-rapidapi-host: {host}
 ```
 
 JavaScript fetch example:
 
 ```javascript
-const API_KEY = '17f6229311msh4d59759f1dcb20cp14a69djsnc2220d97ece0';
+const API_KEY = '${RAPIDAPI_KEY}';
 
 const apiFetch = async (host, path, options = {}) => {
   const r = await fetch('https://' + host + path, {
@@ -372,35 +372,6 @@ Content-Type: application/json
 
 ---
 
-## 4. All Sport Live Stream API (Partially Working)
-
-| Item | Value |
-|------|-------|
-| Host | `all-sport-live-stream.p.rapidapi.com` |
-| Status | **Partial** - some endpoints broken |
-| Category | Sports Streaming |
-| Quota Usage | 10.1% |
-| RapidAPI | https://rapidapi.com/scoreswift-scoreswift-default/api/all-sport-live-stream |
-| Provider | scoreswift |
-
-### Endpoints
-
-#### GET /api/v6/sport-id
-
-Returns list of available sports (17 sports).
-
-```
-GET https://all-sport-live-stream.p.rapidapi.com/api/v6/sport-id
-```
-
-**Response:** Array of sport objects with `id`, `title.name`, `slug`
-
-**Known Issues:**
-- `/api/v6/matches?slug={sport}&current_date={date}` returns `PersistedQueryNotFound` (GraphQL backend issue)
-- `/api/v6/play-stream?id={id}` returns "Stream not available" for most IDs
-
----
-
 ## Dead/Non-Working APIs (Do Not Use)
 
 | API | Host | Issue |
@@ -417,7 +388,7 @@ GET https://all-sport-live-stream.p.rapidapi.com/api/v6/sport-id
 ### Sports Dashboard (Live Scores + Odds)
 
 ```javascript
-const API_KEY = '17f6229311msh4d59759f1dcb20cp14a69djsnc2220d97ece0';
+const API_KEY = '${RAPIDAPI_KEY}';
 
 // 1. Get live events with odds
 const events = await apiFetch('odds-feed.p.rapidapi.com', '/api/v1/events?status=LIVE');
@@ -482,7 +453,6 @@ window.open(launch.payload.game_launch_url, '_blank');
 | Odds Feed | 500회/월 | 1,000 req/hour | Yes (초과 시 차단) |
 | SportAPI7 | 50회/월 | 1,000 req/hour | Yes (초과 시 차단) |
 | Casino API | 299회/월 | 1,000 req/hour | Yes (초과 시 차단) |
-| All Sport Live Stream | 99회/월 | 1,000 req/hour | Yes (초과 시 차단) |
 
 > All APIs include **Bandwidth Platform Fee**: 10,240MB/mo, +$0.001/MB over
 
@@ -527,18 +497,6 @@ window.open(launch.payload.game_launch_url, '_blank');
 > Only 2 plans available! No Pro/Mega. Jump from Free → $999/mo.
 > Pricing: https://rapidapi.com/betnex2026/api/live-casino-slots-evolution-jili-and-50-plus-provider/pricing
 
-### All Sport Live Stream - Pricing
-
-| Plan | Price | Quota | Overage | Rate Limit |
-|------|-------|-------|---------|------------|
-| Basic | $0/mo | 99/mo (Hard) | N/A | 1,000/hour |
-| Mega | $299/mo | 9,999/**day** | +$0.01/req | Unlimited |
-| Pro | $499/mo | 2,000,000/mo | +$0.01/req | Unlimited |
-| Ultra | $999/mo | 33,800,000/mo | +$0.01/req | Unlimited |
-
-> Warning: Mega plan quota is per DAY (not month). ~300K/mo equivalent.
-> Pricing: https://rapidapi.com/scoreswift-scoreswift-default/api/all-sport-live-stream/pricing
-
 ### Cost Summary (Upgrade Comparison)
 
 | API | Cheapest Paid | Best Value | Notes |
@@ -546,4 +504,3 @@ window.open(launch.payload.game_launch_url, '_blank');
 | Odds Feed | Pro $5/mo | Mega $59/mo | Most affordable upgrade |
 | SportAPI7 | Pro $15/mo | Ultra $100/mo | Free plan only 50 calls! |
 | Casino API | Ultra $999/mo | Ultra $999/mo | No mid-tier option |
-| All Sport Live Stream | Mega $299/mo | Mega $299/mo | Partially broken anyway |

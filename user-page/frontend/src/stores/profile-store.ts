@@ -104,11 +104,13 @@ export interface InquiryReply {
 }
 
 interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
+  items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 interface ProfileState {
@@ -221,15 +223,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   updateProfile: async (nickname, phone) => {
-    try {
-      const data = await api.put<Profile>('/api/profile', { nickname, phone });
-      set({ profile: data });
-    } catch {
-      const { profile } = get();
-      if (profile) {
-        set({ profile: { ...profile, nickname, phone } });
-      }
-    }
+    const data = await api.put<Profile>('/api/profile', { nickname, phone });
+    set({ profile: data });
   },
 
   changePassword: async (currentPassword, newPassword) => {
@@ -249,10 +244,10 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       const data = await api.get<PaginatedResponse<BetRecord>>('/api/profile/bets', params);
       set({
-        bets: data.data,
-        betsTotal: data.total,
-        betsPage: data.page,
-        betsHasMore: data.hasMore,
+        bets: data.items,
+        betsTotal: data.pagination.total,
+        betsPage: data.pagination.page,
+        betsHasMore: data.pagination.page < data.pagination.totalPages,
         isLoading: false,
       });
     } catch {
@@ -271,8 +266,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       const data = await api.get<PaginatedResponse<MoneyLog>>('/api/profile/money-logs', params);
       set({
-        moneyLogs: data.data,
-        moneyLogsTotal: data.total,
+        moneyLogs: data.items,
+        moneyLogsTotal: data.pagination.total,
         isLoading: false,
       });
     } catch {
@@ -291,8 +286,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       const data = await api.get<PaginatedResponse<PointLog>>('/api/profile/point-logs', params);
       set({
-        pointLogs: data.data,
-        pointLogsTotal: data.total,
+        pointLogs: data.items,
+        pointLogsTotal: data.pagination.total,
         isLoading: false,
       });
     } catch {
@@ -304,8 +299,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fetchLoginHistory: async () => {
     set({ isLoading: true });
     try {
-      const data = await api.get<LoginHistory[]>('/api/profile/login-history');
-      set({ loginHistory: data, isLoading: false });
+      const data = await api.get<PaginatedResponse<LoginHistory>>('/api/profile/login-history');
+      set({ loginHistory: data.items, isLoading: false });
     } catch {
       set({ loginHistory: [], isLoading: false });
     }
@@ -324,7 +319,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fetchAffiliateMembers: async (page = 1) => {
     try {
       const data = await api.get<PaginatedResponse<AffiliateMember>>('/api/affiliate/members', { page: String(page) });
-      set({ affiliateMembers: data.data });
+      set({ affiliateMembers: data.items });
     } catch {
       set({ affiliateMembers: [] });
     }
@@ -333,7 +328,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fetchCommissionRecords: async (page = 1) => {
     try {
       const data = await api.get<PaginatedResponse<CommissionRecord>>('/api/affiliate/commissions', { page: String(page) });
-      set({ commissionRecords: data.data });
+      set({ commissionRecords: data.items });
     } catch {
       set({ commissionRecords: [] });
     }
@@ -345,8 +340,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const data = await api.get<PaginatedResponse<Message>>('/api/messages', { page: String(page) });
       set({
-        messages: data.data,
-        messagesTotal: data.total,
+        messages: data.items,
+        messagesTotal: data.pagination.total,
         isLoading: false,
       });
     } catch {
@@ -384,11 +379,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   deleteMessage: async (id) => {
-    try {
-      await api.delete(`/api/messages/${id}`);
-    } catch {
-      // Continue with local deletion
-    }
+    await api.delete(`/api/messages/${id}`);
     set((state) => ({
       messages: state.messages.filter((m) => m.id !== id),
       messagesTotal: Math.max(0, state.messagesTotal - 1),
@@ -399,8 +390,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fetchInquiries: async () => {
     set({ isLoading: true });
     try {
-      const data = await api.get<Inquiry[]>('/api/inquiries');
-      set({ inquiries: data, isLoading: false });
+      const data = await api.get<PaginatedResponse<Inquiry>>('/api/inquiries');
+      set({ inquiries: data.items, isLoading: false });
     } catch {
       set({ inquiries: [], isLoading: false });
     }
@@ -417,19 +408,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   createInquiry: async (title, content) => {
-    try {
-      await api.post('/api/inquiries', { title, content });
-      get().fetchInquiries();
-    } catch {
-      // Optimistic add for mock
-      const newInquiry: Inquiry = {
-        id: Date.now(),
-        title,
-        content,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      };
-      set((state) => ({ inquiries: [newInquiry, ...state.inquiries] }));
-    }
+    await api.post('/api/inquiries', { title, content });
+    get().fetchInquiries();
   },
 }));

@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const AUTH_PAGES = ['/login', '/register'];
+const PROTECTED_ROUTES = [
+  '/wallet',
+  '/profile',
+  '/affiliate',
+  '/messages',
+  '/support',
+  '/promotions/attendance',
+  '/promotions/missions',
+  '/promotions/spin',
+  '/promotions/points',
+  '/promotions/vip',
+];
+
+const AUTH_PAGES = ['/register'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasAccessToken = request.cookies.has('accessToken');
   const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
+  const isProtected = PROTECTED_ROUTES.some((p) => pathname.startsWith(p));
 
-  // Unauthenticated users trying to access protected routes → redirect to login
-  if (!hasAccessToken && !isAuthPage) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+  // Unauthenticated users on protected routes → redirect to home
+  if (!hasAccessToken && isProtected) {
+    const homeUrl = new URL('/', request.url);
+    return NextResponse.redirect(homeUrl);
   }
 
   // Authenticated users on auth pages → redirect to home

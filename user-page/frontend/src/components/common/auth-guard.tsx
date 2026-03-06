@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLoginModalStore } from '@/stores/login-modal-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface AuthGuardProps {
@@ -11,7 +11,7 @@ interface AuthGuardProps {
 
 export const AuthGuard = ({ children }: AuthGuardProps) => {
   const { isAuthenticated, isLoading, initialize } = useAuthStore();
-  const router = useRouter();
+  const openLoginModal = useLoginModalStore((s) => s.open);
 
   useEffect(() => {
     initialize();
@@ -19,9 +19,9 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      openLoginModal();
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, openLoginModal]);
 
   if (isLoading) {
     return (
@@ -34,10 +34,6 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
         </div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null;
   }
 
   return <>{children}</>;

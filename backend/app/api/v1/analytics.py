@@ -16,6 +16,7 @@ from app.models.message import Message
 from app.models.point_log import PointLog
 from app.models.user import User
 from app.schemas.analytics import (
+    ALLOWED_POINT_TYPES,
     BulkMessageSend,
     BulkOperationResult,
     BulkPointGrant,
@@ -206,7 +207,7 @@ async def bulk_update_user_status(
     session: AsyncSession = Depends(get_session),
     current_user: AdminUser = Depends(PermissionChecker("users.update")),
 ):
-    ALLOWED_STATUSES = {"active", "suspended", "blocked"}
+    ALLOWED_STATUSES = {"active", "suspended", "banned"}
     if body.new_status not in ALLOWED_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}")
 
@@ -277,6 +278,12 @@ async def bulk_grant_points(
     session: AsyncSession = Depends(get_session),
     current_user: AdminUser = Depends(PermissionChecker("users.update")),
 ):
+    if body.type not in ALLOWED_POINT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid point type. Allowed: {', '.join(sorted(ALLOWED_POINT_TYPES))}",
+        )
+
     success_count = 0
     errors = []
 

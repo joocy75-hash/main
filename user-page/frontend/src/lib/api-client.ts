@@ -94,9 +94,17 @@ class ApiClient {
 
     const text = await response.text();
     try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error(`Invalid JSON response from ${path}`);
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object' && 'success' in parsed && 'data' in parsed) {
+        if (parsed.success) return parsed.data as T;
+        throw new Error(parsed.message || parsed.error || '요청 처리에 실패했습니다');
+      }
+      return parsed;
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        throw new Error(`Invalid JSON response from ${path}`);
+      }
+      throw e;
     }
   }
 

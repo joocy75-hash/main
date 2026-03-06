@@ -23,7 +23,6 @@ class QuotaService:
         "odds_feed": "RAPIDAPI_ODDS_QUOTA",
         "sport_api7": "RAPIDAPI_SPORT_QUOTA",
         "casino_api": "RAPIDAPI_CASINO_QUOTA",
-        "stream_api": "RAPIDAPI_STREAM_QUOTA",
     }
 
     @staticmethod

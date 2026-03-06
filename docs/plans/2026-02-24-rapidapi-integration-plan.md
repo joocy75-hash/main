@@ -18,8 +18,7 @@
 | 1 | **Odds Feed** | odds-feed.p.rapidapi.com | ✅ Working | 500/월 | 스포츠 배당률 (7개 북메이커) |
 | 2 | **SportAPI7** | sportapi7.p.rapidapi.com | ✅ Working | 50/월 | 실시간 스포츠 데이터 (20+ 종목) |
 | 3 | **Casino & Slots** | live-casino-slots-...p.rapidapi.com | ✅ Working | 299/월 | 카지노/슬롯 게임 (100+ 프로바이더) |
-| 4 | All Sport Live Stream | all-sport-live-stream... | ⚠️ Partial | 99/월 | 스포츠 스트리밍 (일부 깨짐) |
-| 5~8 | Dead APIs (4개) | - | ❌ Dead | - | 사용 불가 |
+| 4~8 | Dead APIs (5개) | - | ❌ Dead | - | 사용 불가 |
 
 ### 0-2. 기존 아키텍처 (재활용)
 
@@ -91,11 +90,10 @@ class RapidAPIClient:
 
 **환경변수 추가** (`.env`):
 ```
-RAPIDAPI_KEY=17f6229311msh4d59759f1dcb20cp14a69djsnc2220d97ece0
+RAPIDAPI_KEY=${YOUR_RAPIDAPI_KEY_HERE}
 RAPIDAPI_ODDS_QUOTA=500
 RAPIDAPI_SPORT_QUOTA=50
 RAPIDAPI_CASINO_QUOTA=299
-RAPIDAPI_STREAM_QUOTA=99
 ```
 
 **검증 체크리스트:**
@@ -151,7 +149,6 @@ class QuotaService:
         "odds_feed": 500,
         "sport_api7": 50,
         "casino_api": 299,
-        "stream_api": 99,
     }
 
     async def check_quota(self, api_name: str) -> bool:
@@ -881,7 +878,6 @@ RAPIDAPI_KEY=
 RAPIDAPI_ODDS_QUOTA=500
 RAPIDAPI_SPORT_QUOTA=50
 RAPIDAPI_CASINO_QUOTA=299
-RAPIDAPI_STREAM_QUOTA=99
 ```
 
 ---

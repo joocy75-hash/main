@@ -32,14 +32,12 @@ const API_DISPLAY_NAMES: Record<string, string> = {
   odds_feed: 'Odds Feed',
   sport_api7: 'SportAPI7',
   casino_api: 'Casino API',
-  stream_api: 'Stream API',
 };
 
 const API_DESCRIPTIONS: Record<string, string> = {
   odds_feed: '스포츠 배당률 (7개 북메이커)',
   sport_api7: '실시간 스포츠 (20+ 종목)',
   casino_api: '카지노/슬롯 (100+ 프로바이더)',
-  stream_api: '스포츠 스트리밍',
 };
 
 const SPORT_FILTER_OPTIONS = [

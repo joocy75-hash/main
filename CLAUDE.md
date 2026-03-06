@@ -461,7 +461,6 @@ Stripe/SuitPay/BsPay + PIX 결제 → 암호화폐 전용 입출금으로 전면
 | **Odds Feed** | odds-feed.p.rapidapi.com | 500/월 | 스포츠 배당률 (7개 북메이커) |
 | **SportAPI7** | sportapi7.p.rapidapi.com | 50/월 | 실시간 스포츠 (20+ 종목) |
 | **Casino & Slots** | live-casino-slots-...rapidapi.com | 299/월 | 카지노/슬롯 (100+ 프로바이더) |
-| All Sport Stream | all-sport-live-stream... | 99/월 | 스트리밍 (일부 깨짐) |
 
 ### 핵심 설계 결정
 

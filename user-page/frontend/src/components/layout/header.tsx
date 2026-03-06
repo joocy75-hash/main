@@ -28,6 +28,8 @@ import {
 import { cn, formatUSDT } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLoginModalStore } from '@/stores/login-modal-store';
+import { LoginModal } from '@/components/common/login-modal';
 
 const NAV_LINKS = [
   {
@@ -231,12 +233,13 @@ export const Header = ({ className }: { className?: string }) => {
           ) : (
             <>
               {/* Unauthenticated */}
-              <Link
-                href="/login"
+              <button
+                type="button"
+                onClick={() => useLoginModalStore.getState().open()}
                 className="px-3 py-2 text-sm font-semibold text-[#6b7280] hover:text-[#252531]"
               >
                 Sign In
-              </Link>
+              </button>
               <Link
                 href="/register"
                 className="flex h-[36px] items-center justify-center text-[14px] font-bold text-[#000000] transition-all hover:brightness-110"
@@ -252,6 +255,7 @@ export const Header = ({ className }: { className?: string }) => {
           )}
         </div>
       </div>
+      <LoginModal />
     </header>
   );
 };

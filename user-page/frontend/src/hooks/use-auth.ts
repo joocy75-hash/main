@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 
 export const useAuth = () => {
@@ -16,13 +15,13 @@ export const useAuth = () => {
 
 export const useRequireAuth = () => {
   const auth = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     if (!auth.isLoading && !auth.isAuthenticated) {
-      router.push('/login');
+      const { useLoginModalStore } = require('@/stores/login-modal-store');
+      useLoginModalStore.getState().open();
     }
-  }, [auth.isLoading, auth.isAuthenticated, router]);
+  }, [auth.isLoading, auth.isAuthenticated]);
 
   return auth;
 };

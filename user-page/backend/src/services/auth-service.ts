@@ -130,6 +130,10 @@ export class AuthService {
     } catch (err: any) {
       // Handle Prisma unique constraint violation (race condition fallback)
       if (err?.code === 'P2002') {
+        const target = err.meta?.target;
+        if (Array.isArray(target) && target.includes('my_referral_code')) {
+          throw { statusCode: 409, message: '추천코드 생성 충돌. 다시 시도해주세요' };
+        }
         throw { statusCode: 409, message: '이미 사용 중인 아이디입니다' };
       }
       throw err;

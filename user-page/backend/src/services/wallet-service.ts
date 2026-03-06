@@ -271,10 +271,11 @@ export class WalletService {
       };
     }
 
-    // 2. Calculate fee
+    // 2. Calculate fee (use Decimal to avoid floating-point errors)
     const feeKey = `${coinType}_${network}`;
     const fee = WITHDRAWAL_FEES[feeKey] ?? 0;
-    const totalAmount = amount + fee;
+    const totalDecimalAmount = new Prisma.Decimal(amount).add(new Prisma.Decimal(fee));
+    const totalAmount = totalDecimalAmount.toNumber();
 
     // 3. Atomic balance check, password verification, and deduction within transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -310,8 +311,7 @@ export class WalletService {
       await redis.del(attemptsKey);
 
       const currentBalance = new Prisma.Decimal(users[0].balance.toString());
-      const totalDecimal = new Prisma.Decimal(totalAmount);
-      if (currentBalance.lt(totalDecimal)) {
+      if (currentBalance.lt(totalDecimalAmount)) {
         throw { statusCode: 400, message: '잔액이 부족합니다' };
       }
 
@@ -382,14 +382,16 @@ export class WalletService {
 
       return { ...result.withdrawal, providerUuid: payoutResult.uuid };
     } catch (err: any) {
-      // Payout API failed - mark as pending for manual retry
+      // Payout API failed - mark as api_error for manual retry
       // Balance already deducted, admin can retry or refund
       await prisma.withdrawal.update({
         where: { id: result.withdrawal.id },
         data: { payoutStatus: 'api_error' },
       });
 
-      return result.withdrawal;
+      throw new Error(
+        `출금 요청이 등록되었으나 자동 송금에 실패했습니다. 관리자가 수동 처리합니다. (${err.message || 'payout API error'})`
+      );
     }
   }
 

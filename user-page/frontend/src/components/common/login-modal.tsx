@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { User, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Loader2, X } from 'lucide-react';
 import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLoginModalStore } from '@/stores/login-modal-store';
 
 const loginSchema = z.object({
   username: z.string()
@@ -17,9 +22,9 @@ const loginSchema = z.object({
     .min(8, '비밀번호는 8자 이상이어야 합니다'),
 });
 
-const LoginPage = () => {
-  const router = useRouter();
-  const { login, isAuthenticated, initialize } = useAuthStore();
+export const LoginModal = () => {
+  const { login } = useAuthStore();
+  const { isOpen, close } = useLoginModalStore();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -29,19 +34,16 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    initialize();
-    const saved = localStorage.getItem('savedUsername');
-    if (saved) {
-      setUsername(saved);
-      setRememberUsername(true);
+    if (isOpen) {
+      const saved = localStorage.getItem('savedUsername');
+      if (saved) {
+        setUsername(saved);
+        setRememberUsername(true);
+      }
+      setError('');
+      setPassword('');
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/');
-    }
-  }, [isAuthenticated, router]);
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +65,7 @@ const LoginPage = () => {
       }
 
       await login(username, password);
-      router.push('/');
+      close();
     } catch (err) {
       const message = err instanceof Error ? err.message : '로그인에 실패했습니다';
       setError(message);
@@ -73,50 +75,59 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f2f3f7] px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <div className="mb-6 text-center">
-          <h1 className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) close(); }}>
+      <DialogContent className="max-w-[420px] border-none bg-white p-0 shadow-2xl sm:rounded-2xl">
+        <DialogTitle className="sr-only">로그인</DialogTitle>
+
+        {/* Header */}
+        <div className="relative border-b border-[#f0f0f2] px-6 py-5">
+          <h2 className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] bg-clip-text text-center text-xl font-bold tracking-tight text-transparent">
             Game Platform
-          </h1>
-          <p className="mt-1 text-base text-[#6b7280]">
-            로그인
-          </p>
+          </h2>
+          <p className="mt-0.5 text-center text-sm text-[#6b7280]">로그인</p>
+          <button
+            type="button"
+            onClick={close}
+            className="absolute right-4 top-4 rounded-full p-1 text-[#98a7b5] hover:bg-[#f0f0f2] hover:text-[#252531]"
+          >
+            <X className="size-5" />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium text-[#252531]">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+          <div className="space-y-1.5">
+            <label htmlFor="modal-username" className="text-sm font-medium text-[#252531]">
               아이디
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
               <input
-                id="username"
+                id="modal-username"
                 type="text"
                 placeholder="아이디를 입력하세요"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
+                className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-4 text-sm text-[#252531] placeholder:text-[#999] focus:border-[#feb614] focus:outline-none"
                 autoComplete="username"
                 disabled={isSubmitting}
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-[#252531]">
+          <div className="space-y-1.5">
+            <label htmlFor="modal-password" className="text-sm font-medium text-[#252531]">
               비밀번호
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
               <input
-                id="password"
+                id="modal-password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="비밀번호를 입력하세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
+                className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#999] focus:border-[#feb614] focus:outline-none"
                 autoComplete="current-password"
                 disabled={isSubmitting}
               />
@@ -126,22 +137,18 @@ const LoginPage = () => {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] transition-colors hover:text-[#252531]"
                 tabIndex={-1}
               >
-                {showPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox
-              id="remember"
+              id="modal-remember"
               checked={rememberUsername}
               onCheckedChange={(checked) => setRememberUsername(checked === true)}
             />
-            <label htmlFor="remember" className="cursor-pointer text-sm font-normal text-[#252531]">
+            <label htmlFor="modal-remember" className="cursor-pointer text-sm font-normal text-[#252531]">
               아이디 저장
             </label>
           </div>
@@ -165,19 +172,18 @@ const LoginPage = () => {
             )}
           </button>
 
-          <p className="text-center text-sm text-[#6b7280] mt-4">
+          <p className="text-center text-sm text-[#6b7280]">
             계정이 없으신가요?{' '}
             <Link
               href="/register"
+              onClick={close}
               className="font-medium text-[#feb614] hover:underline"
             >
               회원가입
             </Link>
           </p>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-export default LoginPage;

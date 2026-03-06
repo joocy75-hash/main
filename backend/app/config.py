@@ -25,7 +25,6 @@ class Settings(BaseSettings):
     RAPIDAPI_ODDS_QUOTA: int = 500
     RAPIDAPI_SPORT_QUOTA: int = 50
     RAPIDAPI_CASINO_QUOTA: int = 299
-    RAPIDAPI_STREAM_QUOTA: int = 99
     USER_PAGE_SERVICE_TOKEN: str = ""
 
     # PandaScore (e-sports)

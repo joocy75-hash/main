@@ -21,7 +21,6 @@ HOST_API_MAP: dict[str, str] = {
     "live-casino-slots-evolution-jili-and-50-plus-provider.p.rapidapi.com": "casino_api",
     "odds-feed.p.rapidapi.com": "odds_feed",
     "sportapi7.p.rapidapi.com": "sport_api7",
-    "all-sport-live-stream.p.rapidapi.com": "stream_api",
 }
 
 MAX_RETRIES = 3
@@ -34,12 +33,6 @@ class RapidAPIError(Exception):
         self.status_code = status_code
         self.message = message
         super().__init__(f"RapidAPI error {status_code}: {message}")
-
-
-class QuotaExceededError(Exception):
-    def __init__(self, api_name: str):
-        self.api_name = api_name
-        super().__init__(f"Monthly quota exceeded for {api_name}")
 
 
 class RapidAPIClient:
@@ -71,32 +64,15 @@ class RapidAPIClient:
             return "unknown"
         return resolved
 
-    def _get_quota_limit(self, api_name: str) -> int:
-        quota_map: dict[str, int] = {
-            "casino_api": settings.RAPIDAPI_CASINO_QUOTA,
-            "odds_feed": settings.RAPIDAPI_ODDS_QUOTA,
-            "sport_api7": settings.RAPIDAPI_SPORT_QUOTA,
-            "stream_api": settings.RAPIDAPI_STREAM_QUOTA,
-        }
-        return quota_map.get(api_name, 0)
-
     async def _check_quota(self, api_name: str) -> None:
-        try:
-            from app.services.quota_service import QuotaService
-            quota_svc = QuotaService()
-            allowed = await quota_svc.check_quota(api_name)
-            if not allowed:
-                raise QuotaExceededError(api_name)
-        except ImportError:
-            logger.debug("quota_service not available, skipping quota check")
+        from app.services.quota_service import QuotaExceededError, quota_service
+        allowed = await quota_service.check_quota(api_name)
+        if not allowed:
+            raise QuotaExceededError(api_name)
 
     async def _increment_quota(self, api_name: str) -> None:
-        try:
-            from app.services.quota_service import QuotaService
-            quota_svc = QuotaService()
-            await quota_svc.increment(api_name)
-        except ImportError:
-            logger.debug("quota_service not available, skipping quota increment")
+        from app.services.quota_service import quota_service
+        await quota_service.increment(api_name)
 
     async def _request(
         self,
