@@ -69,11 +69,11 @@ export default function AttendancePage() {
       </div>
 
       {/* Check-in status card */}
-      <div className="rounded-xl bg-white p-6">
+      <div className="rounded-xl bg-[#f5f5f7] p-6">
         {/* Current reward info */}
         <div className="mb-6 text-center">
-          <p className="text-sm text-[#707070]">Check in now to get</p>
-          <p className="text-2xl font-bold text-[#f4b53e]">
+          <p className="text-sm text-[#6b7280]">Check in now to get</p>
+          <p className="text-2xl font-bold text-[#feb614]">
             {nextReward
               ? `₩${Number(nextReward.amount).toLocaleString('ko-KR')}`
               : '₩1,000'
@@ -94,7 +94,7 @@ export default function AttendancePage() {
                   'flex flex-1 flex-col items-center justify-center rounded-lg py-4 transition-all',
                   isChecked
                     ? 'bg-emerald-500/20'
-                    : 'bg-[#edeef3]/50'
+                    : 'bg-[#e8e8e8]/50'
                 )}
               >
                 {isChecked ? (
@@ -102,11 +102,11 @@ export default function AttendancePage() {
                     <Check className="size-5 text-green-600" />
                   </div>
                 ) : (
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#edeef3]/50">
-                    <Check className="size-5 text-[#707070]/30" />
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#e8e8e8]/50">
+                    <Check className="size-5 text-[#6b7280]/30" />
                   </div>
                 )}
-                <span className="mt-2 text-xs font-medium uppercase text-[#707070]">
+                <span className="mt-2 text-xs font-medium uppercase text-[#6b7280]">
                   {label}
                 </span>
               </div>
@@ -118,18 +118,18 @@ export default function AttendancePage() {
             className={cn(
               'flex flex-[1.5] flex-col items-center justify-center rounded-lg py-4 transition-all',
               consecutiveDays >= 7
-                ? 'bg-[#f4b53e]/30'
-                : 'bg-[#f4b53e]/10 border border-[#f4b53e]/20'
+                ? 'bg-[#feb614]/30'
+                : 'bg-[#feb614]/10 border border-[#feb614]/20'
             )}
           >
             {consecutiveDays >= 7 ? (
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#f4b53e]/40">
-                <Check className="size-5 text-[#f4b53e]" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#feb614]/40">
+                <Check className="size-5 text-[#feb614]" />
               </div>
             ) : (
-              <Gift className="size-10 text-[#f4b53e]" />
+              <Gift className="size-10 text-[#feb614]" />
             )}
-            <span className="mt-2 text-sm font-bold uppercase text-[#f4b53e]">
+            <span className="mt-2 text-sm font-bold uppercase text-[#feb614]">
               Day 7
             </span>
           </div>
@@ -160,8 +160,8 @@ export default function AttendancePage() {
             className={cn(
               'w-full rounded-full py-4 text-lg font-bold transition-all',
               checkedToday
-                ? 'cursor-not-allowed bg-[#edeef3] text-[#707070]'
-                : 'bg-[#f4b53e] text-black hover:bg-[#f4b53e]/90 active:scale-[0.98]'
+                ? 'cursor-not-allowed bg-[#e8e8e8] text-[#6b7280]'
+                : 'bg-[#feb614] text-black hover:bg-[#feb614]/90 active:scale-[0.98]'
             )}
           >
             {isCheckingIn ? (
@@ -182,11 +182,11 @@ export default function AttendancePage() {
       </div>
 
       {/* Reward table (kzkzb style: amber header) */}
-      <div className="rounded-xl bg-white p-4">
+      <div className="rounded-xl bg-[#f5f5f7] p-4">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#f4b53e]/90 text-black">
+              <tr className="bg-[#feb614]/90 text-black">
                 <th className="rounded-tl-lg px-3 py-2.5 text-left text-xs font-semibold">
                   Deposit / Bet
                 </th>
@@ -205,12 +205,12 @@ export default function AttendancePage() {
                 <tr
                   key={idx}
                   className={cn(
-                    'border-b border-[#dddddd]/30',
-                    idx % 2 === 0 ? 'bg-[#edeef3]/20' : 'bg-[#edeef3]/10'
+                    'border-b border-[#e8e8e8]/30',
+                    idx % 2 === 0 ? 'bg-[#e8e8e8]/20' : 'bg-[#e8e8e8]/10'
                   )}
                 >
                   <td className="px-3 py-2.5 text-xs">
-                    <span className="text-[#707070]">≥</span> ₩{row.deposit} / <span className="text-[#707070]">≥</span> ₩{row.bet}
+                    <span className="text-[#6b7280]">≥</span> ₩{row.deposit} / <span className="text-[#6b7280]">≥</span> ₩{row.bet}
                   </td>
                   {row.days.map((val, di) => (
                     <td key={di} className="px-2 py-2.5 text-center text-xs font-medium">
@@ -218,7 +218,7 @@ export default function AttendancePage() {
                     </td>
                   ))}
                   <td className="px-2 py-2.5 text-center">
-                    <span className="inline-block rounded bg-[#f4b53e]/20 px-2 py-0.5 text-xs font-bold text-[#f4b53e]">
+                    <span className="inline-block rounded bg-[#feb614]/20 px-2 py-0.5 text-xs font-bold text-[#feb614]">
                       Extra Bonus {row.weekBonus}
                     </span>
                   </td>
@@ -228,23 +228,23 @@ export default function AttendancePage() {
           </table>
         </div>
 
-        <p className="mt-3 text-center text-xs text-[#707070]">
+        <p className="mt-3 text-center text-xs text-[#6b7280]">
           Check in 7 days bonus
         </p>
       </div>
 
       {/* Consecutive days info */}
-      <div className="rounded-xl bg-white p-4">
+      <div className="rounded-xl bg-[#f5f5f7] p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-[#707070]">연속 출석</p>
+            <p className="text-xs text-[#6b7280]">연속 출석</p>
             <p className="text-xl font-bold">
               {consecutiveDays}일째
               {consecutiveDays >= 3 && <span className="ml-1">🔥</span>}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-[#707070]">이번 달 출석</p>
+            <p className="text-xs text-[#6b7280]">이번 달 출석</p>
             <p className="text-xl font-bold">
               {attendanceStatus?.monthLogs?.length || 0}일
             </p>

@@ -113,7 +113,7 @@ export default function TabMessages({ userId }: Props) {
               {selected.is_read && selected.read_at && (
                 <>
                   <span>·</span>
-                  <span className="text-blue-600">읽음 {new Date(selected.read_at).toLocaleString('ko-KR')}</span>
+                  <span className="text-blue-400">읽음 {new Date(selected.read_at).toLocaleString('ko-KR')}</span>
                 </>
               )}
             </div>
@@ -170,7 +170,7 @@ export default function TabMessages({ userId }: Props) {
                       </td>
                       <td className="px-4 py-2 text-center">
                         {msg.is_read ? (
-                          <span className="text-xs text-blue-600">읽음</span>
+                          <span className="text-xs text-blue-400">읽음</span>
                         ) : (
                           <span className="text-xs text-muted-foreground">안읽음</span>
                         )}

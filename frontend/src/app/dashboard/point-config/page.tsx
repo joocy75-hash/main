@@ -95,20 +95,20 @@ export default function PointConfigPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">포인트 설정</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">포인트 전환 및 제한 설정을 관리합니다.</p>
+        <p className="text-sm text-muted-foreground">포인트 전환 및 제한 설정을 관리합니다.</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : mergedData.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             설정 항목이 없습니다
           </CardContent>
         </Card>
@@ -116,23 +116,23 @@ export default function PointConfigPage() {
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">설정키</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">설정값</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">설명</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400 w-32">관리</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">설정키</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">설정값</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">설명</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground w-32">관리</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {mergedData.map((item) => {
                     const isEditing = editingKey === item.key;
                     const isSaving = savingKey === item.key;
                     const editVal = editValues[item.key];
 
                     return (
-                      <tr key={item.key} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={item.key} className="hover:bg-accent">
                         <td className="whitespace-nowrap px-4 py-3 text-sm font-mono font-medium">
                           {item.key}
                         </td>
@@ -148,8 +148,8 @@ export default function PointConfigPage() {
                               autoFocus
                             />
                           ) : (
-                            <span className="font-mono tabular-nums text-gray-700 dark:text-gray-300">
-                              {item.value || <span className="text-gray-400 italic">미설정</span>}
+                            <span className="font-mono tabular-nums text-foreground">
+                              {item.value || <span className="text-muted-foreground italic">미설정</span>}
                             </span>
                           )}
                         </td>
@@ -165,7 +165,7 @@ export default function PointConfigPage() {
                               placeholder="설명 (선택)"
                             />
                           ) : (
-                            <span className="text-gray-500 dark:text-gray-400">
+                            <span className="text-muted-foreground">
                               {item.description || '-'}
                             </span>
                           )}

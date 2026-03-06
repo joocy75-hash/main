@@ -4,6 +4,31 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* KZING Font Faces */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ProximaNova";
+  src: url("/fonts/ProximaNova-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ProximaNova";
+  src: url("/fonts/ProximaNova-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -47,74 +72,84 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
-/* kzkzb.com Light Theme - body bg: #f1f2f7, cards: white, accent: gold #f4b53e */
+/* KZING (kzkzb.com) Light Theme Design System — Extracted 100% from live site
+   Page BG: #f1f2f7 (--theme-light-bg)
+   Card/Content BG: #ffffff (--theme-light-secondary)
+   Text: primary #252531, secondary #31373d, muted #707070, light #999
+   Gold: primary #feb614 (--yellow-theme), CTA gradient #f4b53e->#f48d3e
+   Main yellow gradient: linear-gradient(180deg, #ffd651, #fe960e)
+   Border: #e8e8e8 (--lm-border), selected: #d4d4d6 (--lm-border-selected)
+   Button selected: #edeef3 (--lm-button-selected)
+   Sidebar: #f1f2f7 with white active items
+   Header height: 70px, Sidebar width: 270px
+   Font: Inter, ProximaNova, sans-serif */
 :root {
   --radius: 0.5rem;
-  --background: #f1f2f7;
+  --background: #f2f3f7;
   --foreground: #252531;
   --card: #ffffff;
   --card-foreground: #252531;
   --popover: #ffffff;
   --popover-foreground: #252531;
-  --primary: #f4b53e;
+  --primary: #feb614;
   --primary-foreground: #ffffff;
   --secondary: #edeef3;
-  --secondary-foreground: #31373d;
+  --secondary-foreground: #252531;
   --muted: #edeef3;
   --muted-foreground: #707070;
-  --accent: #f4b53e;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --border: #dddddd;
-  --input: #dddddd;
-  --ring: #f4b53e;
-  --chart-1: #f4b53e;
+  --accent: #feb614;
+  --accent-foreground: #252531;
+  --destructive: #ff4f4f;
+  --border: #e8e8e8;
+  --input: #f2f3f7;
+  --ring: #feb614;
+  --chart-1: #feb614;
   --chart-2: #3b82f6;
   --chart-3: #10b981;
   --chart-4: #8b5cf6;
   --chart-5: #f97316;
-  --sidebar: #252531;
-  --sidebar-foreground: #e5e5e5;
-  --sidebar-primary: #f4b53e;
-  --sidebar-primary-foreground: #252531;
-  --sidebar-accent: #31373d;
-  --sidebar-accent-foreground: #e5e5e5;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #f4b53e;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #252531;
+  --sidebar-primary: #feb614;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #edeef3;
+  --sidebar-accent-foreground: #31373d;
+  --sidebar-border: #e8e8e8;
+  --sidebar-ring: #feb614;
 }
 
 .dark {
   --background: #252531;
   --foreground: #e5e5e5;
-  --card: #31373d;
+  --card: #2a2a37;
   --card-foreground: #e5e5e5;
-  --popover: #31373d;
+  --popover: #2a2a37;
   --popover-foreground: #e5e5e5;
-  --primary: #f4b53e;
+  --primary: #feb614;
   --primary-foreground: #252531;
-  --secondary: #31373d;
+  --secondary: #303134;
   --secondary-foreground: #e5e5e5;
-  --muted: #3a3a4a;
-  --muted-foreground: #9f9f9f;
-  --accent: #f4b53e;
+  --muted: #303134;
+  --muted-foreground: #98a7b5;
+  --accent: #feb614;
   --accent-foreground: #252531;
-  --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: #f4b53e;
-  --chart-1: #f4b53e;
+  --destructive: #ff4f4f;
+  --border: #3a3a4a;
+  --input: #303134;
+  --ring: #feb614;
+  --chart-1: #feb614;
   --chart-2: #3b82f6;
   --chart-3: #10b981;
   --chart-4: #8b5cf6;
   --chart-5: #f97316;
-  --sidebar: #1a1a2e;
+  --sidebar: #303134;
   --sidebar-foreground: #e5e5e5;
-  --sidebar-primary: #f4b53e;
+  --sidebar-primary: #feb614;
   --sidebar-primary-foreground: #252531;
   --sidebar-accent: #252531;
   --sidebar-accent-foreground: #e5e5e5;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #f4b53e;
+  --sidebar-border: #3a3a4a;
+  --sidebar-ring: #feb614;
 }
 
 @layer base {
@@ -123,8 +158,21 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      -apple-system, "Inter", "ProximaNova", "Microsoft Yahei UI",
+      "PingFang SC", "Segoe UI", sans-serif;
     font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
@@ -140,6 +188,10 @@
 
 .animate-marquee {
   animation: marquee 20s linear infinite;
+}
+
+.animate-marquee-slow {
+  animation: marquee 35s linear infinite;
 }
 
 .animate-marquee:hover {
@@ -158,10 +210,116 @@
   background: linear-gradient(to bottom, #ffe066, #ffaa22);
 }
 
-/* kzkzb-style section heading */
+/* KZING section heading - white theme */
 .section-heading {
   font-size: 16px;
-  font-weight: 600;
-  color: #707070;
-  margin-bottom: 20px;
+  font-weight: 700;
+  color: #252531;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   KZING (kzkzb.com) Complete Design Token System
+   97 CSS Variables — Extracted from live site 2026-03-06
+   ============================================================ */
+:root {
+  /* --- Layout --- */
+  --kz-header-height: 70px;
+  --kz-sidebar-width: 270px;
+  --kz-sidebar-collapsed: 90px;
+
+  /* --- Page / Surface --- */
+  --kz-bg: #f2f3f7;
+  --kz-surface: #edeef3;
+  --kz-elevated: #ffffff;
+  --kz-hover: #f0f0f2;
+
+  /* --- Header --- */
+  --kz-header-bg: #ffffff;
+  --kz-header-shadow: rgba(0, 0, 0, 0.16) 0px 5px 4px 0px;
+
+  /* --- Sidebar --- */
+  --kz-sidebar-bg: #ffffff;
+  --kz-sidebar-list-bg: #edeef3;
+  --kz-sidebar-list-text: #31373d;
+  --kz-sidebar-active-bg: #edeef3;
+  --kz-sidebar-active-text: #31373d;
+  --kz-sidebar-submenu-text: #707070;
+  --kz-sidebar-submenu-hover: #31373d;
+  --kz-sidebar-home-text: #31373d;
+  --kz-sidebar-border: #d4d4d6;
+
+  /* --- Brand / Gold --- */
+  --kz-gold: #feb614;
+  --kz-gold-hover: #f4b53e;
+  --kz-gold-gradient: linear-gradient(180deg, #ffd651, #fe960e);
+  --kz-cta-gradient: linear-gradient(#f4b53e, #f48d3e);
+  --kz-secondary-yellow: #f4b53e;
+  --kz-progress-bar: #ffd87e;
+
+  /* --- Light Mode Text (--lm-*) --- */
+  --kz-lm-txt-black: #31373d;
+  --kz-lm-txt-dark: #333;
+  --kz-lm-txt-dark2: #000;
+
+  /* --- Light Mode BG (--lm-*) --- */
+  --kz-lm-button-selected: #edeef3;
+  --kz-lm-bg-light: #f2f3f7;
+  --kz-lm-bg-score: #f6f7fb;
+
+  /* --- Light Mode Border (--lm-*) --- */
+  --kz-border: #e8e8e8;
+  --kz-border-selected: #d4d4d6;
+  --kz-lm-border2: #d6d6d6;
+  --kz-lm-border3: #f2f2f2;
+  --kz-lm-scrollbar: #ccc3c3;
+
+  /* --- Neutral Colors (--black-* / --white-*) --- */
+  --kz-main-black: #333;
+  --kz-black-2: #828282;
+  --kz-black-3: #4f4f4f;
+  --kz-black-4: #999;
+  --kz-black-5: #bdbdbd;
+  --kz-black-6: #e0e0e0;
+  --kz-main-white: #fff;
+  --kz-white-2: #f2f2f2;
+  --kz-white-3: #d9d9d9;
+
+  /* --- UI Colors --- */
+  --kz-body-color: #252531;
+  --kz-text-primary: #252531;
+  --kz-text-secondary: #707070;
+  --kz-text-muted: #999999;
+  --kz-txt-grey: #666;
+  --kz-txt-grey2: #bdbdbd;
+  --kz-bg-grey: #d6d6d6;
+  --kz-bg-grey2: #f7f7f7;
+  --kz-btn-grey: #f2f2f2;
+  --kz-border-grey: #e8e8e8;
+  --kz-search-text: #ccc3c3;
+  --kz-dropdown-text: #252531;
+  --kz-disabled-button: #d6d6d6;
+
+  /* --- Semantic --- */
+  --kz-green: #36a638;
+  --kz-red: #ff4848;
+  --kz-hot-new-tab: #fff;
+
+  /* --- Footer (Dark, same in both modes) --- */
+  --kz-footer-bg: #202125;
+  --kz-footer-text: #98a7b5;
+
+  /* --- Dark Mode Reference (--dm-*) --- */
+  --kz-dm-txt-white: #98a7b5;
+  --kz-dm-txt-grey: #c4c4c2;
+  --kz-dm-txt-black: #252531;
+  --kz-dm-bg-dark: #202125;
+  --kz-dm-button-selected: #2c2d33;
+  --kz-dm-border-selected: #484a51;
+  --kz-dm-border: #999;
+  --kz-dm-border2: #808087;
+  --kz-dm-scrollbar: #707070;
+  --kz-dm-header-btn: #303134;
+  --kz-dm-bg-score: #303134;
+  --kz-dm-odd-border: #484a51;
 }

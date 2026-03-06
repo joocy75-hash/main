@@ -18,6 +18,7 @@ import eventRoutes from './routes/events.js';
 import sportsRoutes from './routes/sports.js';
 import profileRoutes from './routes/profile.js';
 import minigameRoutes from './routes/minigame.js';
+import webhookRoutes from './routes/webhooks.js';
 
 const app = Fastify({
   logger: config.nodeEnv === 'development'
@@ -42,6 +43,7 @@ await app.register(eventRoutes);
 await app.register(sportsRoutes);
 await app.register(profileRoutes);
 await app.register(minigameRoutes);
+await app.register(webhookRoutes);
 
 // Start server
 const start = async () => {

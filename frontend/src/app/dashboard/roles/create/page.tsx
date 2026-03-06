@@ -97,7 +97,7 @@ export default function CreateRolePage() {
         <Card>
           <CardHeader><CardTitle>역할 정보</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm">{error}</div>}
+            {error && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{error}</div>}
 
             <div className="space-y-2">
               <label className="text-sm font-medium">코드명 (영문) *</label>
@@ -132,22 +132,22 @@ export default function CreateRolePage() {
           </CardHeader>
           <CardContent>
             {permLoading ? (
-              <p className="text-gray-500">권한 로딩 중...</p>
+              <p className="text-muted-foreground">권한 로딩 중...</p>
             ) : (
               <div className="space-y-6">
                 {grouped.map(([module, perms]) => (
                   <div key={module} className="space-y-2">
-                    <div className="flex items-center gap-2 border-b pb-2 dark:border-gray-700">
+                    <div className="flex items-center gap-2 border-b pb-2">
                       <input
                         type="checkbox"
                         checked={perms.every((p) => selectedPerms.has(p.id))}
                         onChange={() => toggleModule(perms)}
-                        className="rounded border-gray-300"
+                        className="rounded border-border"
                       />
-                      <span className="text-sm font-semibold uppercase text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-semibold uppercase text-foreground">
                         {module}
                       </span>
-                      <span className="text-xs text-gray-400">({perms.length})</span>
+                      <span className="text-xs text-muted-foreground">({perms.length})</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 pl-6">
                       {perms.map((perm) => (
@@ -156,11 +156,11 @@ export default function CreateRolePage() {
                             type="checkbox"
                             checked={selectedPerms.has(perm.id)}
                             onChange={() => togglePerm(perm.id)}
-                            className="rounded border-gray-300"
+                            className="rounded border-border"
                           />
-                          <span className="text-gray-700 dark:text-gray-300">{perm.name}</span>
+                          <span className="text-foreground">{perm.name}</span>
                           {perm.description && (
-                            <span className="text-xs text-gray-400">{perm.description}</span>
+                            <span className="text-xs text-muted-foreground">{perm.description}</span>
                           )}
                         </label>
                       ))}

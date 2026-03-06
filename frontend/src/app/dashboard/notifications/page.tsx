@@ -36,10 +36,10 @@ const TYPE_TABS = [
 ];
 
 const PRIORITY_STYLES: Record<string, { label: string; cls: string }> = {
-  urgent: { label: '긴급', cls: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
-  high: { label: '높음', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
-  normal: { label: '보통', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  low: { label: '낮음', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  urgent: { label: '긴급', cls: 'bg-red-500/10 text-red-500' },
+  high: { label: '높음', cls: 'bg-orange-500/10 text-orange-500' },
+  normal: { label: '보통', cls: 'bg-blue-500/10 text-blue-500' },
+  low: { label: '낮음', cls: 'bg-muted text-muted-foreground' },
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -186,7 +186,7 @@ export default function NotificationsPage() {
                     return (
                       <TableRow
                         key={item.id}
-                        className={!item.is_read ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}
+                        className={!item.is_read ? 'bg-primary/5' : ''}
                       >
                         <TableCell>
                           <span className="text-xs px-1.5 py-0.5 rounded bg-muted font-medium">
@@ -234,7 +234,7 @@ export default function NotificationsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
+                              className="h-7 w-7 p-0 text-red-500 hover:text-red-500"
                               onClick={() => handleDelete(item.id)}
                               title="삭제"
                             >

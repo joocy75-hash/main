@@ -110,7 +110,7 @@ export default function AgentsPage() {
               </Button>
             </form>
             <select
-              className="border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-950"
+              className="border rounded-md px-3 py-2 text-sm bg-card"
               value={roleFilter}
               onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
             >
@@ -166,7 +166,7 @@ export default function AgentsPage() {
                       <TableCell className="font-medium">
                         <Link
                           href={`/dashboard/agents/${agent.id}`}
-                          className="text-blue-600 hover:underline"
+                          className="text-primary hover:underline"
                         >
                           {agent.username}
                         </Link>
@@ -201,7 +201,7 @@ export default function AgentsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(agent)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-500"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

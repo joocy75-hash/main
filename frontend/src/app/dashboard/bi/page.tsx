@@ -61,7 +61,7 @@ function ChangeIndicator({ current, previous }: { current: number; previous: num
   const change = ((current - previous) / previous) * 100;
   const isUp = change >= 0;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-xs ${isUp ? 'text-emerald-600' : 'text-red-600'}`}>
+    <span className={`inline-flex items-center gap-0.5 text-xs ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
       {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
       {Math.abs(change).toFixed(1)}%
     </span>
@@ -81,14 +81,14 @@ function KpiSection() {
   const { data, loading } = useBiOverview();
 
   const cards = [
-    { label: '전체 회원', value: data?.total_users, icon: Users, color: 'text-blue-600' },
-    { label: '오늘 활성', value: data?.active_today, icon: Activity, color: 'text-emerald-600' },
-    { label: '오늘 입금', value: data?.deposits_today, icon: ArrowDownToLine, color: 'text-blue-600', isMoney: true },
-    { label: '오늘 출금', value: data?.withdrawals_today, icon: ArrowUpFromLine, color: 'text-red-600', isMoney: true },
-    { label: '오늘 순수익', value: data?.net_revenue_today, icon: DollarSign, color: 'text-emerald-600', isMoney: true },
-    { label: '오늘 베팅', value: data?.bets_today, icon: Gamepad2, color: 'text-purple-600', isMoney: true },
-    { label: '신규 가입', value: data?.new_registrations, icon: UserPlus, color: 'text-indigo-600' },
-    { label: '출금 대기', value: data?.pending_withdrawals, icon: Clock, color: 'text-amber-600' },
+    { label: '전체 회원', value: data?.total_users, icon: Users, color: 'text-blue-400' },
+    { label: '오늘 활성', value: data?.active_today, icon: Activity, color: 'text-emerald-400' },
+    { label: '오늘 입금', value: data?.deposits_today, icon: ArrowDownToLine, color: 'text-blue-400', isMoney: true },
+    { label: '오늘 출금', value: data?.withdrawals_today, icon: ArrowUpFromLine, color: 'text-red-400', isMoney: true },
+    { label: '오늘 순수익', value: data?.net_revenue_today, icon: DollarSign, color: 'text-emerald-400', isMoney: true },
+    { label: '오늘 베팅', value: data?.bets_today, icon: Gamepad2, color: 'text-purple-400', isMoney: true },
+    { label: '신규 가입', value: data?.new_registrations, icon: UserPlus, color: 'text-indigo-400' },
+    { label: '출금 대기', value: data?.pending_withdrawals, icon: Clock, color: 'text-amber-400' },
   ];
 
   return (
@@ -157,21 +157,21 @@ function RevenueSection() {
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-sm text-muted-foreground">총 입금</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-blue-600">{fmtMoney(summary.total_deposits)}</span>
+                  <span className="text-sm font-semibold text-blue-400">{fmtMoney(summary.total_deposits)}</span>
                   <ChangeIndicator current={summary.total_deposits} previous={summary.prev_deposits} />
                 </div>
               </div>
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-sm text-muted-foreground">총 출금</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-red-600">{fmtMoney(summary.total_withdrawals)}</span>
+                  <span className="text-sm font-semibold text-red-400">{fmtMoney(summary.total_withdrawals)}</span>
                   <ChangeIndicator current={summary.total_withdrawals} previous={summary.prev_withdrawals} />
                 </div>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-muted-foreground">순수익</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-emerald-600">{fmtMoney(summary.net_revenue)}</span>
+                  <span className="text-sm font-bold text-emerald-400">{fmtMoney(summary.net_revenue)}</span>
                   <ChangeIndicator current={summary.net_revenue} previous={summary.prev_net_revenue} />
                 </div>
               </div>
@@ -213,9 +213,9 @@ function RevenueSection() {
                   {trend.map((row) => (
                     <TableRow key={row.date}>
                       <TableCell className="text-xs tabular-nums">{formatDate(row.date)}</TableCell>
-                      <TableCell className="text-xs text-right tabular-nums text-blue-600">{fmtMoney(row.deposits)}</TableCell>
-                      <TableCell className="text-xs text-right tabular-nums text-red-600">{fmtMoney(row.withdrawals)}</TableCell>
-                      <TableCell className={`text-xs text-right tabular-nums ${row.net_revenue >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      <TableCell className="text-xs text-right tabular-nums text-blue-400">{fmtMoney(row.deposits)}</TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-red-400">{fmtMoney(row.withdrawals)}</TableCell>
+                      <TableCell className={`text-xs text-right tabular-nums ${row.net_revenue >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {fmtMoney(row.net_revenue)}
                       </TableCell>
                       <TableCell className="text-xs text-right tabular-nums">{fmtMoney(row.cumulative)}</TableCell>
@@ -253,11 +253,11 @@ function UserAnalyticsSection() {
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-sm text-muted-foreground">신규 유저</span>
-                <span className="text-sm font-semibold text-indigo-600">{fmtMoney(retention.new_users)}</span>
+                <span className="text-sm font-semibold text-indigo-400">{fmtMoney(retention.new_users)}</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-sm text-muted-foreground">활성 유저</span>
-                <span className="text-sm font-semibold text-emerald-600">{fmtMoney(retention.active_users)}</span>
+                <span className="text-sm font-semibold text-emerald-400">{fmtMoney(retention.active_users)}</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-sm text-muted-foreground">전체 유저</span>
@@ -265,11 +265,11 @@ function UserAnalyticsSection() {
               </div>
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-sm text-muted-foreground">활성 비율</span>
-                <span className="text-sm font-semibold text-blue-600">{fmtPercent(retention.active_rate)}</span>
+                <span className="text-sm font-semibold text-blue-400">{fmtPercent(retention.active_rate)}</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-muted-foreground">이탈률</span>
-                <span className="text-sm font-semibold text-red-600">{fmtPercent(retention.churn_rate)}</span>
+                <span className="text-sm font-semibold text-red-400">{fmtPercent(retention.churn_rate)}</span>
               </div>
             </div>
           ) : (
@@ -333,10 +333,10 @@ function UserAnalyticsSection() {
 
 function CohortCell({ value }: { value: number }) {
   const bg =
-    value >= 80 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-    : value >= 50 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-    : value >= 20 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
-    : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300';
+    value >= 80 ? 'bg-emerald-500/10 text-emerald-500'
+    : value >= 50 ? 'bg-blue-500/10 text-blue-500'
+    : value >= 20 ? 'bg-amber-500/10 text-amber-500'
+    : 'bg-red-500/10 text-red-500';
 
   return (
     <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${bg}`}>
@@ -387,7 +387,7 @@ function PerformanceSection() {
                       <TableCell className="text-xs font-medium">{g.game_name}</TableCell>
                       <TableCell className="text-xs text-right tabular-nums">{fmtMoney(g.total_bet)}</TableCell>
                       <TableCell className="text-xs text-right tabular-nums">{fmtMoney(g.total_win)}</TableCell>
-                      <TableCell className={`text-xs text-right tabular-nums ${g.rtp > 100 ? 'text-red-600' : 'text-emerald-600'}`}>
+                      <TableCell className={`text-xs text-right tabular-nums ${g.rtp > 100 ? 'text-red-400' : 'text-emerald-400'}`}>
                         {fmtPercent(g.rtp)}
                       </TableCell>
                       <TableCell className="text-xs text-right tabular-nums">{g.player_count.toLocaleString()}</TableCell>
@@ -434,10 +434,10 @@ function PerformanceSection() {
                     <TableRow key={i}>
                       <TableCell className="text-xs font-medium">{a.agent_name}</TableCell>
                       <TableCell className="text-xs text-right tabular-nums">{a.sub_count.toLocaleString()}</TableCell>
-                      <TableCell className="text-xs text-right tabular-nums text-blue-600">{fmtMoney(a.total_deposit)}</TableCell>
+                      <TableCell className="text-xs text-right tabular-nums text-blue-400">{fmtMoney(a.total_deposit)}</TableCell>
                       <TableCell className="text-xs text-right tabular-nums">{fmtMoney(a.total_bet)}</TableCell>
-                      <TableCell className="text-xs text-right tabular-nums text-purple-600">{fmtMoney(a.commission)}</TableCell>
-                      <TableCell className={`text-xs text-right tabular-nums ${a.net_revenue >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      <TableCell className="text-xs text-right tabular-nums text-purple-400">{fmtMoney(a.commission)}</TableCell>
+                      <TableCell className={`text-xs text-right tabular-nums ${a.net_revenue >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {fmtMoney(a.net_revenue)}
                       </TableCell>
                     </TableRow>

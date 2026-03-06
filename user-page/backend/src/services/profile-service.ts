@@ -1,6 +1,9 @@
-import { PrismaClient, GameCategory, Prisma } from '@prisma/client';
+import { PrismaClient, GameCategory, Prisma, MoneyLogType, PointLogType } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 const { hash, compare } = bcryptjs;
+
+const VALID_MONEY_LOG_TYPES = new Set(Object.values(MoneyLogType));
+const VALID_POINT_LOG_TYPES = new Set(Object.values(PointLogType));
 
 const BCRYPT_ROUNDS = 10;
 
@@ -198,7 +201,10 @@ export class ProfileService {
 
     const where: Prisma.MoneyLogWhereInput = { userId };
     if (type) {
-      where.type = type as any;
+      if (!VALID_MONEY_LOG_TYPES.has(type as MoneyLogType)) {
+        throw { statusCode: 400, message: `유효하지 않은 거래 유형입니다: ${type}` };
+      }
+      where.type = type as MoneyLogType;
     }
 
     const [items, total] = await Promise.all([
@@ -233,7 +239,10 @@ export class ProfileService {
 
     const where: Prisma.PointLogWhereInput = { userId };
     if (type) {
-      where.type = type as any;
+      if (!VALID_POINT_LOG_TYPES.has(type as PointLogType)) {
+        throw { statusCode: 400, message: `유효하지 않은 포인트 유형입니다: ${type}` };
+      }
+      where.type = type as PointLogType;
     }
 
     const [items, total] = await Promise.all([

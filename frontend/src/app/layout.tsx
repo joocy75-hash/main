@@ -1,15 +1,17 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, Noto_Sans_KR } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
   subsets: ['latin'],
+  variable: '--font-inter',
+  weight: ['400', '500', '600', '700', '800', '900'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const notoSansKr = Noto_Sans_KR({
   subsets: ['latin'],
+  variable: '--font-noto-sans-kr',
+  weight: ['400', '500', '700', '900'],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +25,8 @@ const isDev = process.env.NODE_ENV === 'development';
 const scriptSrc = isDev
   ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
   : "script-src 'self' 'unsafe-inline'";
-const cspContent = `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ${apiUrl} ${wsUrl};`;
+// Added fonts.googleapis.com and fonts.gstatic.com for Google Fonts support
+const cspContent = `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ${apiUrl} ${wsUrl};`;
 
 export default function RootLayout({
   children,
@@ -39,7 +42,7 @@ export default function RootLayout({
         />
       </head>
       {/* TODO: Migrate sensitive tokens from localStorage to httpOnly cookies for production */}
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${inter.variable} ${notoSansKr.variable} font-sans antialiased text-slate-800 bg-[#f4f7fa] selection:bg-blue-200 selection:text-blue-900`}>
         {children}
       </body>
     </html>

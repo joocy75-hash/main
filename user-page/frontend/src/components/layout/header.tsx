@@ -2,20 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Search,
-  Bell,
-  Wallet,
-  Menu,
   User,
   LogOut,
   Settings,
   ChevronDown,
+  RefreshCw,
+  Menu,
 } from 'lucide-react';
-import {
-  Avatar,
-  AvatarFallback,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,37 +22,37 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
-import { GAME_CATEGORIES } from '@/lib/constants';
+import { cn, formatUSDT } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 import { useAuthStore } from '@/stores/auth-store';
 
-const formatKRW = (amount: number) => {
-  return new Intl.NumberFormat('ko-KR').format(amount);
-};
-
-const PROMO_MENU = [
-  { name: '출석체크', href: '/promotions/attendance' },
-  { name: '미션', href: '/promotions/missions' },
-  { name: '럭키스핀', href: '/promotions/spin' },
-  { name: 'VIP', href: '/promotions/vip' },
-];
-
-const SUPPORT_MENU = [
-  { name: '고객센터', href: '/support' },
-  { name: '문의하기', href: '/support' },
+const NAV_LINKS = [
+  {
+    href: '/games?category=casino',
+    label: 'Casino',
+    icon: '/images/ui-icons/icon_casino.webp',
+  },
+  {
+    href: '/sports',
+    label: 'Sports',
+    icon: '/images/ui-icons/icon_sport.webp',
+  },
+  {
+    href: '/minigame',
+    label: 'Duck Race',
+    icon: '/images/ui-icons/icon_duckrace.webp',
+    badge: true,
+  },
 ];
 
 export const Header = ({ className }: { className?: string }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { unreadCount, fetchUnreadCount } = useProfileStore();
   const { user: authUser, isAuthenticated, logout } = useAuthStore();
+  const [isSpinning, setIsSpinning] = useState(false);
 
-  // Poll unread count every 60s (only when authenticated)
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchUnreadCount();
@@ -66,211 +62,188 @@ export const Header = ({ className }: { className?: string }) => {
     return () => clearInterval(interval);
   }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const notificationCount = unreadCount;
+  const notificationCount = unreadCount ?? 0;
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 border-b border-[#dddddd] bg-white',
-        className
+        'sticky top-0 z-50 h-[70px] bg-white',
+        className,
       )}
+      style={{ boxShadow: 'rgba(0,0,0,0.16) 0px 5px 4px 0px' }}
     >
-      <div className="flex h-14 items-center gap-2 px-4 lg:h-16 lg:px-6">
-        {/* Mobile menu button */}
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild className="lg:hidden">
-            <button
-              type="button"
-              className="text-[#707070] hover:text-[#252531] p-1.5 rounded-lg hover:bg-[#f8f9fc] lg:hidden"
-            >
-              <Menu className="size-5" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 bg-white p-0">
-            <SheetHeader className="border-b border-[#dddddd] p-4">
-              <SheetTitle>
-                <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                  <span className="text-xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">GP</span>
-                  <span className="text-lg font-semibold text-[#252531]">Game Platform</span>
-                </Link>
-              </SheetTitle>
-            </SheetHeader>
-            <nav className="flex flex-col gap-1 p-3">
-              <p className="px-3 py-2 text-xs font-semibold uppercase text-[#707070]">
-                게임
-              </p>
-              {GAME_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.code}
-                  href={`/games/${cat.code}`}
-                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-[#252531] transition-colors hover:bg-[#f8f9fc]"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-base">{cat.icon}</span>
-                  <span>{cat.name}</span>
-                </Link>
-              ))}
-              <div className="my-2 border-t border-[#dddddd]" />
-              <p className="px-3 py-2 text-xs font-semibold uppercase text-[#707070]">
-                프로모션
-              </p>
-              {PROMO_MENU.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-[#252531] transition-colors hover:bg-[#f8f9fc]"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>{item.name}</span>
-                </Link>
-              ))}
-              <div className="my-2 border-t border-[#dddddd]" />
-              <p className="px-3 py-2 text-xs font-semibold uppercase text-[#707070]">
-                지원
-              </p>
-              {SUPPORT_MENU.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-[#252531] transition-colors hover:bg-[#f8f9fc]"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>{item.name}</span>
-                </Link>
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
+      <div className="flex h-full items-center justify-between px-4 lg:px-6">
+        {/* -- Left: Hamburger (mobile) + Logo -- */}
+        <div className="flex items-center gap-3">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="lg:hidden">
+              <button
+                type="button"
+                className="flex items-center justify-center rounded-lg p-1.5 text-[#98a7b5] hover:bg-[#f0f0f2] hover:text-[#252531]"
+              >
+                <Menu className="size-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] bg-white p-0" />
+          </Sheet>
 
-        {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent lg:text-2xl">
-            KZ
-          </span>
-          <span className="hidden text-base font-semibold text-[#252531] sm:inline">
-            Casino
-          </span>
-        </Link>
-
-        {/* Search bar (desktop) */}
-        <div className="mx-4 hidden flex-1 lg:block lg:max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
-            <input
-              type="text"
-              placeholder="게임 검색..."
-              className="h-9 w-full bg-[#f8f9fc] border border-[#dddddd] rounded-lg pl-9 pr-3 text-sm focus:outline-none focus:border-[#f4b53e] focus:ring-1 focus:ring-[#f4b53e]"
+          <Link href="/" className="flex shrink-0 items-center">
+            <Image
+              src="/images/logo/kzb_logo.png"
+              alt="KZ Logo"
+              width={80}
+              height={32}
+              className="h-8 w-auto"
+              priority
             />
-          </div>
+          </Link>
         </div>
 
-        {/* Spacer */}
-        <div className="flex-1 lg:hidden" />
+        {/* -- Center: Top Nav (desktop only) -- */}
+        <nav className="ml-10 hidden flex-1 items-center gap-6 lg:flex">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center gap-2 text-[15px] font-medium text-[#6b7280] transition-colors hover:text-[#252531]"
+            >
+              <Image
+                src={link.icon}
+                alt={link.label}
+                width={20}
+                height={20}
+                className="size-5"
+              />
+              {link.label}
+              {link.badge && (
+                <span className="relative -ml-0.5 -mt-2 flex size-3.5 items-center justify-center rounded-full bg-[#feb614] text-[7px] font-bold text-white">
+                  ★
+                </span>
+              )}
+            </Link>
+          ))}
+        </nav>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2">
+        {/* -- Right: Balance / Deposit / Bell / Profile -- */}
+        <div className="flex items-center gap-3">
           {isAuthenticated && authUser ? (
             <>
-              {/* Balance (compact on mobile) */}
-              <div className="bg-[#f8f9fc] rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 lg:px-3">
-                <Wallet className="size-4 text-[#f4b53e]" />
-                <span className="text-xs font-semibold text-[#252531] lg:text-sm">
-                  {formatKRW(Number(authUser.balance) || 0)}
+              {/* Balance Pill */}
+              <div className="hidden h-[36px] items-center gap-2 rounded-full border border-[#e8e8e8] bg-[#f5f5f7] px-3 transition-colors hover:bg-[#eeeef0] sm:flex">
+                <div className="flex size-[22px] items-center justify-center rounded-full bg-[#26A17B] text-[10px] font-bold text-white">
+                  T
+                </div>
+                <span className="text-[14px] font-bold text-[#252531]">
+                  USDT {formatUSDT(Number(authUser.balance) || 0)}
                 </span>
-                <span className="hidden text-xs text-[#707070] lg:inline">
-                  원
-                </span>
+                <button
+                  onClick={() => setIsSpinning(true)}
+                  onAnimationEnd={() => setIsSpinning(false)}
+                  className="ml-0.5 text-[#b0b0b0] hover:text-[#252531]"
+                >
+                  <RefreshCw
+                    className={cn('size-3.5', isSpinning && 'animate-spin')}
+                  />
+                </button>
+                <ChevronDown className="size-3.5 text-[#b0b0b0]" />
               </div>
 
-              {/* Deposit button - gold prominent CTA */}
+              {/* Deposit Button */}
               <Link
                 href="/wallet/deposit"
-                className="hidden sm:flex items-center bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold hover:from-amber-400 hover:to-yellow-400 shadow-lg shadow-amber-500/20 text-sm px-4 py-1.5 rounded-lg"
+                className="flex h-[36px] items-center justify-center text-[14px] font-bold text-white transition-all hover:brightness-110"
+                style={{
+                  background: 'linear-gradient(180deg, #FFD651 0%, #FE960E 100%)',
+                  borderRadius: '5px',
+                  padding: '0 25px',
+                }}
               >
-                입금
+                Deposit
               </Link>
 
-              {/* Notification bell */}
+              {/* Notification Bell */}
               <Link
                 href="/messages"
-                className="text-[#707070] hover:text-[#252531] relative p-1.5 rounded-lg hover:bg-[#f8f9fc]"
+                className="relative flex size-[36px] items-center justify-center rounded-full transition-colors hover:bg-[#f0f0f2]"
               >
-                <Bell className="size-4" />
+                <Image
+                  src="/images/ui-icons/icon_bell.webp"
+                  alt="Notifications"
+                  width={20}
+                  height={20}
+                  className="size-5"
+                />
                 {notificationCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center p-0 text-[10px] bg-red-500 text-white rounded-full">
+                  <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#feb614] px-1 text-[10px] font-bold text-white">
                     {notificationCount > 99 ? '99+' : notificationCount}
                   </span>
                 )}
               </Link>
 
-              {/* Profile dropdown */}
+              {/* Profile Avatar / Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="text-[#252531] hover:bg-[#f8f9fc] rounded-lg px-1.5 py-1 flex items-center gap-1.5"
-                  >
-                    <Avatar className="size-7">
-                      <AvatarFallback className="bg-[#f4b53e]/20 text-xs text-[#f4b53e]">
-                        {authUser.nickname.charAt(0)}
+                  <button className="flex size-[36px] items-center justify-center overflow-hidden rounded-full border border-[#e8e8e8] outline-none transition-transform hover:scale-105">
+                    <Avatar className="size-full">
+                      <AvatarImage
+                        src="https://i.pravatar.cc/150?img=11"
+                        alt="Profile"
+                      />
+                      <AvatarFallback className="bg-[#feb614]/20 text-[#feb614]">
+                        {authUser.nickname?.charAt(0) ?? '?'}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden text-sm lg:inline">
-                      {authUser.nickname}
-                    </span>
-                    <ChevronDown className="hidden size-3 lg:block" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{authUser.nickname}</p>
+                <DropdownMenuContent align="end" className="mt-1 w-[200px]">
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-bold text-foreground">
+                      {authUser.nickname}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       @{authUser.username}
                     </p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
-                      <User className="size-4" />
-                      마이페이지
+                    <Link href="/profile">
+                      <User className="mr-2 size-4" /> My Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/wallet/deposit" className="cursor-pointer">
-                      <Wallet className="size-4" />
-                      입출금
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile/settings" className="cursor-pointer">
-                      <Settings className="size-4" />
-                      설정
+                    <Link href="/profile/settings">
+                      <Settings className="mr-2 size-4" /> Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer text-destructive focus:text-destructive"
-                    onClick={() => logout().then(() => { window.location.href = '/login'; })}
+                    className="cursor-pointer text-red-500 hover:text-red-600 focus:text-red-600"
+                    onClick={() => logout()}
                   >
-                    <LogOut className="size-4" />
-                    로그아웃
+                    <LogOut className="mr-2 size-4" /> Log Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
             <>
+              {/* Unauthenticated */}
               <Link
                 href="/login"
-                className="text-[#707070] hover:text-[#252531] text-sm px-3 py-1.5 rounded-lg hover:bg-[#f8f9fc]"
+                className="px-3 py-2 text-sm font-semibold text-[#6b7280] hover:text-[#252531]"
               >
-                로그인
+                Sign In
               </Link>
               <Link
                 href="/register"
-                className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] text-white font-bold text-sm px-4 py-1.5 rounded-lg"
+                className="flex h-[36px] items-center justify-center text-[14px] font-bold text-[#000000] transition-all hover:brightness-110"
+                style={{
+                  background: 'linear-gradient(180deg, #FFD651 0%, #FE960E 100%)',
+                  borderRadius: '5px',
+                  padding: '0 25px',
+                }}
               >
-                회원가입
+                Join Now
               </Link>
             </>
           )}

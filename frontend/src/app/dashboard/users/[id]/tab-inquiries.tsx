@@ -14,9 +14,9 @@ const STATUS_LABELS: Record<string, string> = {
   pending: '미답변', answered: '답변완료', closed: '종료',
 };
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  answered: 'bg-blue-100 text-blue-800',
-  closed: 'bg-gray-100 text-gray-800',
+  pending: 'bg-yellow-500/10 text-yellow-500',
+  answered: 'bg-blue-500/10 text-blue-500',
+  closed: 'bg-muted text-foreground',
 };
 
 const PERIOD_PRESETS = [
@@ -81,17 +81,17 @@ export default function TabInquiries({ userId }: Props) {
       {/* Summary */}
       {summary && (
         <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900"><CardContent className="pt-6">
-            <p className="text-xs text-blue-600 dark:text-blue-400">전체 건수</p>
-            <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{summary.total_count}</p>
+          <Card className="bg-primary/10 border-primary/30"><CardContent className="pt-6">
+            <p className="text-xs text-primary">전체 건수</p>
+            <p className="text-xl font-bold text-primary">{summary.total_count}</p>
           </CardContent></Card>
-          <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900"><CardContent className="pt-6">
-            <p className="text-xs text-red-600 dark:text-red-400">미답변</p>
-            <p className="text-xl font-bold text-red-700 dark:text-red-300">{summary.pending_count}</p>
+          <Card className="bg-destructive/10 border-destructive/30"><CardContent className="pt-6">
+            <p className="text-xs text-destructive">미답변</p>
+            <p className="text-xl font-bold text-destructive">{summary.pending_count}</p>
           </CardContent></Card>
-          <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900"><CardContent className="pt-6">
-            <p className="text-xs text-green-600 dark:text-green-400">답변완료</p>
-            <p className="text-xl font-bold text-green-700 dark:text-green-300">{summary.answered_count}</p>
+          <Card className="bg-emerald-500/10 border-emerald-500/30"><CardContent className="pt-6">
+            <p className="text-xs text-emerald-500">답변완료</p>
+            <p className="text-xl font-bold text-emerald-500">{summary.answered_count}</p>
           </CardContent></Card>
         </div>
       )}
@@ -135,7 +135,7 @@ export default function TabInquiries({ userId }: Props) {
             {selected.replies.length > 0 && (
               <div className="space-y-2">
                 {selected.replies.map((r) => (
-                  <div key={r.id} className="p-3 rounded-lg border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950">
+                  <div key={r.id} className="p-3 rounded-lg border-l-4 border-primary bg-primary/10">
                     <p className="text-sm whitespace-pre-wrap">{r.content}</p>
                     <p className="text-xs text-muted-foreground mt-2">관리자 · {new Date(r.created_at).toLocaleString('ko-KR')}</p>
                   </div>

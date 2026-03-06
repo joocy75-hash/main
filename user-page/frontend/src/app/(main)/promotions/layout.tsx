@@ -36,7 +36,7 @@ export default function PromotionsLayout({
   return (
     <div className="flex flex-col gap-4">
       {/* Sub-navigation */}
-      <nav className="flex gap-1 overflow-x-auto rounded-lg border border-[#dddddd] bg-white p-1 scrollbar-none">
+      <nav className="flex gap-1 overflow-x-auto rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] p-1 scrollbar-none">
         {PROMO_TABS.map((tab) => {
           const active = isActive(tab.href);
           const Icon = tab.icon;
@@ -47,8 +47,8 @@ export default function PromotionsLayout({
               className={cn(
                 'flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-[#f4b53e] text-black'
-                  : 'text-[#707070] hover:bg-[#edeef3] hover:text-[#252531]'
+                  ? 'bg-[#feb614] text-black'
+                  : 'text-[#6b7280] hover:bg-[#f0f0f2] hover:text-[#252531]'
               )}
             >
               <Icon className="size-4" />

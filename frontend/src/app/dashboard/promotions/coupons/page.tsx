@@ -200,10 +200,10 @@ export default function CouponsPage() {
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 {redeemError && (
-                  <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-950 dark:text-red-300">{redeemError}</div>
+                  <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{redeemError}</div>
                 )}
                 {redeemSuccess && (
-                  <div className="bg-green-50 text-green-700 px-4 py-3 rounded-md text-sm dark:bg-green-950 dark:text-green-300">쿠폰이 정상적으로 적용되었습니다.</div>
+                  <div className="bg-green-500/10 text-green-500 px-4 py-3 rounded-md text-sm">쿠폰이 정상적으로 적용되었습니다.</div>
                 )}
                 <div className="space-y-2">
                   <Label>회원 ID *</Label>
@@ -243,10 +243,10 @@ export default function CouponsPage() {
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 {batchError && (
-                  <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-950 dark:text-red-300">{batchError}</div>
+                  <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{batchError}</div>
                 )}
                 {batchResult !== null && (
-                  <div className="bg-green-50 text-green-700 px-4 py-3 rounded-md text-sm dark:bg-green-950 dark:text-green-300">
+                  <div className="bg-green-500/10 text-green-500 px-4 py-3 rounded-md text-sm">
                     {batchResult}개의 쿠폰이 생성되었습니다.
                   </div>
                 )}
@@ -255,7 +255,7 @@ export default function CouponsPage() {
                   <select
                     value={batchForm.promotion_id}
                     onChange={(e) => setBatchForm({ ...batchForm, promotion_id: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                   >
                     <option value="">프로모션 선택</option>
                     {promotionsData?.items.map((p) => (
@@ -305,14 +305,14 @@ export default function CouponsPage() {
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 {createError && (
-                  <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-950 dark:text-red-300">{createError}</div>
+                  <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{createError}</div>
                 )}
                 <div className="space-y-2">
                   <Label>프로모션 *</Label>
                   <select
                     value={createForm.promotion_id}
                     onChange={(e) => setCreateForm({ ...createForm, promotion_id: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                   >
                     <option value="">프로모션 선택</option>
                     {promotionsData?.items.map((p) => (
@@ -365,7 +365,7 @@ export default function CouponsPage() {
             <select
               value={promotionFilter}
               onChange={(e) => { setPromotionFilter(e.target.value); setPage(1); }}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="rounded-md border border-border px-3 py-2 text-sm"
             >
               <option value="">전체 프로모션</option>
               {promotionsData?.items.map((p) => (
@@ -375,7 +375,7 @@ export default function CouponsPage() {
             <select
               value={activeFilter}
               onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="rounded-md border border-border px-3 py-2 text-sm"
             >
               <option value="">전체 상태</option>
               <option value="true">활성</option>
@@ -409,81 +409,81 @@ export default function CouponsPage() {
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">코드</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">프로모션</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">최대사용</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">사용횟수</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">만료일</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">생성일</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">액션</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">코드</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">프로모션</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">최대사용</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">사용횟수</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">상태</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">만료일</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">생성일</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">액션</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {data!.items.map((coupon) => {
                     const isExpired = coupon.expires_at && new Date(coupon.expires_at) < new Date();
                     const isFullyUsed = coupon.used_count >= coupon.max_uses;
                     return (
-                      <tr key={coupon.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={coupon.id} className="hover:bg-accent">
                         <td className="whitespace-nowrap px-4 py-3 text-sm">
                           <div className="flex items-center gap-2">
-                            <code className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
+                            <code className="font-mono text-sm bg-muted px-2 py-0.5 rounded">
                               {coupon.code}
                             </code>
                             <button
                               onClick={() => handleCopyCode(coupon.code)}
-                              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              className="text-muted-foreground hover:text-foreground"
                               title="코드 복사"
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </button>
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                           {coupon.promotion_name || `ID: ${coupon.promotion_id}`}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center font-mono tabular-nums">
                           {coupon.max_uses}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
-                          <span className={`font-mono tabular-nums ${isFullyUsed ? 'text-red-600 font-medium' : ''}`}>
+                          <span className={`font-mono tabular-nums ${isFullyUsed ? 'text-red-400 font-medium' : ''}`}>
                             {coupon.used_count}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                           {isExpired ? (
-                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-muted text-foreground">
                               만료
                             </span>
                           ) : isFullyUsed ? (
-                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
+                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-orange-500/10 text-orange-500">
                               소진
                             </span>
                           ) : coupon.is_active ? (
-                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-green-500/10 text-green-500">
                               활성
                             </span>
                           ) : (
-                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+                            <span className="inline-flex rounded-full px-2 py-1 text-xs font-semibold bg-muted text-foreground">
                               비활성
                             </span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                           {coupon.expires_at
                             ? new Date(coupon.expires_at).toLocaleDateString('ko-KR')
                             : '-'}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                           {new Date(coupon.created_at).toLocaleDateString('ko-KR')}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600 hover:text-red-800" title="삭제">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-500" title="삭제">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
@@ -519,14 +519,14 @@ export default function CouponsPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             전체: {data.total}개
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               이전
             </button>
@@ -536,7 +536,7 @@ export default function CouponsPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               다음
             </button>

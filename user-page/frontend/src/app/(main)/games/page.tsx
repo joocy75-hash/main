@@ -2,24 +2,45 @@
 
 import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import {
   Search,
   Loader2,
   SlidersHorizontal,
-  Heart,
   ChevronLeft,
   ChevronRight,
-  Play,
-  Eye,
+  ChevronDown,
 } from 'lucide-react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { GAME_CATEGORIES } from '@/lib/constants';
 import { useGameStore } from '@/stores/game-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { GameLaunchModal } from '@/components/game/game-launch-modal';
 import type { Game, GameCategory } from '../../../../../shared/types/game';
+
+// ──────────────────── Data ────────────────────
+
+const PROMO_CARDS = [
+  {
+    title: 'LUCKY LACE',
+    subtitle: 'IN KZ AI LIVE',
+    gradient: 'from-red-500 to-rose-600',
+    href: '/promotions',
+  },
+  {
+    title: 'A MIRACULOUS',
+    subtitle: 'INTERFACE & EXPERIENCE',
+    gradient: 'from-violet-500 to-purple-600',
+    href: '/promotions',
+  },
+  {
+    title: 'KZ SPORTS',
+    subtitle: 'REAL-TIME MATCH',
+    gradient: 'from-amber-400 to-orange-500',
+    href: '/sports',
+  },
+];
 
 // ──────────────────── Sub-category maps ────────────────────
 
@@ -74,12 +95,7 @@ const SUB_CATEGORIES: Record<string, { label: string; icon: string }[]> = {
 const DEFAULT_SUBS = [{ label: 'All Games', icon: '🎰' }];
 
 // ──────────────────── Banner data ────────────────────
-
-const BANNERS = [
-  { gradient: 'from-amber-500/20 to-yellow-500/10', text: 'Hot Games' },
-  { gradient: 'from-purple-500/20 to-fuchsia-500/10', text: 'New Releases' },
-  { gradient: 'from-emerald-500/20 to-green-500/10', text: 'Top Providers' },
-];
+// Removed to use PROMO_CARDS
 
 // ──────────────────── Component ────────────────────
 
@@ -140,7 +156,10 @@ function GamesContent() {
   useEffect(() => {
     fetchProviders(selectedCategory ?? undefined);
     fetchGames(selectedProvider ?? undefined);
-    setSelectedSubCategory('All Games');
+    // Avoid synchronous cascading render
+    setTimeout(() => {
+      setSelectedSubCategory('All Games');
+    }, 0);
   }, [selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refetch when provider changes
@@ -165,16 +184,6 @@ function GamesContent() {
       }, 300);
     },
     [selectedCategory, selectedProvider, setSearchQuery, searchGames, fetchGames]
-  );
-
-  const handleCategorySelect = useCallback(
-    (code: string) => {
-      const category = code === 'all' ? null : (code as GameCategory);
-      setSelectedCategory(category);
-      setSearchInput('');
-      setSearchQuery('');
-    },
-    [setSelectedCategory, setSearchQuery]
   );
 
   const handleProviderSelect = useCallback(
@@ -208,180 +217,154 @@ function GamesContent() {
 
   return (
     <div className="flex flex-col gap-0">
-      {/* ── Banner Carousel ── */}
-      <div className="mb-4 grid grid-cols-3 gap-3">
-        {BANNERS.map((b, i) => (
-          <div
-            key={i}
+      {/* ── Banner Carousel (3 Promos) ── */}
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {PROMO_CARDS.map((card) => (
+          <Link
+            key={card.title}
+            href={card.href}
             className={cn(
-              'flex h-14 items-center justify-center rounded-lg bg-gradient-to-r',
-              b.gradient,
-              'border border-[#dddddd]/50'
+              'flex flex-col justify-center rounded-[12px] bg-gradient-to-r px-5 py-6 text-white shadow-sm transition-transform hover:scale-[1.02]',
+              card.gradient
             )}
           >
-            <span className="text-sm font-medium text-[#707070]">{b.text}</span>
-          </div>
+            <span className="text-[15px] font-extrabold leading-tight tracking-tight">{card.title}</span>
+            <span className="mt-0.5 text-[9px] font-medium opacity-90">{card.subtitle}</span>
+          </Link>
         ))}
       </div>
 
-      {/* ── Search Bar (full-width, kzkzb style) ── */}
-      <div className="relative mb-4">
-        <Search className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[#707070]" />
+      {/* ── Search Bar ── */}
+      <div className="relative mb-6 drop-shadow-sm">
+        <Search className="absolute left-5 top-1/2 size-5 -translate-y-1/2 text-[#6b7280] opacity-70" />
         <input
           type="text"
           placeholder="Search your game"
           value={searchInput}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="h-12 w-full rounded-xl border border-[#dddddd] bg-white pl-12 text-base text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+          className="h-[52px] w-full rounded-xl bg-[#f5f5f7] border border-[#e8e8e8] pl-12 pr-4 text-[15px] font-semibold text-[#252531] placeholder:text-[#6b7280] focus:outline-none"
         />
       </div>
 
       {/* ── Filter Bar ── */}
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex items-center gap-2 text-sm text-[#707070]">
-          <SlidersHorizontal className="size-4" />
-          <span className="font-medium">Filter By</span>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-[15px] font-bold text-[#252531]">
+            <SlidersHorizontal className="size-4 text-[#feb614]" />
+            Filter By
+          </div>
+
+          {/* Provider Dropdown (Mock) */}
+          <button className="flex h-[42px] items-center justify-between gap-2 rounded-full bg-[#f8f8fa] px-5 text-[15px] font-bold text-[#252531] shadow-sm ml-2 border border-[#e8e8e8]">
+            Provider: All <ChevronDown className="size-4 opacity-50" />
+          </button>
+
+          {/* Favourite Toggle */}
+          <button
+            onClick={() => setShowFavourites(!showFavourites)}
+            className={cn(
+              'flex h-[42px] shrink-0 items-center justify-center rounded-full bg-[#f5f5f7] px-6 text-[15px] font-bold shadow-sm transition-colors',
+              showFavourites ? 'text-[#feb614]' : 'text-[#6b7280] hover:text-[#feb614]'
+            )}
+          >
+            Favourite
+          </button>
         </div>
 
-        {/* Category selector (main categories) */}
-        <ScrollArea className="flex-1">
-          <div className="flex gap-1.5 pb-1">
-            <button
-              onClick={() => handleCategorySelect('all')}
-              className={cn(
-                'shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
-                selectedCategory === null
-                  ? 'border-[#f4b53e] bg-[#f4b53e] text-black'
-                  : 'border-[#dddddd] bg-white text-[#707070] hover:text-[#252531]'
-              )}
-            >
-              All
-            </button>
-            {GAME_CATEGORIES.map((cat) => (
-              <button
-                key={cat.code}
-                onClick={() => handleCategorySelect(cat.code)}
-                className={cn(
-                  'flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
-                  selectedCategory === cat.code
-                    ? 'border-[#f4b53e] bg-[#f4b53e] text-black'
-                    : 'border-[#dddddd] bg-white text-[#707070] hover:text-[#252531]'
-                )}
-              >
-                <span>{cat.icon}</span>
-                {cat.name}
-              </button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-
-        {/* Favourite toggle */}
-        <button
-          onClick={() => setShowFavourites(!showFavourites)}
-          className={cn(
-            'flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
-            showFavourites
-              ? 'border-red-400 bg-red-500/10 text-red-400'
-              : 'border-[#dddddd] bg-white text-[#707070] hover:text-[#252531]'
-          )}
-        >
-          <Heart className={cn('size-3.5', showFavourites && 'fill-current')} />
-          Favourite
-        </button>
+        {/* Scroll arrows */}
+        <div className="flex gap-1.5 hidden md:flex">
+          <button
+            onClick={() => scrollProviders('left')}
+            className="flex h-10 w-10 items-center justify-center rounded bg-[#f8f8fa] text-[#6b7280] transition-colors hover:bg-[#f0f0f2] hover:text-[#252531]"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+          <button
+            onClick={() => scrollProviders('right')}
+            className="flex h-10 w-10 items-center justify-center rounded bg-[#f8f8fa] text-[#6b7280] transition-colors hover:bg-[#f0f0f2] hover:text-[#252531]"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+        </div>
       </div>
 
       {/* ── Provider Logos with Game Count Badges ── */}
       {providers.length > 0 && (
-        <div className="relative mb-4">
-          <div className="flex items-center gap-3">
+        <div className="relative mb-6">
+          <div className="flex items-center gap-2 overflow-hidden py-2" ref={providerScrollRef} style={{ scrollbarWidth: 'none' }}>
             {/* ALL button */}
             <button
               onClick={() => setSelectedProvider(null)}
               className={cn(
-                'flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-xl border-2 transition-all',
+                'group relative flex h-[72px] w-[130px] shrink-0 flex-col items-center justify-center overflow-hidden rounded-[14px] transition-all',
                 selectedProvider === null
-                  ? 'border-[#f4b53e] bg-[#f4b53e]/10'
-                  : 'border-[#dddddd] bg-white hover:border-[#f4b53e]/30'
+                  ? 'bg-gradient-to-r from-[#f0f0f2] to-[#e8e8e8] shadow-md border-[3px] border-[#e8e8e8]'
+                  : 'bg-[#f8f8fa] shadow-sm border-[3px] border-transparent hover:border-[#e8e8e8]'
               )}
             >
-              <span className="text-2xl">🎰</span>
-              <span className="mt-1 text-xs font-bold">ALL</span>
+              <Image src="/images/category-icons/slots.webp" alt="" width={48} height={48} className="absolute -left-2 -top-4 size-12 opacity-20" />
+              <span className={cn("relative z-10 text-[18px] font-black tracking-widest", selectedProvider === null ? "text-[#252531]" : "text-[#252531]")}>
+                ALL
+              </span>
             </button>
 
-            {/* Provider scroll area */}
-            <div className="relative flex-1 overflow-hidden">
-              <div
-                ref={providerScrollRef}
-                className="flex gap-3 overflow-x-auto scrollbar-hide"
-                style={{ scrollbarWidth: 'none' }}
+            {providers.map((provider) => (
+              <button
+                key={provider.id}
+                onClick={() => handleProviderSelect(provider.code)}
+                className={cn(
+                  'group relative flex h-[72px] w-[130px] shrink-0 flex-col items-center justify-center overflow-hidden rounded-[14px] transition-all',
+                  selectedProvider === provider.code
+                    ? 'bg-[#1e4a46] shadow-md border-[3px] border-[#20b2aa]'
+                    : 'bg-gradient-to-tr from-[#303846] to-[#404856] shadow-sm border-[3px] border-transparent hover:border-[#dddddd]'
+                )}
               >
-                {providers.map((provider) => (
-                  <button
-                    key={provider.id}
-                    onClick={() => handleProviderSelect(provider.code)}
-                    className={cn(
-                      'group relative flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-xl border-2 transition-all',
-                      selectedProvider === provider.code
-                        ? 'border-[#f4b53e] bg-[#f4b53e]/10'
-                        : 'border-[#dddddd] bg-white hover:border-[#f4b53e]/30'
-                    )}
-                  >
-                    {/* Game count badge */}
-                    <div className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-bold text-white">
-                      {provider.gameCount}
-                    </div>
-                    <span className="text-center text-[10px] font-semibold leading-tight text-[#252531]">
-                      {provider.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+                {/* Mock abstract graphics based on provider */}
+                <div className="absolute inset-0 opacity-40 mix-blend-overlay">
+                  {/* Decorative background for provider cards */}
+                  <div className="absolute -right-4 -top-8 size-20 rounded-full bg-white/20 blur-xl"></div>
+                </div>
 
-            {/* Scroll arrows */}
-            <div className="flex shrink-0 gap-1">
-              <button
-                onClick={() => scrollProviders('left')}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dddddd] bg-white text-[#707070] hover:text-[#252531]"
-              >
-                <ChevronLeft className="size-4" />
+                {/* Game count badge */}
+                <div className="absolute right-1 top-1 z-20 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#feb614] px-1.5 text-[11px] font-black text-white shadow-sm">
+                  {provider.gameCount}
+                </div>
+                
+                <span className="relative z-10 text-center text-[13px] font-black leading-tight text-white mt-4">
+                  {provider.name}
+                </span>
               </button>
-              <button
-                onClick={() => scrollProviders('right')}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dddddd] bg-white text-[#707070] hover:text-[#252531]"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* ── Sub-category Tabs (kzkzb style text tabs) ── */}
-      <div className="mb-4 flex items-center gap-6 border-b border-[#dddddd] pb-3">
-        {subCategories.map((sub) => (
-          <button
-            key={sub.label}
-            onClick={() => setSelectedSubCategory(sub.label)}
-            className={cn(
-              'flex items-center gap-1.5 text-lg font-semibold transition-colors',
-              selectedSubCategory === sub.label
-                ? 'text-[#252531]'
-                : 'text-[#707070] hover:text-[#252531]/70'
-            )}
-          >
-            <span className="text-base">{sub.icon}</span>
-            {sub.label}
-          </button>
-        ))}
+      {/* ── Sub-category Tabs (kzkzb style single container) ── */}
+      <div className="mb-6 flex overflow-x-auto no-scrollbar">
+        <div className="flex h-[52px] items-center gap-2 rounded-xl bg-[#f8f8fa] px-2 shadow-sm min-w-max">
+          {subCategories.map((sub) => (
+            <button
+              key={sub.label}
+              onClick={() => setSelectedSubCategory(sub.label)}
+              className={cn(
+                'flex h-[36px] items-center gap-2 rounded-lg px-4 text-[15px] font-bold transition-colors',
+                selectedSubCategory === sub.label
+                  ? 'bg-transparent text-[#252531]'
+                  : 'text-[#6b7280] hover:bg-[#f0f0f2]'
+              )}
+            >
+              <span className="text-base opacity-70">{sub.icon}</span>
+              {sub.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Section Title ── */}
-      <div className="mb-4 flex items-center gap-2">
-        <span className="text-lg">{categoryInfo?.icon ?? '🎰'}</span>
-        <h3 className="text-lg font-semibold">
-          {categoryInfo?.name ?? '전체 게임'}
+      <div className="mb-5 flex items-center gap-3 pl-1">
+        <Image src={`/images/category-icons/${currentCategory === 'casino' ? 'live_casino' : currentCategory === 'slot' ? 'slots' : currentCategory === 'shooting' ? 'fishing' : currentCategory === 'coin' ? 'marble' : currentCategory === 'mini_game' ? 'arcade' : currentCategory}.webp`} alt="" width={22} height={22} className="size-[22px] opacity-70" />
+        <h3 className="text-[20px] font-black text-[#252531]">
+          {categoryInfo?.name ?? 'Live Casino'}
         </h3>
       </div>
 
@@ -390,8 +373,8 @@ function GamesContent() {
         <GameGridSkeleton />
       ) : games.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <span className="text-4xl">🎮</span>
-          <p className="text-sm text-[#707070]">
+          <Image src="/images/category-icons/arcade.webp" alt="" width={48} height={48} className="size-12 opacity-50" />
+          <p className="text-sm text-[#6b7280]">
             아직 게임 데이터가 없습니다
           </p>
         </div>
@@ -411,14 +394,14 @@ function GamesContent() {
 
           {/* Displaying count + Load More */}
           <div className="mt-6 flex flex-col items-center gap-3">
-            <p className="text-sm text-[#707070]">
+            <p className="text-sm text-[#6b7280]">
               Displaying {games.length} of {totalGames} games
             </p>
             {hasMore && (
               <button
                 onClick={loadMoreGames}
                 disabled={isLoadingMore}
-                className="min-w-[200px] rounded-lg border border-[#dddddd] bg-white px-6 py-3 text-sm font-medium text-[#252531] hover:border-[#f4b53e] disabled:opacity-50"
+                className="min-w-[200px] rounded-lg border border-[#e8e8e8] bg-[#f8f8fa] px-6 py-3 text-sm font-medium text-[#252531] hover:border-[#feb614] disabled:opacity-50"
               >
                 {isLoadingMore ? (
                   <span className="flex items-center justify-center gap-2">
@@ -478,7 +461,7 @@ const GameCardOverlay = ({
           onError={() => setImageError(true)}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#f4b53e]/20 via-[#edeef3] to-[#f4b53e]/10">
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#feb614]/20 via-[#f8f8fa] to-[#feb614]/10">
           <span className="text-3xl font-bold text-[#707070]/50">
             {game.name.charAt(0)}
           </span>
@@ -508,7 +491,7 @@ const GameCardOverlay = ({
               e.stopPropagation();
               onPlay(game);
             }}
-            className="rounded-lg bg-[#f4b53e] px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-[#f4b53e]/90"
+            className="rounded-lg bg-[#feb614] px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-[#feb614]/90"
           >
             Play Now
           </button>
@@ -533,7 +516,7 @@ const GameCardOverlay = ({
 const GameGridSkeleton = () => (
   <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
     {Array.from({ length: 18 }).map((_, i) => (
-      <div key={i} className="aspect-square w-full animate-pulse rounded-xl bg-[#edeef3]" />
+      <div key={i} className="aspect-square w-full animate-pulse rounded-xl bg-[#f8f8fa]" />
     ))}
   </div>
 );

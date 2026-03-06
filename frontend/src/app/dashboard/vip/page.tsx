@@ -35,21 +35,21 @@ import { useToast } from '@/components/toast-provider';
 const fmt = (n: number) => Intl.NumberFormat('ko-KR').format(n);
 
 const LEVEL_COLORS: Record<number, string> = {
-  0: 'bg-gray-100 text-gray-800',
-  1: 'bg-green-100 text-green-800',
-  2: 'bg-blue-100 text-blue-800',
-  3: 'bg-purple-100 text-purple-800',
-  4: 'bg-yellow-100 text-yellow-800',
-  5: 'bg-orange-100 text-orange-800',
-  6: 'bg-red-100 text-red-800',
-  7: 'bg-pink-100 text-pink-800',
-  8: 'bg-indigo-100 text-indigo-800',
-  9: 'bg-emerald-100 text-emerald-800',
-  10: 'bg-amber-100 text-amber-800',
+  0: 'bg-muted text-foreground',
+  1: 'bg-green-500/10 text-green-500',
+  2: 'bg-blue-500/10 text-blue-500',
+  3: 'bg-purple-500/10 text-purple-500',
+  4: 'bg-yellow-500/10 text-yellow-500',
+  5: 'bg-orange-500/10 text-orange-500',
+  6: 'bg-red-500/10 text-red-500',
+  7: 'bg-pink-500/10 text-pink-500',
+  8: 'bg-indigo-500/10 text-indigo-500',
+  9: 'bg-emerald-500/10 text-emerald-500',
+  10: 'bg-amber-500/10 text-amber-500',
 };
 
 const getLevelBadgeColor = (level: number) =>
-  LEVEL_COLORS[level] || LEVEL_COLORS[level % 11] || 'bg-gray-100 text-gray-800';
+  LEVEL_COLORS[level] || LEVEL_COLORS[level % 11] || 'bg-muted text-foreground';
 
 // ─── Form ────────────────────────────────────────────────────────
 
@@ -238,15 +238,15 @@ export default function VipPage() {
             <div className="space-y-3 py-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm">총 검사</span>
-                <Badge className="bg-gray-100 text-gray-800" variant="secondary">{autoCheckResult.total_checked}명</Badge>
+                <Badge className="bg-muted text-foreground" variant="secondary">{autoCheckResult.total_checked}명</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">승급</span>
-                <Badge className="bg-blue-100 text-blue-800" variant="secondary">{autoCheckResult.total_upgraded}명</Badge>
+                <Badge className="bg-blue-500/10 text-blue-500" variant="secondary">{autoCheckResult.total_upgraded}명</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">변동 없음</span>
-                <Badge className="bg-gray-100 text-gray-800" variant="secondary">{autoCheckResult.total_checked - autoCheckResult.total_upgraded}명</Badge>
+                <Badge className="bg-muted text-foreground" variant="secondary">{autoCheckResult.total_checked - autoCheckResult.total_upgraded}명</Badge>
               </div>
             </div>
           )}
@@ -416,7 +416,7 @@ export default function VipPage() {
                           <TableCell className="text-right font-mono">{fmt(user.total_bet)}</TableCell>
                           <TableCell>
                             <Badge
-                              className={user.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                              className={user.status === 'active' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}
                               variant="secondary"
                             >
                               {user.status === 'active' ? '정상' : user.status}
@@ -466,8 +466,8 @@ export default function VipPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 pt-0">
-            <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900">
-              <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div className="rounded-lg bg-purple-500/10 p-3">
+              <Crown className="h-5 w-5 text-purple-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">총 등급 수</p>
@@ -477,8 +477,8 @@ export default function VipPage() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-4 pt-0">
-            <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900">
-              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="rounded-lg bg-blue-500/10 p-3">
+              <Users className="h-5 w-5 text-blue-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">전체 회원 분포</p>
@@ -559,13 +559,13 @@ export default function VipPage() {
                   <TableCell className="text-right font-mono">{level.losing_bonus_rate}%</TableCell>
                   <TableCell className="text-right font-mono">{fmt(level.withdrawal_limit_daily)}</TableCell>
                   <TableCell className="text-right">
-                    <Badge className="bg-gray-100 text-gray-800" variant="secondary">
+                    <Badge className="bg-muted text-foreground" variant="secondary">
                       {level.user_count}명
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
-                      className={level.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={level.is_active ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}
                       variant="secondary"
                     >
                       {level.is_active ? '활성' : '비활성'}
@@ -577,7 +577,7 @@ export default function VipPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-400 hover:text-red-500"
                         onClick={() => handleDelete(level)}
                       >
                         삭제

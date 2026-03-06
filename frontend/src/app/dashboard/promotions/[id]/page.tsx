@@ -51,10 +51,10 @@ const TARGET_OPTIONS = [
 ];
 
 const PARTICIPANT_STATUS_STYLES: Record<string, { label: string; cls: string }> = {
-  active: { label: '진행중', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  completed: { label: '완료', cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  expired: { label: '만료', cls: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400' },
-  cancelled: { label: '취소', cls: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
+  active: { label: '진행중', cls: 'bg-blue-500/10 text-blue-500' },
+  completed: { label: '완료', cls: 'bg-green-500/10 text-green-500' },
+  expired: { label: '만료', cls: 'bg-muted text-foreground' },
+  cancelled: { label: '취소', cls: 'bg-red-500/10 text-red-500' },
 };
 
 const TABS = [
@@ -196,8 +196,8 @@ export default function PromotionDetailPage() {
               key={tab.key}
               className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.key
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                  ? 'border-blue-600 text-blue-400'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
               onClick={() => setActiveTab(tab.key)}
             >
@@ -212,7 +212,7 @@ export default function PromotionDetailPage() {
       {activeTab === 'info' && (
         <div className="space-y-6">
           {saveError && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-950 dark:text-red-300">
+            <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
               {saveError}
             </div>
           )}
@@ -233,7 +233,7 @@ export default function PromotionDetailPage() {
                   <select
                     value={editForm.type}
                     onChange={(e) => updateField('type', e.target.value)}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                   >
                     {PROMOTION_TYPES.map((t) => (
                       <option key={t.value} value={t.value}>{t.label}</option>
@@ -245,7 +245,7 @@ export default function PromotionDetailPage() {
                   <select
                     value={editForm.target}
                     onChange={(e) => updateField('target', e.target.value)}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                   >
                     {TARGET_OPTIONS.map((t) => (
                       <option key={t.value} value={t.value}>{t.label}</option>
@@ -270,7 +270,7 @@ export default function PromotionDetailPage() {
                   value={editForm.description}
                   onChange={(e) => updateField('description', e.target.value)}
                   rows={3}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 />
               </div>
             </CardContent>
@@ -285,7 +285,7 @@ export default function PromotionDetailPage() {
                   <select
                     value={editForm.bonus_type}
                     onChange={(e) => updateField('bonus_type', e.target.value)}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                   >
                     {BONUS_TYPES.map((t) => (
                       <option key={t.value} value={t.value}>{t.label}</option>
@@ -431,27 +431,27 @@ export default function PromotionDetailPage() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-muted">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">회원ID</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">닉네임</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">보너스금액</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">배팅요구</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">배팅완료</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">참여일</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">회원ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">닉네임</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">보너스금액</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">배팅요구</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">배팅완료</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">상태</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">참여일</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                    <tbody className="divide-y divide-border bg-card">
                       {participantData.items.map((p) => {
                         const statusStyle = PARTICIPANT_STATUS_STYLES[p.status];
                         const wageringPercent = p.wagering_required > 0
                           ? Math.min(100, Math.round((p.wagering_completed / p.wagering_required) * 100))
                           : 0;
                         return (
-                          <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-400">
+                          <tr key={p.id} className="hover:bg-accent">
+                            <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-muted-foreground">
                               {p.username}
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -460,7 +460,7 @@ export default function PromotionDetailPage() {
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums">
                               {amountFormatter.format(p.bonus_amount)} USDT
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">
+                            <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">
                               {amountFormatter.format(p.wagering_required)}
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-right">
@@ -470,11 +470,11 @@ export default function PromotionDetailPage() {
                               </div>
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
-                              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusStyle?.cls || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusStyle?.cls || 'bg-muted text-foreground'}`}>
                                 {statusStyle?.label || p.status}
                               </span>
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                            <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                               {new Date(p.claimed_at).toLocaleDateString('ko-KR')}
                             </td>
                           </tr>
@@ -486,12 +486,12 @@ export default function PromotionDetailPage() {
 
                 {participantData.total > participantData.page_size && (
                   <div className="flex items-center justify-between px-4 py-3 border-t">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">전체: {participantData.total}명</p>
+                    <p className="text-sm text-muted-foreground">전체: {participantData.total}명</p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setParticipantPage(Math.max(1, participantPage - 1))}
                         disabled={participantPage <= 1}
-                        className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+                        className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
                       >
                         이전
                       </button>
@@ -501,7 +501,7 @@ export default function PromotionDetailPage() {
                       <button
                         onClick={() => setParticipantPage(participantPage + 1)}
                         disabled={participantPage >= Math.ceil(participantData.total / participantData.page_size)}
-                        className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+                        className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
                       >
                         다음
                       </button>
@@ -582,7 +582,7 @@ export default function PromotionDetailPage() {
                         <span className="text-xs text-muted-foreground w-20 shrink-0 tabular-nums">
                           {new Date(day.date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
                         </span>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-6 overflow-hidden">
+                        <div className="flex-1 bg-muted rounded-full h-6 overflow-hidden">
                           <div
                             className="bg-blue-500 h-full rounded-full transition-all duration-300 flex items-center justify-end pr-2"
                             style={{ width: `${Math.max(widthPercent, 2)}%` }}

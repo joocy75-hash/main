@@ -30,7 +30,7 @@ export default function PartnerSettlementsPage() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         >
           <option value="">전체 상태</option>
           <option value="draft">초안</option>
@@ -42,22 +42,22 @@ export default function PartnerSettlementsPage() {
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">기간</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">총 커미션</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">지급일</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">생성일</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">기간</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">총 커미션</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">상태</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">지급일</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">생성일</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data?.items.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr key={s.id} className="hover:bg-accent">
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
                     {new Date(s.period_start).toLocaleDateString('ko-KR')} ~ {new Date(s.period_end).toLocaleDateString('ko-KR')}
                   </td>
@@ -67,27 +67,27 @@ export default function PartnerSettlementsPage() {
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                       s.status === 'paid'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        ? 'bg-green-500/10 text-green-500'
                         : s.status === 'confirmed'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                        ? 'bg-blue-500/10 text-blue-500'
                         : s.status === 'rejected'
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-red-500/10 text-red-500'
+                        : 'bg-muted text-foreground'
                     }`}>
                       {STATUS_LABELS[s.status] || s.status}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {s.paid_at ? new Date(s.paid_at).toLocaleDateString('ko-KR') : '-'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {new Date(s.created_at).toLocaleDateString('ko-KR')}
                   </td>
                 </tr>
               ))}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                     정산 내역이 없습니다
                   </td>
                 </tr>
@@ -100,14 +100,14 @@ export default function PartnerSettlementsPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             전체: {data.total}건
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 "
             >
               이전
             </button>
@@ -117,7 +117,7 @@ export default function PartnerSettlementsPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 "
             >
               다음
             </button>

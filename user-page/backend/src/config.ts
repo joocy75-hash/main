@@ -43,4 +43,19 @@ export const config = {
     apiKey: process.env.API_FOOTBALL_KEY || '',
     baseUrl: 'https://v3.football.api-sports.io',
   },
+  payment: {
+    provider: (process.env.PAYMENT_PROVIDER || 'cryptomus') as 'heleket' | 'cryptomus',
+    webhookBaseUrl: process.env.WEBHOOK_BASE_URL || 'http://localhost:8003',
+    heleket: {
+      apiKey: process.env.HELEKET_API_KEY || '',
+      merchantId: process.env.HELEKET_MERCHANT_ID || '',
+      baseUrl: 'https://api.heleket.com/v1',
+    },
+    cryptomus: {
+      paymentKey: process.env.CRYPTOMUS_PAYMENT_KEY || '',
+      payoutKey: process.env.CRYPTOMUS_PAYOUT_KEY || '',
+      merchantId: process.env.CRYPTOMUS_MERCHANT_ID || '',
+      baseUrl: 'https://api.cryptomus.com/v1',
+    },
+  },
 } as const;

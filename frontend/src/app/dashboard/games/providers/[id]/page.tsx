@@ -84,7 +84,7 @@ export default function ProviderDetailPage() {
   };
 
   if (loading || !provider) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">로딩 중...</div>;
+    return <div className="flex items-center justify-center h-64 text-muted-foreground">로딩 중...</div>;
   }
 
   return (
@@ -93,7 +93,7 @@ export default function ProviderDetailPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
         >
           &larr; 뒤로
         </button>
@@ -101,21 +101,21 @@ export default function ProviderDetailPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{provider.name}</h1>
             <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-              provider.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+              provider.is_active ? 'bg-green-500/10 text-green-500' : 'bg-muted text-foreground'
             }`}>
               {provider.is_active ? '활성' : '비활성'}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {provider.code} &middot; {CATEGORY_LABELS[provider.category] || provider.category}
           </p>
         </div>
       </div>
 
       {/* Edit Form */}
-      <div className="rounded-lg border p-6 dark:border-gray-700 space-y-4 max-w-2xl">
+      <div className="rounded-lg border p-6 space-y-4 max-w-2xl">
         <h2 className="text-lg font-semibold">프로바이더 정보 수정</h2>
-        {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">{error}</div>}
+        {error && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{error}</div>}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -124,7 +124,7 @@ export default function ProviderDetailPage() {
               type="text"
               value={editForm.name}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -133,7 +133,7 @@ export default function ProviderDetailPage() {
               type="text"
               value={editForm.code}
               onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -141,7 +141,7 @@ export default function ProviderDetailPage() {
             <select
               value={editForm.category}
               onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             >
               {CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -153,7 +153,7 @@ export default function ProviderDetailPage() {
             <select
               value={editForm.is_active ? 'true' : 'false'}
               onChange={(e) => setEditForm({ ...editForm, is_active: e.target.value === 'true' })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             >
               <option value="true">활성</option>
               <option value="false">비활성</option>
@@ -167,7 +167,7 @@ export default function ProviderDetailPage() {
             value={editForm.api_url}
             onChange={(e) => setEditForm({ ...editForm, api_url: e.target.value })}
             placeholder="https://api.provider.com"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+            className="w-full rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
         <div className="space-y-2">
@@ -176,7 +176,7 @@ export default function ProviderDetailPage() {
             type="password"
             value={editForm.api_key}
             onChange={(e) => setEditForm({ ...editForm, api_key: e.target.value })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+            className="w-full rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
         <div className="space-y-2">
@@ -185,7 +185,7 @@ export default function ProviderDetailPage() {
             value={editForm.description}
             onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
             rows={3}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+            className="w-full rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
 
@@ -193,13 +193,13 @@ export default function ProviderDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? '저장 중...' : '저장'}
           </button>
           <button
             onClick={handleDelete}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+            className="rounded-md bg-destructive px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive/90"
           >
             비활성화
           </button>
@@ -207,52 +207,52 @@ export default function ProviderDetailPage() {
       </div>
 
       {/* Games List */}
-      <div className="rounded-lg border dark:border-gray-700">
-        <div className="px-6 py-4 border-b dark:border-gray-700">
+      <div className="rounded-lg border">
+        <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold">
             소속 게임 ({gamesData?.total || 0}개)
           </h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">코드</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">이름</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">카테고리</th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">정렬</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">코드</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">이름</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">카테고리</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">정렬</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {gamesData?.items.map((game) => (
-                <tr key={game.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-400">{game.code}</td>
+                <tr key={game.id} className="hover:bg-muted">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-muted-foreground">{game.code}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
-                    <Link href={`/dashboard/games/${game.id}`} className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                    <Link href={`/dashboard/games/${game.id}`} className="text-primary hover:text-primary/80">
                       {game.name}
                     </Link>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
-                    <span className="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    <span className="inline-flex rounded-full bg-muted px-2 py-1 text-xs font-semibold text-foreground">
                       {CATEGORY_LABELS[game.category] || game.category}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                      game.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                      game.is_active ? 'bg-green-500/10 text-green-500' : 'bg-muted text-foreground'
                     }`}>
                       {game.is_active ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-center text-muted-foreground">
                     {game.sort_order}
                   </td>
                 </tr>
               ))}
               {(!gamesData?.items || gamesData.items.length === 0) && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                     등록된 게임이 없습니다
                   </td>
                 </tr>

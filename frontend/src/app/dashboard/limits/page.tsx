@@ -132,8 +132,8 @@ export default function LimitsPage() {
             key={tab.key}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               mainTab === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setMainTab(tab.key)}
           >
@@ -342,8 +342,8 @@ const TransactionLimitsTab = () => {
               key={tab.key}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                 scopeFilter === tab.key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-accent'
               }`}
               onClick={() => setScopeFilter(tab.key)}
             >
@@ -394,7 +394,7 @@ const TransactionLimitsTab = () => {
               {data.items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <Badge className="bg-gray-100 text-gray-800" variant="secondary">
+                    <Badge className="bg-muted text-foreground" variant="secondary">
                       {SCOPE_LABELS[item.scope_type] || item.scope_type}
                     </Badge>
                     {item.scope_id > 0 && (
@@ -403,7 +403,7 @@ const TransactionLimitsTab = () => {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      className={item.tx_type === 'deposit' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}
+                      className={item.tx_type === 'deposit' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}
                       variant="secondary"
                     >
                       {TYPE_LABELS[item.tx_type] || item.tx_type}
@@ -416,7 +416,7 @@ const TransactionLimitsTab = () => {
                   <TableCell className="text-right font-mono">{fmt(item.monthly_limit)}</TableCell>
                   <TableCell>
                     <Badge
-                      className={item.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={item.is_active ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}
                       variant="secondary"
                     >
                       {item.is_active ? '활성' : '비활성'}
@@ -428,7 +428,7 @@ const TransactionLimitsTab = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-800"
+                        className="text-destructive hover:text-destructive"
                         onClick={() => handleDelete(item)}
                       >
                         삭제
@@ -632,8 +632,8 @@ const BettingLimitsTab = () => {
                 key={tab.key}
                 className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                   scopeFilter === tab.key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent'
                 }`}
                 onClick={() => setScopeFilter(tab.key)}
               >
@@ -693,7 +693,7 @@ const BettingLimitsTab = () => {
               {data.items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <Badge className="bg-gray-100 text-gray-800" variant="secondary">
+                    <Badge className="bg-muted text-foreground" variant="secondary">
                       {SCOPE_LABELS[item.scope_type] || item.scope_type}
                     </Badge>
                     {item.scope_id > 0 && (
@@ -701,7 +701,7 @@ const BettingLimitsTab = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge className="bg-purple-100 text-purple-800" variant="secondary">
+                    <Badge className="bg-purple-500/10 text-purple-500" variant="secondary">
                       {CATEGORY_LABELS[item.game_category] || item.game_category}
                     </Badge>
                   </TableCell>
@@ -710,7 +710,7 @@ const BettingLimitsTab = () => {
                   <TableCell className="text-right font-mono">{fmt(item.max_daily_loss)}</TableCell>
                   <TableCell>
                     <Badge
-                      className={item.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={item.is_active ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}
                       variant="secondary"
                     >
                       {item.is_active ? '활성' : '비활성'}
@@ -722,7 +722,7 @@ const BettingLimitsTab = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-800"
+                        className="text-destructive hover:text-destructive"
                         onClick={() => handleDelete(item)}
                       >
                         삭제

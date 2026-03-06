@@ -39,20 +39,20 @@ function ResultCard({ result }: { result: BulkOperationResult }) {
       <CardContent className="py-4 px-5 space-y-3">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
+            <CheckCircle className="h-4 w-4 text-emerald-400" />
             <span className="text-sm">성공: <strong>{result.success_count}</strong>건</span>
           </div>
           {result.fail_count > 0 && (
             <div className="flex items-center gap-2">
-              <XCircle className="h-4 w-4 text-red-600" />
+              <XCircle className="h-4 w-4 text-red-400" />
               <span className="text-sm">실패: <strong>{result.fail_count}</strong>건</span>
             </div>
           )}
         </div>
         {result.errors.length > 0 && (
-          <div className="bg-red-50 dark:bg-red-950 rounded-md p-3">
-            <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">오류 내역:</p>
-            <ul className="text-xs text-red-600 dark:text-red-400 space-y-0.5">
+          <div className="bg-destructive/10 rounded-md p-3">
+            <p className="text-xs font-medium text-destructive mb-1">오류 내역:</p>
+            <ul className="text-xs text-destructive space-y-0.5">
               {result.errors.map((err, i) => (
                 <li key={i}>{err}</li>
               ))}

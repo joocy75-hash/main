@@ -110,7 +110,7 @@ export default function NewPromotionPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-950 dark:text-red-300">
+          <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -133,7 +133,7 @@ export default function NewPromotionPage() {
               <select
                 value={form.type}
                 onChange={(e) => updateForm('type', e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 {PROMOTION_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -148,7 +148,7 @@ export default function NewPromotionPage() {
                 onChange={(e) => updateForm('description', e.target.value)}
                 rows={3}
                 placeholder="프로모션에 대한 설명을 입력하세요"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
             </div>
           </CardContent>
@@ -164,7 +164,7 @@ export default function NewPromotionPage() {
                 <select
                   value={form.bonus_type}
                   onChange={(e) => updateForm('bonus_type', e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 >
                   {BONUS_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>{t.label}</option>
@@ -233,7 +233,7 @@ export default function NewPromotionPage() {
               <select
                 value={form.target}
                 onChange={(e) => updateForm('target', e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 {TARGET_OPTIONS.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>

@@ -15,7 +15,6 @@ from app.config import settings
 from app.database import get_session
 from app.models.admin_login_log import AdminLoginLog
 from app.models.admin_user import AdminUser
-from app.models.user_login_history import UserLoginHistory
 from app.schemas.auth import (
     ChangePasswordRequest,
     LoginRequest,
@@ -132,20 +131,8 @@ async def login(
     user.last_login_ip = request.client.host if request.client else None
     session.add(user)
 
-    # Record login history
-    ua = request.headers.get("user-agent", "")
-    login_history = UserLoginHistory(
-        user_id=user.id,
-        login_ip=request.client.host if request.client else "unknown",
-        user_agent=ua[:500] if ua else None,
-        device_type=_parse_device_type(ua),
-        os=_parse_os(ua),
-        browser=_parse_browser(ua),
-        login_at=now,
-    )
-    session.add(login_history)
-
     # Record admin login log
+    ua = request.headers.get("user-agent", "")
     admin_log = AdminLoginLog(
         admin_user_id=user.id,
         ip_address=request.client.host if request.client else None,

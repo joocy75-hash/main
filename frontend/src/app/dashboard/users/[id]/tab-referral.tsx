@@ -27,12 +27,12 @@ export default function TabReferral({ userId, detail }: Props) {
     <div className="space-y-4">
       {/* Referral Code */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900">
+        <Card className="bg-green-500/10 border-green-500/30">
           <CardContent className="pt-6">
-            <p className="text-xs text-green-600 dark:text-green-400">본인 추천 코드</p>
+            <p className="text-xs text-green-400">본인 추천 코드</p>
             <div className="flex items-center gap-2 mt-1">
-              <Link className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="text-lg font-bold text-green-700 dark:text-green-300">{user.username}</span>
+              <Link className="h-4 w-4 text-green-400" />
+              <span className="text-lg font-bold text-green-500">{user.username}</span>
             </div>
           </CardContent>
         </Card>
@@ -42,19 +42,19 @@ export default function TabReferral({ userId, detail }: Props) {
             <span className="text-lg mt-1 block">{user.referrer_username || '없음'}</span>
           </CardContent>
         </Card>
-        <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
+        <Card className="bg-blue-500/10 border-blue-500/30">
           <CardContent className="pt-6">
-            <p className="text-xs text-blue-600 dark:text-blue-400">하부 회원 수</p>
+            <p className="text-xs text-blue-400">하부 회원 수</p>
             <div className="flex items-center gap-2 mt-1">
-              <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-lg font-bold text-blue-700 dark:text-blue-300">{user.direct_referral_count}명</span>
+              <Users className="h-4 w-4 text-blue-400" />
+              <span className="text-lg font-bold text-blue-500">{user.direct_referral_count}명</span>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900">
+        <Card className="bg-purple-500/10 border-purple-500/30">
           <CardContent className="pt-6">
-            <p className="text-xs text-purple-600 dark:text-purple-400">전체 하위 회원</p>
-            <span className="text-lg font-bold text-purple-700 dark:text-purple-300 mt-1 block">{nodes.length > 0 ? nodes.length - 1 : 0}명</span>
+            <p className="text-xs text-purple-400">전체 하위 회원</p>
+            <span className="text-lg font-bold text-purple-500 mt-1 block">{nodes.length > 0 ? nodes.length - 1 : 0}명</span>
           </CardContent>
         </Card>
       </div>
@@ -68,7 +68,7 @@ export default function TabReferral({ userId, detail }: Props) {
               detail.game_rolling_rates.map((r) => (
                 <div key={r.id} className="flex items-center justify-between p-2 rounded border">
                   <span className="text-sm">{r.game_category}{r.provider ? ` (${r.provider})` : ''}</span>
-                  <Badge className="bg-blue-100 text-blue-800" variant="secondary">{r.rolling_rate}%</Badge>
+                  <Badge className="bg-blue-500/10 text-blue-500" variant="secondary">{r.rolling_rate}%</Badge>
                 </div>
               ))
             ) : (
@@ -113,7 +113,7 @@ export default function TabReferral({ userId, detail }: Props) {
                         <Badge variant="secondary">{RANK_LABELS[child.rank] || child.rank}</Badge>
                       </td>
                       <td className="px-4 py-2 text-center">
-                        <Badge className={child.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'} variant="secondary">
+                        <Badge className={child.status === 'active' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'} variant="secondary">
                           {child.status === 'active' ? '활성' : '정지'}
                         </Badge>
                       </td>

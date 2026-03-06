@@ -73,31 +73,31 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#252531] px-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#2c2d33] p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-[#f2f3f7] px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
         <div className="mb-6 text-center">
           <h1 className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] bg-clip-text text-2xl font-bold tracking-tight text-transparent">
             Game Platform
           </h1>
-          <p className="mt-1 text-base text-[#98a7b5]">
+          <p className="mt-1 text-base text-[#6b7280]">
             로그인
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium text-white">
+            <label htmlFor="username" className="text-sm font-medium text-[#252531]">
               아이디
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#98a7b5]" />
+              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
               <input
                 id="username"
                 type="text"
                 placeholder="아이디를 입력하세요"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="h-11 w-full rounded-lg border border-[#3a3a4a] bg-[#252531] pl-10 pr-10 text-sm text-white placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
+                className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                 autoComplete="username"
                 disabled={isSubmitting}
               />
@@ -105,25 +105,25 @@ const LoginPage = () => {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-white">
+            <label htmlFor="password" className="text-sm font-medium text-[#252531]">
               비밀번호
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#98a7b5]" />
+              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="비밀번호를 입력하세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 w-full rounded-lg border border-[#3a3a4a] bg-[#252531] pl-10 pr-10 text-sm text-white placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
+                className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                 autoComplete="current-password"
                 disabled={isSubmitting}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#98a7b5] transition-colors hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] transition-colors hover:text-[#252531]"
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -141,13 +141,13 @@ const LoginPage = () => {
               checked={rememberUsername}
               onCheckedChange={(checked) => setRememberUsername(checked === true)}
             />
-            <label htmlFor="remember" className="cursor-pointer text-sm font-normal text-white">
+            <label htmlFor="remember" className="cursor-pointer text-sm font-normal text-[#252531]">
               아이디 저장
             </label>
           </div>
 
           {error && (
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-sm text-red-500">{error}</p>
           )}
 
           <button
@@ -165,7 +165,7 @@ const LoginPage = () => {
             )}
           </button>
 
-          <p className="text-center text-sm text-[#98a7b5]">
+          <p className="text-center text-sm text-[#6b7280] mt-4">
             계정이 없으신가요?{' '}
             <Link
               href="/register"

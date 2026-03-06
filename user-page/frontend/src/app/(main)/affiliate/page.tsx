@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Copy, Share2, Users, DollarSign, TrendingUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
-
-const formatAmount = (value: string) =>
-  new Intl.NumberFormat('ko-KR').format(Number(value));
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -82,30 +79,30 @@ export default function AffiliatePage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-[#f5f5f7] rounded-lg p-4">
         <h2 className="flex items-center gap-2 text-lg font-bold text-[#252531]">
           <span>🤝</span> 추천/어필리에이트
         </h2>
       </div>
 
       {/* Referral code */}
-      <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-3">
+      <div className="bg-[#f5f5f7] rounded-lg p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-[#707070]">내 추천코드</p>
-            <p className="text-lg font-bold text-[#f4b53e]">{referralCode}</p>
+            <p className="text-xs text-[#6b7280]">내 추천코드</p>
+            <p className="text-lg font-bold text-[#feb614]">{referralCode}</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => handleCopy(referralCode, 'code')}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] bg-white text-[#707070] rounded-md hover:bg-[#f8f9fc] transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] bg-[#f0f0f2] text-[#6b7280] rounded-md hover:bg-[#f8f8fa] transition-colors"
             >
               <Copy className="size-3" />
               {copied === 'code' ? '복사됨' : '복사'}
             </button>
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] bg-white text-[#707070] rounded-md hover:bg-[#f8f9fc] transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] bg-[#f0f0f2] text-[#6b7280] rounded-md hover:bg-[#f8f8fa] transition-colors"
             >
               <Share2 className="size-3" />
               공유
@@ -113,18 +110,18 @@ export default function AffiliatePage() {
           </div>
         </div>
 
-        <div className="border-t border-[#dddddd]" />
+        <div className="border-t border-[#e8e8e8]" />
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#707070]">추천 링크</p>
-            <p className="truncate text-xs font-mono text-[#707070]">
+            <p className="text-xs text-[#6b7280]">추천 링크</p>
+            <p className="truncate text-xs font-mono text-[#6b7280]">
               {referralLink}
             </p>
           </div>
           <button
             onClick={() => handleCopy(referralLink, 'link')}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] bg-white text-[#707070] rounded-md hover:bg-[#f8f9fc] transition-colors shrink-0"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] bg-[#f0f0f2] text-[#6b7280] rounded-md hover:bg-[#f8f8fa] transition-colors shrink-0"
           >
             <Copy className="size-3" />
             {copied === 'link' ? '복사됨' : '복사'}
@@ -134,26 +131,26 @@ export default function AffiliatePage() {
 
       {/* Dashboard stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center gap-1 p-4">
+        <div className="bg-[#f5f5f7] rounded-lg flex flex-col items-center gap-1 p-4">
           <Users className="size-5 text-blue-500" />
-          <p className="text-xs text-[#707070]">총 추천</p>
+          <p className="text-xs text-[#6b7280]">총 추천</p>
           <p className="text-lg font-bold text-[#252531]">{dashboard?.totalReferrals || 0}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center gap-1 p-4">
+        <div className="bg-[#f5f5f7] rounded-lg flex flex-col items-center gap-1 p-4">
           <DollarSign className="size-5 text-green-500" />
-          <p className="text-xs text-[#707070]">이달 커미션</p>
+          <p className="text-xs text-[#6b7280]">이달 커미션</p>
           <p className="text-lg font-bold text-[#252531]">{formatAmount(dashboard?.thisMonthCommission || '0')}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center gap-1 p-4">
+        <div className="bg-[#f5f5f7] rounded-lg flex flex-col items-center gap-1 p-4">
           <TrendingUp className="size-5 text-yellow-500" />
-          <p className="text-xs text-[#707070]">누적 커미션</p>
+          <p className="text-xs text-[#6b7280]">누적 커미션</p>
           <p className="text-lg font-bold text-[#252531]">{formatAmount(dashboard?.totalCommission || '0')}</p>
         </div>
       </div>
 
       {/* Rolling rates */}
       {dashboard?.rollingRates && dashboard.rollingRates.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-[#f5f5f7] rounded-lg">
           <div className="p-4 pb-3">
             <h3 className="text-base font-bold text-[#252531]">게임별 롤링 요율</h3>
           </div>
@@ -162,10 +159,10 @@ export default function AffiliatePage() {
               {dashboard.rollingRates.map((rate) => (
                 <div
                   key={rate.category}
-                  className="flex items-center gap-1 rounded-md border border-[#dddddd] px-3 py-1.5"
+                  className="flex items-center gap-1 rounded-md border border-[#e8e8e8] px-3 py-1.5"
                 >
                   <span className="text-sm text-[#252531]">{rate.category}</span>
-                  <span className="text-sm font-bold text-[#f4b53e]">{rate.rate}%</span>
+                  <span className="text-sm font-bold text-[#feb614]">{rate.rate}%</span>
                 </div>
               ))}
             </div>
@@ -176,14 +173,14 @@ export default function AffiliatePage() {
       {/* Tabs: Members / Commission History */}
       <div className="w-full">
         {/* Tab triggers */}
-        <div className="flex rounded-lg overflow-hidden border border-[#dddddd]">
+        <div className="flex rounded-lg overflow-hidden border border-[#e8e8e8]">
           <button
             onClick={() => setActiveTab('members')}
             className={cn(
               'flex-1 py-2.5 text-sm font-semibold transition-colors',
               activeTab === 'members'
-                ? 'bg-[#f4b53e] text-white'
-                : 'bg-[#edeef3] text-[#707070] hover:bg-[#e4e5ea]'
+                ? 'bg-[#feb614] text-white'
+                : 'bg-[#e8e8e8] text-[#6b7280] hover:bg-[#f0f0f2]'
             )}
           >
             추천회원
@@ -193,8 +190,8 @@ export default function AffiliatePage() {
             className={cn(
               'flex-1 py-2.5 text-sm font-semibold transition-colors',
               activeTab === 'commissions'
-                ? 'bg-[#f4b53e] text-white'
-                : 'bg-[#edeef3] text-[#707070] hover:bg-[#e4e5ea]'
+                ? 'bg-[#feb614] text-white'
+                : 'bg-[#e8e8e8] text-[#6b7280] hover:bg-[#f0f0f2]'
             )}
           >
             커미션내역
@@ -203,27 +200,27 @@ export default function AffiliatePage() {
 
         {/* Tab content: Members */}
         {activeTab === 'members' && (
-          <div className="bg-white rounded-lg shadow-sm mt-3">
+          <div className="bg-[#f5f5f7] rounded-lg mt-3">
             {affiliateMembers.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-12">
                 <span className="text-4xl">👤</span>
-                <p className="text-sm text-[#707070]">추천회원이 없습니다</p>
+                <p className="text-sm text-[#6b7280]">추천회원이 없습니다</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[#dddddd]">
-                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">아이디</th>
-                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">닉네임</th>
-                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">총 베팅</th>
-                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">커미션</th>
-                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">가입일</th>
+                    <tr className="border-b border-[#e8e8e8]">
+                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">아이디</th>
+                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">닉네임</th>
+                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">총 베팅</th>
+                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">커미션</th>
+                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">가입일</th>
                     </tr>
                   </thead>
                   <tbody>
                     {affiliateMembers.map((member) => (
-                      <tr key={member.id} className="border-b border-[#dddddd] last:border-b-0">
+                      <tr key={member.id} className="border-b border-[#e8e8e8] last:border-b-0">
                         <td className="text-sm text-[#252531] px-4 py-3">{member.username}</td>
                         <td className="text-sm text-[#252531] px-4 py-3">{member.nickname}</td>
                         <td className="text-right text-sm text-[#252531] px-4 py-3">
@@ -232,7 +229,7 @@ export default function AffiliatePage() {
                         <td className="text-right text-sm text-green-600 px-4 py-3">
                           {formatAmount(member.commission)}
                         </td>
-                        <td className="text-right text-xs text-[#707070] px-4 py-3">
+                        <td className="text-right text-xs text-[#6b7280] px-4 py-3">
                           {formatDate(member.joinedAt)}
                         </td>
                       </tr>
@@ -246,29 +243,29 @@ export default function AffiliatePage() {
 
         {/* Tab content: Commissions */}
         {activeTab === 'commissions' && (
-          <div className="bg-white rounded-lg shadow-sm mt-3">
+          <div className="bg-[#f5f5f7] rounded-lg mt-3">
             {commissionRecords.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-12">
                 <span className="text-4xl">💰</span>
-                <p className="text-sm text-[#707070]">커미션내역이 없습니다</p>
+                <p className="text-sm text-[#6b7280]">커미션내역이 없습니다</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[#dddddd]">
-                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">유형</th>
-                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">게임</th>
-                      <th className="text-left text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">회원</th>
-                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">금액</th>
-                      <th className="text-right text-xs font-medium text-[#707070] bg-[#f8f9fc] px-4 py-2.5">일시</th>
+                    <tr className="border-b border-[#e8e8e8]">
+                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">유형</th>
+                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">게임</th>
+                      <th className="text-left text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">회원</th>
+                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">금액</th>
+                      <th className="text-right text-xs font-medium text-[#6b7280] bg-[#f8f8fa] px-4 py-2.5">일시</th>
                     </tr>
                   </thead>
                   <tbody>
                     {commissionRecords.map((record) => (
-                      <tr key={record.id} className="border-b border-[#dddddd] last:border-b-0">
+                      <tr key={record.id} className="border-b border-[#e8e8e8] last:border-b-0">
                         <td className="px-4 py-3">
-                          <span className="inline-block text-[10px] font-medium bg-[#edeef3] text-[#707070] px-2 py-0.5 rounded">
+                          <span className="inline-block text-[10px] font-medium bg-[#e8e8e8] text-[#6b7280] px-2 py-0.5 rounded">
                             {record.type === 'rolling' ? '롤링' : '죽장'}
                           </span>
                         </td>
@@ -277,7 +274,7 @@ export default function AffiliatePage() {
                         <td className="text-right text-sm text-green-600 px-4 py-3">
                           +{formatAmount(record.amount)}
                         </td>
-                        <td className="text-right text-xs text-[#707070] px-4 py-3">
+                        <td className="text-right text-xs text-[#6b7280] px-4 py-3">
                           {formatDateTime(record.createdAt)}
                         </td>
                       </tr>

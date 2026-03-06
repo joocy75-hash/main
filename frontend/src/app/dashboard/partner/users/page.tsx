@@ -33,12 +33,12 @@ export default function PartnerUsersPage() {
           placeholder="유저명 검색"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         />
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         >
           <option value="">전체 상태</option>
           <option value="active">활성</option>
@@ -49,31 +49,31 @@ export default function PartnerUsersPage() {
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">유저명</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">잔액</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">총 베팅</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">총 당첨</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">가입일</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">유저명</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">상태</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">잔액</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">총 베팅</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">총 당첨</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">가입일</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data?.items.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr key={user.id} className="hover:bg-accent">
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">{user.username}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                       user.status === 'active'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        ? 'bg-green-500/10 text-green-500'
                         : user.status === 'suspended'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                        ? 'bg-yellow-500/10 text-yellow-500'
+                        : 'bg-red-500/10 text-red-500'
                     }`}>
                       {STATUS_LABELS[user.status] || user.status}
                     </span>
@@ -81,14 +81,14 @@ export default function PartnerUsersPage() {
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono">{formatAmount(user.balance)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono">{formatAmount(user.total_bet)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono">{formatAmount(user.total_win)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {new Date(user.created_at).toLocaleDateString('ko-KR')}
                   </td>
                 </tr>
               ))}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     하위 유저가 없습니다
                   </td>
                 </tr>
@@ -101,14 +101,14 @@ export default function PartnerUsersPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             전체: {data.total}명
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 "
             >
               이전
             </button>
@@ -118,7 +118,7 @@ export default function PartnerUsersPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 "
             >
               다음
             </button>

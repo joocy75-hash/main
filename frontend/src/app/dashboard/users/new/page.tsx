@@ -73,7 +73,7 @@ export default function NewUserPage() {
         <CardHeader><CardTitle>회원 정보</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm">{error}</div>}
+            {error && <div className="bg-red-500/10 text-red-500 px-4 py-3 rounded-md text-sm">{error}</div>}
 
             <div className="space-y-2">
               <label className="text-sm font-medium">아이디 (추천인 코드) *</label>

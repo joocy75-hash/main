@@ -27,11 +27,11 @@ function SkeletonCard() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-4 animate-pulse rounded bg-muted" />
       </CardHeader>
       <CardContent>
-        <div className="h-7 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-7 w-24 animate-pulse rounded bg-muted" />
       </CardContent>
     </Card>
   );
@@ -91,21 +91,21 @@ export default function PartnerDashboardPage() {
           <CardContent className="space-y-2">
             <Link
               href="/dashboard/partner/users"
-              className="flex items-center gap-3 rounded-lg border px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-3 rounded-lg border px-4 py-3 text-sm hover:bg-accent transition-colors"
             >
               <Users className="h-4 w-4 text-blue-500" />
               <span>하위 유저 관리</span>
             </Link>
             <Link
               href="/dashboard/partner/commissions"
-              className="flex items-center gap-3 rounded-lg border px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-3 rounded-lg border px-4 py-3 text-sm hover:bg-accent transition-colors"
             >
               <Percent className="h-4 w-4 text-orange-500" />
               <span>커미션 내역</span>
             </Link>
             <Link
               href="/dashboard/partner/settlements"
-              className="flex items-center gap-3 rounded-lg border px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-3 rounded-lg border px-4 py-3 text-sm hover:bg-accent transition-colors"
             >
               <Calculator className="h-4 w-4 text-emerald-500" />
               <span>정산 내역</span>
@@ -117,7 +117,7 @@ export default function PartnerDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">최근 커미션</CardTitle>
-            <Link href="/dashboard/partner/commissions" className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400">
+            <Link href="/dashboard/partner/commissions" className="text-xs text-primary hover:text-primary">
               전체보기
             </Link>
           </CardHeader>
@@ -125,7 +125,7 @@ export default function PartnerDashboardPage() {
             {commLoading ? (
               <div className="space-y-3">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  <div key={i} className="h-8 animate-pulse rounded bg-muted" />
                 ))}
               </div>
             ) : !commissions?.items.length ? (
@@ -143,12 +143,12 @@ export default function PartnerDashboardPage() {
                   </thead>
                   <tbody className="divide-y">
                     {commissions.items.map((c) => (
-                      <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={c.id} className="hover:bg-accent">
                         <td className="py-2">
                           <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
                             c.type === 'rolling'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                              ? 'bg-blue-500/10 text-blue-500'
+                              : 'bg-purple-500/10 text-purple-500'
                           }`}>
                             {TYPE_LABELS[c.type] || c.type}
                           </span>

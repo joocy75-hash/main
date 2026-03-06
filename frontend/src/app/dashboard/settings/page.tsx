@@ -71,22 +71,22 @@ export default function SettingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">시스템 설정</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">시스템 설정 값을 관리합니다.</p>
+        <p className="text-sm text-muted-foreground">시스템 설정 값을 관리합니다.</p>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {/* Loading */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : groups.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             설정 항목이 없습니다
           </CardContent>
         </Card>
@@ -105,8 +105,8 @@ export default function SettingsPage() {
                       {GROUP_LABELS[group.group_name] || group.group_name}
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400">{group.items.length}개</span>
-                      <span className="text-gray-400">{isOpen ? '▼' : '▶'}</span>
+                      <span className="text-sm text-muted-foreground">{group.items.length}개</span>
+                      <span className="text-muted-foreground">{isOpen ? '▼' : '▶'}</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                         const isSaving = savingKeys.has(compositeKey);
 
                         return (
-                          <div key={item.id} className="flex items-start gap-4 py-2 border-b last:border-0 dark:border-gray-700">
+                          <div key={item.id} className="flex items-start gap-4 py-2 border-b last:border-0">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium">{item.key}</span>
@@ -130,7 +130,7 @@ export default function SettingsPage() {
                                 )}
                               </div>
                               {item.description && (
-                                <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                               )}
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
@@ -139,7 +139,7 @@ export default function SettingsPage() {
                                   value={currentValue}
                                   onChange={(e) => setEditValues({ ...editValues, [compositeKey]: e.target.value })}
                                   rows={3}
-                                  className="w-80 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-mono dark:bg-gray-900 dark:border-gray-700"
+                                  className="w-80 rounded-md border border-border px-3 py-1.5 text-sm font-mono"
                                 />
                               ) : (
                                 <Input

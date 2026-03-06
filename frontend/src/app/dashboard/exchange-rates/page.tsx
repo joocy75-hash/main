@@ -99,14 +99,14 @@ export default function ExchangeRatesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">환율 관리</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">암호화폐 환율을 관리합니다.</p>
+          <p className="text-sm text-muted-foreground">암호화폐 환율을 관리합니다.</p>
         </div>
         <Button onClick={openCreate}>+ 환율 등록</Button>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
@@ -126,7 +126,7 @@ export default function ExchangeRatesPage() {
                 <select
                   value={form.pair}
                   onChange={(e) => setForm({ ...form, pair: e.target.value })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 >
                   {DEFAULT_PAIRS.map((p) => (
                     <option key={p} value={p}>{p}</option>
@@ -156,7 +156,7 @@ export default function ExchangeRatesPage() {
                 <select
                   value={form.is_active ? 'true' : 'false'}
                   onChange={(e) => setForm({ ...form, is_active: e.target.value === 'true' })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 >
                   <option value="true">활성</option>
                   <option value="false">비활성</option>
@@ -175,52 +175,52 @@ export default function ExchangeRatesPage() {
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : data.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             등록된 환율이 없습니다
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">통화쌍</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">환율</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">소스</th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">수정일</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">수정</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">통화쌍</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">환율</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">소스</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">수정일</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">수정</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr key={item.id} className="hover:bg-accent">
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">{item.pair}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums">
                     {rateFormatter.format(item.rate)}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {item.source || '-'}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                       item.is_active
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                        ? 'bg-green-500/10 text-green-500'
+                        : 'bg-muted text-foreground'
                     }`}>
                       {item.is_active ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {new Date(item.updated_at).toLocaleString('ko-KR')}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
                     <button
                       onClick={() => openEdit(item)}
-                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                      className="text-primary hover:text-primary/80"
                     >
                       수정
                     </button>

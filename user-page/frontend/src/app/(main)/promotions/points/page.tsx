@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 import { useWalletStore } from '@/stores/wallet-store';
 
-const CONVERSION_RATE = 100; // 100P = 1 KRW
+const CONVERSION_RATE = 100; // 100P = 1 USDT
 const MIN_CONVERT = 1000; // Minimum 1,000P
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -100,14 +100,14 @@ export default function PointsPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Balance card */}
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-[#f5f5f7] rounded-lg">
         <div className="px-4 pt-4 pb-2">
           <h2 className="text-lg font-bold text-[#252531]">포인트</h2>
         </div>
         <div className="px-4 pb-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-[#707070]">보유 포인트</p>
-            <p className="text-2xl font-bold text-[#f4b53e]">
+            <p className="text-sm text-[#6b7280]">보유 포인트</p>
+            <p className="text-2xl font-bold text-[#feb614]">
               {Number(points).toLocaleString('ko-KR')} P
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function PointsPage() {
       </div>
 
       {/* Conversion card */}
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-[#f5f5f7] rounded-lg">
         <div className="px-4 pt-4 pb-2">
           <h2 className="text-base font-bold text-[#252531]">
             포인트 전환 ({CONVERSION_RATE}P = 1원)
@@ -124,7 +124,7 @@ export default function PointsPage() {
         <div className="px-4 pb-4 flex flex-col gap-4">
           {/* Convert amount input */}
           <div>
-            <label className="mb-2 block text-sm text-[#707070]">
+            <label className="mb-2 block text-sm text-[#6b7280]">
               전환할 포인트
             </label>
             <div className="relative">
@@ -136,11 +136,11 @@ export default function PointsPage() {
                   setConvertAmount(e.target.value);
                   setError('');
                 }}
-                className="w-full h-10 px-3 pr-8 bg-white border border-[#dddddd] rounded-lg text-sm text-[#252531] placeholder:text-[#707070] focus:outline-none focus:ring-2 focus:ring-[#f4b53e]/40 focus:border-[#f4b53e]"
+                className="w-full h-10 px-3 pr-8 bg-[#f5f5f7] border border-[#e8e8e8] rounded-lg text-sm text-[#252531] placeholder:text-[#999] focus:outline-none focus:ring-2 focus:ring-[#feb614]/40 focus:border-[#feb614]"
                 min={0}
                 step={100}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#707070]">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#6b7280]">
                 P
               </span>
             </div>
@@ -152,24 +152,25 @@ export default function PointsPage() {
               <button
                 key={amt}
                 onClick={() => setConvertAmount(String(amt))}
-                className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors"
+                className="px-3 py-1.5 text-xs font-medium border border-[#e8e8e8] rounded-lg bg-[#f5f5f7] text-[#252531] hover:bg-[#f0f0f2] transition-colors"
               >
                 {amt.toLocaleString('ko-KR')}P
               </button>
             ))}
             <button
               onClick={() => setConvertAmount(points)}
-              className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors"
+              className="px-3 py-1.5 text-xs font-medium border border-[#e8e8e8] rounded-lg bg-[#f5f5f7] text-[#252531] hover:bg-[#f0f0f2] transition-colors"
             >
               전액
             </button>
           </div>
 
-          <hr className="border-[#dddddd]" />
+          <hr className="border-[#e8e8e8]" />
+
 
           {/* Receive amount */}
-          <div className="flex items-center justify-between rounded-lg bg-[#f8f9fc] px-4 py-3">
-            <div className="flex items-center gap-2 text-sm text-[#707070]">
+          <div className="flex items-center justify-between rounded-lg bg-[#f8f8fa] px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-[#6b7280]">
               <ArrowRightLeft className="size-4" />
               <span>받을 금액</span>
             </div>
@@ -185,7 +186,7 @@ export default function PointsPage() {
             </div>
           )}
           {success && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-600">
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-700">
               {success}
             </div>
           )}
@@ -209,7 +210,7 @@ export default function PointsPage() {
       </div>
 
       {/* Point history */}
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-[#f5f5f7] rounded-lg">
         <div className="px-4 pt-4 pb-2">
           <h2 className="text-base font-bold text-[#252531]">포인트 내역</h2>
         </div>
@@ -217,7 +218,7 @@ export default function PointsPage() {
           {!pointHistory || pointHistory.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
               <span className="text-2xl">💎</span>
-              <p className="text-sm text-[#707070]">
+              <p className="text-sm text-[#6b7280]">
                 포인트 내역이 없습니다
               </p>
             </div>
@@ -227,24 +228,24 @@ export default function PointsPage() {
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[#dddddd]">
-                      <th className="text-left text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">일시</th>
-                      <th className="text-left text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">유형</th>
-                      <th className="text-right text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">금액</th>
-                      <th className="text-right text-[#707070] text-xs uppercase font-medium bg-[#f8f9fc] px-3 py-2.5">잔여</th>
+                    <tr className="border-b border-[#e8e8e8]">
+                      <th className="text-left text-[#6b7280] text-xs uppercase font-medium bg-[#f8f8fa] px-3 py-2.5">일시</th>
+                      <th className="text-left text-[#6b7280] text-xs uppercase font-medium bg-[#f8f8fa] px-3 py-2.5">유형</th>
+                      <th className="text-right text-[#6b7280] text-xs uppercase font-medium bg-[#f8f8fa] px-3 py-2.5">금액</th>
+                      <th className="text-right text-[#6b7280] text-xs uppercase font-medium bg-[#f8f8fa] px-3 py-2.5">잔여</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pointHistory.items.map((item) => {
-                      const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-[#707070]' };
+                      const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-[#6b7280]' };
                       const isPositive = Number(item.amount) > 0;
                       return (
-                        <tr key={item.id} className="border-b border-[#dddddd] last:border-b-0 hover:bg-[#f8f9fc] transition-colors">
-                          <td className="px-3 py-2.5 text-xs text-[#707070]">
+                        <tr key={item.id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f8f8fa] transition-colors">
+                          <td className="px-3 py-2.5 text-xs text-[#6b7280]">
                             {formatDate(item.createdAt)}
                           </td>
                           <td className="px-3 py-2.5">
-                            <span className={cn('inline-block rounded-2xl bg-[#edeef3] px-2.5 py-0.5 text-xs font-medium', typeInfo.color)}>
+                            <span className={cn('inline-block rounded-2xl bg-[#e8e8e8] px-2.5 py-0.5 text-xs font-medium', typeInfo.color)}>
                               {typeInfo.label}
                             </span>
                           </td>
@@ -254,7 +255,7 @@ export default function PointsPage() {
                           )}>
                             {isPositive ? '+' : ''}{Number(item.amount).toLocaleString('ko-KR')}
                           </td>
-                          <td className="px-3 py-2.5 text-right text-sm text-[#707070]">
+                          <td className="px-3 py-2.5 text-right text-sm text-[#6b7280]">
                             {Number(item.balance).toLocaleString('ko-KR')}
                           </td>
                         </tr>
@@ -267,20 +268,20 @@ export default function PointsPage() {
               {/* Mobile card layout */}
               <div className="flex flex-col gap-2 sm:hidden">
                 {pointHistory.items.map((item) => {
-                  const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-[#707070]' };
+                  const typeInfo = TYPE_LABELS[item.type] || { label: item.type, color: 'text-[#6b7280]' };
                   const isPositive = Number(item.amount) > 0;
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-2.5"
+                      className="flex items-center justify-between rounded-lg border border-[#e8e8e8] bg-[#f8f8fa] px-3 py-2.5"
                     >
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
-                          <span className={cn('inline-block rounded-2xl bg-[#edeef3] px-2.5 py-0.5 text-[10px] font-medium', typeInfo.color)}>
+                          <span className={cn('inline-block rounded-2xl bg-[#e8e8e8] px-2.5 py-0.5 text-[10px] font-medium', typeInfo.color)}>
                             {typeInfo.label}
                           </span>
                         </div>
-                        <span className="text-[10px] text-[#707070]">
+                        <span className="text-[10px] text-[#6b7280]">
                           {formatDate(item.createdAt)}
                         </span>
                       </div>
@@ -291,7 +292,7 @@ export default function PointsPage() {
                         )}>
                           {isPositive ? '+' : ''}{Number(item.amount).toLocaleString('ko-KR')}P
                         </p>
-                        <p className="text-[10px] text-[#707070]">
+                        <p className="text-[10px] text-[#6b7280]">
                           잔여: {Number(item.balance).toLocaleString('ko-KR')}
                         </p>
                       </div>
@@ -306,17 +307,17 @@ export default function PointsPage() {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 text-xs font-medium border border-[#e8e8e8] rounded-lg bg-[#f5f5f7] text-[#252531] hover:bg-[#f0f0f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     이전
                   </button>
-                  <span className="text-xs text-[#707070]">
+                  <span className="text-xs text-[#6b7280]">
                     {currentPage} / {totalPages}
                   </span>
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages}
-                    className="px-3 py-1.5 text-xs font-medium border border-[#dddddd] rounded-lg bg-white text-[#252531] hover:bg-[#f8f9fc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 text-xs font-medium border border-[#e8e8e8] rounded-lg bg-[#f5f5f7] text-[#252531] hover:bg-[#f0f0f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     다음
                   </button>

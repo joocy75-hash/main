@@ -25,9 +25,9 @@ import TabReferral from '@/app/dashboard/users/[id]/tab-referral';
 import TabMessages from '@/app/dashboard/users/[id]/tab-messages';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  active: { label: '활성', color: 'bg-blue-100 text-blue-800' },
-  suspended: { label: '정지', color: 'bg-red-100 text-red-800' },
-  banned: { label: '차단', color: 'bg-red-100 text-red-800' },
+  active: { label: '활성', color: 'bg-blue-500/10 text-blue-500' },
+  suspended: { label: '정지', color: 'bg-red-500/10 text-red-500' },
+  banned: { label: '차단', color: 'bg-red-500/10 text-red-500' },
 };
 
 const TAB_LIST = [
@@ -164,14 +164,14 @@ export function UserDetailContent({ userId, onClose, isSheet }: Props) {
   if (loading || !detail || !user) {
     return (
       <div className="space-y-4 p-4">
-        <div className="h-8 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-12 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-64 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-8 w-48 animate-pulse rounded bg-accent" />
+        <div className="h-12 w-full animate-pulse rounded bg-accent" />
+        <div className="h-64 w-full animate-pulse rounded bg-accent" />
       </div>
     );
   }
 
-  const statusInfo = STATUS_MAP[user.status] || { label: user.status, color: 'bg-gray-100 text-gray-800' };
+  const statusInfo = STATUS_MAP[user.status] || { label: user.status, color: 'bg-muted text-foreground' };
 
   return (
     <div className="flex flex-col h-full">

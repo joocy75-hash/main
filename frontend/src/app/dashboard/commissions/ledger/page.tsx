@@ -11,9 +11,9 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  rolling: 'bg-blue-100 text-blue-800',
-  losing: 'bg-red-100 text-red-800',
-  deposit: 'bg-green-100 text-green-800',
+  rolling: 'bg-blue-500/10 text-blue-500',
+  losing: 'bg-red-500/10 text-red-500',
+  deposit: 'bg-green-500/10 text-green-500',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -24,10 +24,10 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  settled: 'bg-green-100 text-green-800',
-  withdrawn: 'bg-gray-100 text-gray-800',
-  cancelled: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-500/10 text-yellow-500',
+  settled: 'bg-green-500/10 text-green-500',
+  withdrawn: 'bg-muted text-foreground',
+  cancelled: 'bg-red-500/10 text-red-500',
 };
 
 export default function CommissionLedgerPage() {
@@ -59,7 +59,7 @@ export default function CommissionLedgerPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">커미션 원장</h1>
         <Link href="/dashboard/commissions">
-          <button className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-800">
+          <button className="rounded-md border border-border bg-card px-4 py-2 text-sm hover:bg-accent">
             정책 목록
           </button>
         </Link>
@@ -68,19 +68,19 @@ export default function CommissionLedgerPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-4 gap-4">
         {summary.map((s) => (
-          <div key={s.type} className="rounded-lg border bg-white p-4 dark:bg-gray-900 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{TYPE_LABELS[s.type] || s.type}</p>
+          <div key={s.type} className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground capitalize">{TYPE_LABELS[s.type] || s.type}</p>
             <p className="text-xl font-bold">{Number(s.total_amount).toLocaleString()}</p>
-            <p className="text-xs text-gray-400">{s.count}건</p>
+            <p className="text-xs text-muted-foreground">{s.count}건</p>
           </div>
         ))}
         {data && (
-          <div className="rounded-lg border bg-blue-50 p-4">
-            <p className="text-sm text-blue-600">합계 (필터 적용)</p>
-            <p className="text-xl font-bold text-blue-800">
+          <div className="rounded-lg border border-border bg-primary/10 p-4">
+            <p className="text-sm text-primary">합계 (필터 적용)</p>
+            <p className="text-xl font-bold text-primary">
               {Number(data.total_commission).toLocaleString()}
             </p>
-            <p className="text-xs text-blue-400">{data.total}건</p>
+            <p className="text-xs text-primary/60">{data.total}건</p>
           </div>
         )}
       </div>
@@ -90,7 +90,7 @@ export default function CommissionLedgerPage() {
         <select
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="rounded-md border border-border px-3 py-2 text-sm bg-background"
         >
           <option value="">전체 유형</option>
           <option value="rolling">롤링</option>
@@ -100,7 +100,7 @@ export default function CommissionLedgerPage() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm bg-background"
         >
           <option value="">전체 상태</option>
           <option value="pending">대기</option>
@@ -113,57 +113,57 @@ export default function CommissionLedgerPage() {
           value={agentIdFilter}
           onChange={(e) => { setAgentIdFilter(e.target.value); setPage(1); }}
           placeholder="에이전트 ID"
-          className="w-28 rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="w-28 rounded-md border border-border px-3 py-2 text-sm bg-background"
         />
         <input
           type="date"
           value={dateFrom}
           onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm bg-background"
         />
-        <span className="self-center text-gray-400">~</span>
+        <span className="self-center text-muted-foreground">~</span>
         <input
           type="date"
           value={dateTo}
           onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm bg-background"
         />
       </div>
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">ID</th>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">에이전트</th>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">유형</th>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">단계</th>
-                <th className="px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">원금</th>
-                <th className="px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">비율</th>
-                <th className="px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">커미션</th>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">참조</th>
-                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">일시</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">ID</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">에이전트</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">유형</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">단계</th>
+                <th className="px-3 py-3 text-right text-xs font-medium uppercase text-muted-foreground">원금</th>
+                <th className="px-3 py-3 text-right text-xs font-medium uppercase text-muted-foreground">비율</th>
+                <th className="px-3 py-3 text-right text-xs font-medium uppercase text-muted-foreground">커미션</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">상태</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">참조</th>
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase text-muted-foreground">일시</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data?.items.map((entry) => (
-                <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-500">{entry.id}</td>
+                <tr key={entry.id} className="hover:bg-accent">
+                  <td className="whitespace-nowrap px-3 py-3 text-sm text-muted-foreground">{entry.id}</td>
                   <td className="whitespace-nowrap px-3 py-3 text-sm">
                     <div>
                       <span className="font-medium">{entry.agent_username || entry.agent_id}</span>
                       {entry.agent_code && (
-                        <span className="ml-1 text-xs text-gray-400">({entry.agent_code})</span>
+                        <span className="ml-1 text-xs text-muted-foreground">({entry.agent_code})</span>
                       )}
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-sm">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${TYPE_COLORS[entry.type] || 'bg-gray-100'}`}>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${TYPE_COLORS[entry.type] || 'bg-muted'}`}>
                       {TYPE_LABELS[entry.type] || entry.type}
                     </span>
                   </td>
@@ -178,21 +178,21 @@ export default function CommissionLedgerPage() {
                     {Number(entry.commission_amount).toLocaleString()}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-sm">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLORS[entry.status] || 'bg-gray-100'}`}>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLORS[entry.status] || 'bg-muted'}`}>
                       {STATUS_LABELS[entry.status] || entry.status}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-xs text-gray-400">
+                  <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">
                     {entry.reference_id ? `${entry.reference_type}/${entry.reference_id}` : '-'}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-xs text-gray-500">
+                  <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">
                     {new Date(entry.created_at).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })}
                   </td>
                 </tr>
               ))}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
                     커미션 내역이 없습니다
                   </td>
                 </tr>
@@ -205,12 +205,12 @@ export default function CommissionLedgerPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">전체: {data.total}건</p>
+          <p className="text-sm text-muted-foreground">전체: {data.total}건</p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
             >
               이전
             </button>
@@ -220,7 +220,7 @@ export default function CommissionLedgerPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
             >
               다음
             </button>

@@ -102,8 +102,8 @@ export default function ReportsPage() {
             onClick={() => setPreset(p.key)}
             className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               preset === p.key
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             {p.label}
@@ -115,14 +115,14 @@ export default function ReportsPage() {
               type="date"
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="rounded-md border border-border px-3 py-1.5 text-sm"
             />
             <span className="text-sm text-muted-foreground">~</span>
             <input
               type="date"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="rounded-md border border-border px-3 py-1.5 text-sm"
             />
           </div>
         )}
@@ -136,8 +136,8 @@ export default function ReportsPage() {
             onClick={() => setTab(t.key)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               tab === t.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             {t.label}
@@ -184,25 +184,25 @@ function AgentTab({ data, loading }: { data: import('@/hooks/use-reports').Agent
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-800">
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-muted">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">에이전트</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">코드</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">역할</th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">총 회원</th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">총 베팅</th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">총 커미션</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">에이전트</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">코드</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">역할</th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">총 회원</th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">총 베팅</th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">총 커미션</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+        <tbody className="divide-y divide-border bg-card">
           {data.map((r) => (
-            <tr key={r.agent_id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+            <tr key={r.agent_id} className="hover:bg-muted">
               <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">{r.username}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-400">{r.agent_code}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-muted-foreground">{r.agent_code}</td>
               <td className="whitespace-nowrap px-4 py-3 text-sm">
-                <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
                   {ROLE_LABELS[r.role] || r.role}
                 </span>
               </td>
@@ -212,7 +212,7 @@ function AgentTab({ data, loading }: { data: import('@/hooks/use-reports').Agent
             </tr>
           ))}
         </tbody>
-        <tfoot className="bg-gray-50 dark:bg-gray-800">
+        <tfoot className="bg-muted">
           <tr className="font-semibold">
             <td className="px-4 py-3 text-sm" colSpan={3}>합계</td>
             <td className="px-4 py-3 text-sm text-right">{totals.users}</td>
@@ -248,7 +248,7 @@ function CommissionTab({ data, loading }: { data: import('@/hooks/use-reports').
             <CardTitle className="text-sm font-medium text-muted-foreground">롤링 커미션 합계</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{formatAmount(rollingTotal)}</div>
+            <div className="text-2xl font-bold text-primary">{formatAmount(rollingTotal)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -256,29 +256,29 @@ function CommissionTab({ data, loading }: { data: import('@/hooks/use-reports').
             <CardTitle className="text-sm font-medium text-muted-foreground">죽장 커미션 합계</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{formatAmount(losingTotal)}</div>
+            <div className="text-2xl font-bold text-purple-400">{formatAmount(losingTotal)}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-800">
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">커미션 유형</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">건수</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">합계 금액</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">커미션 유형</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">건수</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">합계 금액</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+          <tbody className="divide-y divide-border bg-card">
             {data.map((d, i) => (
-              <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+              <tr key={i} className="hover:bg-muted">
                 <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
                   <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
                     d.type === 'rolling'
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                      : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-purple-500/10 text-purple-500'
                   }`}>
                     {TYPE_LABELS[d.type] || d.type}
                   </span>
@@ -309,7 +309,7 @@ function FinancialTab({ data, loading }: { data: import('@/hooks/use-reports').F
             <CardTitle className="text-sm font-medium text-muted-foreground">총 입금</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatAmount(data.total_deposits)}</div>
+            <div className="text-2xl font-bold text-green-400">{formatAmount(data.total_deposits)}</div>
             <p className="text-xs text-muted-foreground mt-1">{data.deposit_count}건</p>
           </CardContent>
         </Card>
@@ -318,7 +318,7 @@ function FinancialTab({ data, loading }: { data: import('@/hooks/use-reports').F
             <CardTitle className="text-sm font-medium text-muted-foreground">총 출금</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatAmount(data.total_withdrawals)}</div>
+            <div className="text-2xl font-bold text-destructive">{formatAmount(data.total_withdrawals)}</div>
             <p className="text-xs text-muted-foreground mt-1">{data.withdrawal_count}건</p>
           </CardContent>
         </Card>
@@ -327,7 +327,7 @@ function FinancialTab({ data, loading }: { data: import('@/hooks/use-reports').F
             <CardTitle className="text-sm font-medium text-muted-foreground">순수익</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${data.net_revenue >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${data.net_revenue >= 0 ? 'text-primary' : 'text-destructive'}`}>
               {formatAmount(data.net_revenue)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">입금 - 출금</p>
@@ -338,7 +338,7 @@ function FinancialTab({ data, loading }: { data: import('@/hooks/use-reports').F
             <CardTitle className="text-sm font-medium text-muted-foreground">커미션 지출</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{formatAmount(data.total_commissions)}</div>
+            <div className="text-2xl font-bold text-orange-400">{formatAmount(data.total_commissions)}</div>
           </CardContent>
         </Card>
       </div>
@@ -357,7 +357,7 @@ function LoadingTable() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-10 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div key={i} className="h-10 animate-pulse rounded bg-accent" />
       ))}
     </div>
   );

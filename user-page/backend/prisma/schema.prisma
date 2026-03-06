@@ -205,34 +205,47 @@ model WalletAddress {
 }
 
 model Deposit {
-  id             Int               @id @default(autoincrement())
-  userId         Int               @map("user_id")
-  coinType       CoinType          @map("coin_type")
-  network        NetworkType
-  amount         Decimal           @db.Decimal(18, 2)
-  depositAddress String?           @map("deposit_address")
-  txHash         String?           @map("tx_hash") @db.VarChar(100)
-  status         TransactionStatus @default(PENDING)
-  processedAt    DateTime?         @map("processed_at")
-  createdAt      DateTime          @default(now()) @map("created_at")
+  id               Int               @id @default(autoincrement())
+  userId           Int               @map("user_id")
+  coinType         CoinType          @map("coin_type")
+  network          NetworkType
+  amount           Decimal           @db.Decimal(18, 8)
+  depositAddress   String?           @map("deposit_address")
+  txHash           String?           @map("tx_hash") @db.VarChar(200)
+  status           TransactionStatus @default(PENDING)
+  processedAt      DateTime?         @map("processed_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  providerName     String?           @map("provider_name") @db.VarChar(20)
+  providerUuid     String?           @unique @map("provider_uuid") @db.VarChar(100)
+  paymentUrl       String?           @map("payment_url")
+  paymentAmount    Decimal?          @map("payment_amount") @db.Decimal(18, 8)
+  merchantAmount   Decimal?          @map("merchant_amount") @db.Decimal(18, 8)
+  payerCurrency    String?           @map("payer_currency") @db.VarChar(10)
+  fromAddress      String?           @map("from_address") @db.VarChar(200)
+  confirmations    Int               @default(0)
+  expiredAt        DateTime?         @map("expired_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  userPromotions UserPromotion[]
 
   @@map("deposits")
 }
 
 model Withdrawal {
-  id          Int               @id @default(autoincrement())
-  userId      Int               @map("user_id")
-  coinType    CoinType          @map("coin_type")
-  network     NetworkType
-  amount      Decimal           @db.Decimal(18, 2)
-  fee         Decimal           @default(0) @db.Decimal(18, 2)
-  address     String            @db.VarChar(100)
-  txHash      String?           @map("tx_hash") @db.VarChar(100)
-  status      TransactionStatus @default(PENDING)
-  processedAt DateTime?         @map("processed_at")
-  createdAt   DateTime          @default(now()) @map("created_at")
+  id             Int               @id @default(autoincrement())
+  userId         Int               @map("user_id")
+  coinType       CoinType          @map("coin_type")
+  network        NetworkType
+  amount         Decimal           @db.Decimal(18, 8)
+  fee            Decimal           @default(0) @db.Decimal(18, 8)
+  address        String            @db.VarChar(200)
+  txHash         String?           @map("tx_hash") @db.VarChar(200)
+  status         TransactionStatus @default(PENDING)
+  processedAt    DateTime?         @map("processed_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  providerName   String?           @map("provider_name") @db.VarChar(20)
+  providerUuid   String?           @unique @map("provider_uuid") @db.VarChar(100)
+  payoutStatus   String?           @map("payout_status") @db.VarChar(30)
 
   user User @relation(fields: [userId], references: [id])
 
@@ -328,6 +341,7 @@ model MoneyLog {
 
   user User @relation(fields: [userId], references: [id])
 
+  @@unique([referenceId, userId, type])
   @@map("money_logs")
 }
 
@@ -343,6 +357,7 @@ model PointLog {
 
   user User @relation(fields: [userId], references: [id])
 
+  @@unique([referenceId, userId, type])
   @@map("point_logs")
 }
 
@@ -447,6 +462,7 @@ model SpinLog {
 
   user User @relation(fields: [userId], references: [id])
 
+  @@index([userId, spinDate])
   @@map("spin_logs")
 }
 
@@ -484,14 +500,17 @@ model UserPromotion {
   id           Int      @id @default(autoincrement())
   userId       Int      @map("user_id")
   promotionId  Int      @map("promotion_id")
+  depositId    Int?     @map("deposit_id")
   bonusAmount  Decimal  @map("bonus_amount") @db.Decimal(18, 2)
   status       String   @default("active") @db.VarChar(20) // active, completed, revoked
   claimedAt    DateTime @default(now()) @map("claimed_at")
 
   user      User            @relation(fields: [userId], references: [id])
   promotion PromotionConfig @relation(fields: [promotionId], references: [id])
+  deposit   Deposit?        @relation(fields: [depositId], references: [id])
 
   @@unique([userId, promotionId])
+  @@unique([userId, depositId])
   @@map("user_promotions")
 }
 

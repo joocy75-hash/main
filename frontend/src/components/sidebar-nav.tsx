@@ -215,9 +215,9 @@ export function SidebarNav() {
   const isDashboardActive = pathname === dashboardItem.href;
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r bg-white dark:bg-gray-950">
-      <div className="flex h-16 items-center border-b px-6">
-        <h1 className="text-lg font-bold">Game Admin</h1>
+    <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
+      <div className="flex h-16 items-center border-b border-border px-6">
+        <h1 className="text-lg font-bold text-foreground">Game Admin</h1>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -226,8 +226,8 @@ export function SidebarNav() {
             href={dashboardItem.href}
             className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
               isDashboardActive
-                ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white font-medium'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800'
+                ? 'bg-accent text-foreground font-medium'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
             <dashboardItem.icon className="h-4 w-4" />
@@ -245,8 +245,8 @@ export function SidebarNav() {
                 onClick={() => toggleGroup(group.title)}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                   hasActiveChild
-                    ? 'text-gray-900 dark:text-white font-medium'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800'
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
               >
                 <group.icon className="h-4 w-4" />
@@ -268,8 +268,8 @@ export function SidebarNav() {
                         href={item.href}
                         className={`flex items-center gap-3 rounded-lg pl-9 pr-3 py-1.5 text-sm transition-colors ${
                           isActive
-                            ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white font-medium'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800'
+                            ? 'bg-accent text-foreground font-medium'
+                            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                         }`}
                       >
                         <item.icon className="h-3.5 w-3.5" />
@@ -284,16 +284,16 @@ export function SidebarNav() {
         })}
       </nav>
 
-      <div className="border-t p-4">
+      <div className="border-t border-border p-4">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.username}</p>
+            <p className="text-sm font-medium text-foreground truncate">{user?.username}</p>
             <p className="text-xs text-muted-foreground truncate">{user?.role}</p>
           </div>
           <ThemeToggle />
           <button
             onClick={handleLogout}
-            className="text-gray-400 hover:text-red-500 transition-colors"
+            className="text-muted-foreground hover:text-destructive transition-colors"
             title="로그아웃"
           >
             <LogOut className="h-4 w-4" />

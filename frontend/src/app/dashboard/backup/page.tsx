@@ -35,9 +35,9 @@ import { useToast } from '@/components/toast-provider';
 // ─── Constants ───────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, { label: string; cls: string }> = {
-  completed: { label: '완료', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
-  in_progress: { label: '진행중', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  failed: { label: '실패', cls: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
+  completed: { label: '완료', cls: 'bg-emerald-500/10 text-emerald-500' },
+  in_progress: { label: '진행중', cls: 'bg-blue-500/10 text-blue-500' },
+  failed: { label: '실패', cls: 'bg-red-500/10 text-red-500' },
 };
 
 const SCHEDULE_OPTIONS = [

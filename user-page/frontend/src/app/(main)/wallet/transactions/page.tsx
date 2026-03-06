@@ -34,9 +34,9 @@ const PAGE_SIZE = 10;
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variants: Record<string, { label: string; className: string }> = {
-    pending: { label: '대기중', className: 'bg-yellow-50 text-yellow-600' },
-    approved: { label: '완료', className: 'bg-green-50 text-green-600' },
-    rejected: { label: '거부', className: 'bg-red-50 text-red-500' },
+    pending: { label: '대기중', className: 'bg-yellow-100 text-yellow-700' },
+    approved: { label: '완료', className: 'bg-green-100 text-green-700' },
+    rejected: { label: '거부', className: 'bg-red-100 text-red-700' },
   };
   const v = variants[status] || variants.pending;
   return (
@@ -49,13 +49,13 @@ const StatusBadge = ({ status }: { status: string }) => {
 const TypeBadge = ({ type }: { type: string }) => {
   if (type === 'deposit') {
     return (
-      <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600">
+      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
         입금
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-500">
+    <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
       출금
     </span>
   );
@@ -65,7 +65,6 @@ export default function TransactionsPage() {
   const {
     transactions,
     transactionsTotal,
-    transactionsPage,
     transactionsHasMore,
     isLoading,
     fetchTransactions,
@@ -92,7 +91,10 @@ export default function TransactionsPage() {
   );
 
   useEffect(() => {
-    setCurrentPage(1);
+    // Avoid synchronous cascading render
+    setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
     loadTransactions(1);
   }, [typeFilter, statusFilter, periodFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -151,9 +153,9 @@ export default function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg bg-white shadow-sm">
+      <div className="rounded-lg bg-[#f5f5f7]">
         {/* Header */}
-        <div className="border-b border-[#dddddd] px-5 py-4">
+        <div className="border-b border-[#e8e8e8] px-5 py-4">
           <h2 className="text-lg font-bold text-[#252531]">거래 내역</h2>
         </div>
 
@@ -161,7 +163,7 @@ export default function TransactionsPage() {
           {/* Filters */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Type tabs */}
-            <div className="flex gap-1 rounded-lg bg-[#f8f9fc] p-1">
+            <div className="flex gap-1 rounded-lg bg-[#f8f8fa] p-1">
               {TYPE_TABS.map((tab) => (
                 <button
                   key={tab.value}
@@ -169,8 +171,8 @@ export default function TransactionsPage() {
                   className={cn(
                     'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                     typeFilter === tab.value
-                      ? 'bg-[#f4b53e] text-white'
-                      : 'text-[#707070] hover:text-[#252531]'
+                      ? 'bg-[#feb614] text-[#252531]'
+                      : 'text-[#6b7280] hover:text-[#374151]'
                   )}
                 >
                   {tab.label}
@@ -184,7 +186,7 @@ export default function TransactionsPage() {
                 value={periodFilter}
                 onValueChange={(val) => setPeriodFilter(val as PeriodFilter)}
               >
-                <SelectTrigger className="h-8 w-24 border-[#dddddd] bg-white text-xs">
+                <SelectTrigger className="h-8 w-24 border-[#e8e8e8] bg-white text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,8 +207,8 @@ export default function TransactionsPage() {
                 className={cn(
                   'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
                   statusFilter === sf.value
-                    ? 'border-[#f4b53e] bg-[#f4b53e] text-white'
-                    : 'border-[#dddddd] text-[#707070] hover:border-[#f4b53e] hover:text-[#252531]'
+                    ? 'border-[#feb614] bg-[#feb614] text-[#252531]'
+                    : 'border-[#e8e8e8] text-[#6b7280] hover:border-[#feb614] hover:text-[#374151]'
                 )}
               >
                 {sf.label}
@@ -218,12 +220,12 @@ export default function TransactionsPage() {
           {isLoading ? (
             <div className="flex flex-col gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-12 w-full animate-pulse rounded-lg bg-[#edeef3]" />
+                <div key={i} className="h-12 w-full animate-pulse rounded-lg bg-[#e8e8e8]" />
               ))}
             </div>
           ) : transactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-              <p className="text-sm text-[#707070]">
+              <p className="text-sm text-[#6b7280]">
                 거래 내역이 없습니다
               </p>
             </div>
@@ -233,19 +235,19 @@ export default function TransactionsPage() {
               <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#f8f9fc]">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">일시</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">유형</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">코인</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-[#707070]">금액</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-[#707070]">TX Hash</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-[#707070]">상태</th>
+                    <tr className="bg-[#f8f8fa]">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#6b7280]">일시</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#6b7280]">유형</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#6b7280]">코인</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-[#6b7280]">금액</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#6b7280]">TX Hash</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-[#6b7280]">상태</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#dddddd]">
+                  <tbody className="divide-y divide-[#e8e8e8]">
                     {transactions.map((tx: Transaction) => (
-                      <tr key={`${tx.type}-${tx.id}`} className="hover:bg-[#f8f9fc] transition-colors">
-                        <td className="px-4 py-3 text-sm text-[#707070]">
+                      <tr key={`${tx.type}-${tx.id}`} className="hover:bg-[#f8f8fa] transition-colors">
+                        <td className="px-4 py-3 text-sm text-[#6b7280]">
                           {formatDate(tx.createdAt)}
                         </td>
                         <td className="px-4 py-3">
@@ -266,7 +268,7 @@ export default function TransactionsPage() {
                           {tx.txHash ? (
                             <button
                               onClick={() => handleCopyHash(tx.txHash!)}
-                              className="inline-flex items-center gap-1 font-mono text-xs text-[#707070] transition-colors hover:text-[#252531]"
+                              className="inline-flex items-center gap-1 font-mono text-xs text-[#6b7280] transition-colors hover:text-[#374151]"
                             >
                               {truncateHash(tx.txHash)}
                               {copiedHash === tx.txHash ? (
@@ -276,7 +278,7 @@ export default function TransactionsPage() {
                               )}
                             </button>
                           ) : (
-                            <span className="text-xs text-[#707070]">-</span>
+                            <span className="text-xs text-[#6b7280]">-</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -293,7 +295,7 @@ export default function TransactionsPage() {
                 {transactions.map((tx: Transaction) => (
                   <div
                     key={`${tx.type}-${tx.id}`}
-                    className="rounded-lg border border-[#dddddd] bg-[#f8f9fc] px-3 py-3"
+                    className="rounded-lg border border-[#e8e8e8] bg-[#f8f8fa] px-3 py-3"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -310,7 +312,7 @@ export default function TransactionsPage() {
                       </span>
                     </div>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-[#707070]">
+                      <span className="text-xs text-[#6b7280]">
                         {formatDate(tx.createdAt)}
                       </span>
                       <StatusBadge status={tx.status} />
@@ -319,7 +321,7 @@ export default function TransactionsPage() {
                       <div className="mt-1.5">
                         <button
                           onClick={() => handleCopyHash(tx.txHash!)}
-                          className="inline-flex items-center gap-1 font-mono text-[11px] text-[#707070] transition-colors hover:text-[#252531]"
+                          className="inline-flex items-center gap-1 font-mono text-[11px] text-[#6b7280] transition-colors hover:text-[#374151]"
                         >
                           TX: {truncateHash(tx.txHash)}
                           {copiedHash === tx.txHash ? (
@@ -340,7 +342,7 @@ export default function TransactionsPage() {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className="inline-flex size-8 items-center justify-center rounded-md border border-[#dddddd] bg-white text-[#707070] transition-colors hover:bg-[#f8f9fc] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-[#e8e8e8] bg-white text-[#6b7280] transition-colors hover:bg-[#f8f8fa] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="size-4" />
                   </button>
@@ -352,8 +354,8 @@ export default function TransactionsPage() {
                       className={cn(
                         'inline-flex size-8 items-center justify-center rounded-md text-xs font-medium transition-colors',
                         page === currentPage
-                          ? 'bg-[#f4b53e] text-white'
-                          : 'border border-[#dddddd] bg-white text-[#707070] hover:bg-[#f8f9fc]'
+                          ? 'bg-[#feb614] text-[#252531]'
+                          : 'border border-[#e8e8e8] bg-white text-[#6b7280] hover:bg-[#f8f8fa]'
                       )}
                     >
                       {page}
@@ -363,7 +365,7 @@ export default function TransactionsPage() {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={!transactionsHasMore && currentPage >= totalPages}
-                    className="inline-flex size-8 items-center justify-center rounded-md border border-[#dddddd] bg-white text-[#707070] transition-colors hover:bg-[#f8f9fc] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-[#e8e8e8] bg-white text-[#6b7280] transition-colors hover:bg-[#f8f8fa] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronRight className="size-4" />
                   </button>

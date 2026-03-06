@@ -42,17 +42,17 @@ export default function TabBetting({ userId }: Props) {
       {/* Summary */}
       {summary && (
         <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900"><CardContent className="pt-6">
-            <p className="text-xs text-blue-600 dark:text-blue-400">총 베팅</p>
-            <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{formatAmount(summary.total_bet)}</p>
+          <Card className="bg-blue-500/10 border-blue-500/30"><CardContent className="pt-6">
+            <p className="text-xs text-blue-400">총 베팅</p>
+            <p className="text-xl font-bold text-blue-500">{formatAmount(summary.total_bet)}</p>
           </CardContent></Card>
-          <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900"><CardContent className="pt-6">
-            <p className="text-xs text-green-600 dark:text-green-400">총 당첨액</p>
-            <p className="text-xl font-bold text-green-700 dark:text-green-300">{formatAmount(summary.total_win)}</p>
+          <Card className="bg-green-500/10 border-green-500/30"><CardContent className="pt-6">
+            <p className="text-xs text-green-400">총 당첨액</p>
+            <p className="text-xl font-bold text-green-500">{formatAmount(summary.total_win)}</p>
           </CardContent></Card>
-          <Card className={`${summary.net_profit >= 0 ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900'}`}><CardContent className="pt-6">
-            <p className={`text-xs ${summary.net_profit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>손익</p>
-            <p className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-blue-700 dark:text-blue-300' : 'text-red-700 dark:text-red-300'}`}>
+          <Card className={`${summary.net_profit >= 0 ? 'bg-blue-500/10 border-blue-500/30' : 'bg-red-500/10 border-red-500/30'}`}><CardContent className="pt-6">
+            <p className={`text-xs ${summary.net_profit >= 0 ? 'text-blue-400' : 'text-red-400'}`}>손익</p>
+            <p className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-blue-500' : 'text-red-500'}`}>
               {formatAmount(summary.net_profit)}
             </p>
           </CardContent></Card>
@@ -123,8 +123,8 @@ export default function TabBetting({ userId }: Props) {
                       <td className="px-4 py-2 text-muted-foreground">{bet.provider || '-'}</td>
                       <td className="px-4 py-2">{bet.game_name || '-'}</td>
                       <td className="px-4 py-2 text-right font-mono">{formatAmount(bet.bet_amount)}</td>
-                      <td className="px-4 py-2 text-right font-mono text-blue-600">{formatAmount(bet.win_amount)}</td>
-                      <td className={`px-4 py-2 text-right font-mono ${bet.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                      <td className="px-4 py-2 text-right font-mono text-blue-400">{formatAmount(bet.win_amount)}</td>
+                      <td className={`px-4 py-2 text-right font-mono ${bet.profit >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
                         {formatAmount(bet.profit)}
                       </td>
                       <td className="px-4 py-2 text-center">

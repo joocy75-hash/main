@@ -96,7 +96,7 @@ export default function GameDetailPage() {
   };
 
   if (loading || !game) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">로딩 중...</div>;
+    return <div className="flex items-center justify-center h-64 text-muted-foreground">로딩 중...</div>;
   }
 
   return (
@@ -105,7 +105,7 @@ export default function GameDetailPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent"
         >
           &larr; 뒤로
         </button>
@@ -113,12 +113,12 @@ export default function GameDetailPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{game.name}</h1>
             <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-              game.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+              game.is_active ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'
             }`}>
               {game.is_active ? '활성' : '비활성'}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {game.code} &middot; {CATEGORY_LABELS[game.category] || game.category}
             {game.provider_name && ` &middot; ${game.provider_name}`}
           </p>
@@ -126,14 +126,14 @@ export default function GameDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b dark:border-gray-700">
+      <div className="flex gap-2 border-b border-border">
         {(['info', 'rounds'] as const).map((t) => (
           <button
             key={t}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               tab === t
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setTab(t)}
           >
@@ -144,9 +144,9 @@ export default function GameDetailPage() {
 
       {/* Tab: Info */}
       {tab === 'info' && (
-        <div className="rounded-lg border p-6 dark:border-gray-700 space-y-4 max-w-2xl">
+        <div className="rounded-lg border p-6 border-border space-y-4 max-w-2xl">
           <h2 className="text-lg font-semibold">게임 정보 수정</h2>
-          {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">{error}</div>}
+          {error && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{error}</div>}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -155,7 +155,7 @@ export default function GameDetailPage() {
                 type="text"
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -164,7 +164,7 @@ export default function GameDetailPage() {
                 type="text"
                 value={editForm.code}
                 onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -172,7 +172,7 @@ export default function GameDetailPage() {
               <select
                 value={editForm.provider_id}
                 onChange={(e) => setEditForm({ ...editForm, provider_id: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 {providerData?.items.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -184,7 +184,7 @@ export default function GameDetailPage() {
               <select
                 value={editForm.category}
                 onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -198,7 +198,7 @@ export default function GameDetailPage() {
                 min="0"
                 value={editForm.sort_order}
                 onChange={(e) => setEditForm({ ...editForm, sort_order: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -206,7 +206,7 @@ export default function GameDetailPage() {
               <select
                 value={editForm.is_active ? 'true' : 'false'}
                 onChange={(e) => setEditForm({ ...editForm, is_active: e.target.value === 'true' })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 <option value="true">활성</option>
                 <option value="false">비활성</option>
@@ -220,7 +220,7 @@ export default function GameDetailPage() {
               value={editForm.thumbnail_url}
               onChange={(e) => setEditForm({ ...editForm, thumbnail_url: e.target.value })}
               placeholder="https://..."
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
 
@@ -228,13 +228,13 @@ export default function GameDetailPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? '저장 중...' : '저장'}
             </button>
             <button
               onClick={handleDelete}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+              className="rounded-md bg-destructive px-4 py-2 text-sm text-destructive-foreground hover:bg-destructive/90"
             >
               비활성화
             </button>
@@ -246,31 +246,31 @@ export default function GameDetailPage() {
       {tab === 'rounds' && (
         <div className="space-y-4">
           {roundsLoading ? (
-            <p className="text-gray-500">로딩 중...</p>
+            <p className="text-muted-foreground">로딩 중...</p>
           ) : (
-            <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">라운드 ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">유저</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">베팅금</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">당첨금</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">결과</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">시간</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">라운드 ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">유저</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">베팅금</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">당첨금</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">결과</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">시간</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {roundData?.items.map((round) => (
-                    <tr key={round.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-400">{round.round_id}</td>
+                    <tr key={round.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-muted-foreground">{round.round_id}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">
                         {round.user_username ? (
-                          <Link href={`/dashboard/users/${round.user_id}`} className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                          <Link href={`/dashboard/users/${round.user_id}`} className="text-primary hover:text-primary/80">
                             {round.user_username}
                           </Link>
                         ) : (
-                          <span className="text-gray-400">#{round.user_id}</span>
+                          <span className="text-muted-foreground">#{round.user_id}</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono">
@@ -281,21 +281,21 @@ export default function GameDetailPage() {
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                         <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                          round.result === 'win' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-                          round.result === 'lose' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
-                          'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                          round.result === 'win' ? 'bg-green-500/10 text-green-500' :
+                          round.result === 'lose' ? 'bg-destructive/10 text-destructive' :
+                          'bg-muted text-muted-foreground'
                         }`}>
                           {RESULT_LABELS[round.result] || round.result}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {round.started_at ? new Date(round.started_at).toLocaleString('ko-KR') : '-'}
                       </td>
                     </tr>
                   ))}
                   {roundData?.items.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                      <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                         게임 라운드가 없습니다
                       </td>
                     </tr>
@@ -308,12 +308,12 @@ export default function GameDetailPage() {
           {/* Pagination */}
           {roundData && roundData.total > roundData.page_size && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-400">전체: {roundData.total}건</p>
+              <p className="text-sm text-muted-foreground">전체: {roundData.total}건</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setRoundPage(Math.max(1, roundPage - 1))}
                   disabled={roundPage <= 1}
-                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 border-border"
                 >
                   이전
                 </button>
@@ -323,7 +323,7 @@ export default function GameDetailPage() {
                 <button
                   onClick={() => setRoundPage(roundPage + 1)}
                   disabled={roundPage >= Math.ceil(roundData.total / roundData.page_size)}
-                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 border-border"
                 >
                   다음
                 </button>

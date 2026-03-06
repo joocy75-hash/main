@@ -21,15 +21,14 @@ const ladderCountLabel = (v: 1 | 2) => (v === 1 ? '3줄' : '4줄');
 
 const oddEvenColor = (v: 1 | 2) => (v === 1 ? 'text-red-500' : 'text-blue-500');
 const underOverColor = (v: 1 | 2) => (v === 1 ? 'text-green-500' : 'text-orange-500');
-const smlColor = (v: 1 | 2 | 3) =>
-  v === 1 ? 'text-green-500' : v === 2 ? 'text-yellow-500' : 'text-red-500';
+
 
 const smlBg = (v: 1 | 2 | 3) =>
-  v === 1 ? 'bg-green-500/20 text-green-400' : v === 2 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400';
+  v === 1 ? 'bg-green-100 text-green-700' : v === 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700';
 const oddEvenBg = (v: 1 | 2) =>
-  v === 1 ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400';
+  v === 1 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700';
 const underOverBg = (v: 1 | 2) =>
-  v === 1 ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400';
+  v === 1 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700';
 
 function useCountdown() {
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -42,6 +41,7 @@ function useCountdown() {
       return ROUND_INTERVAL - elapsed;
     };
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSecondsLeft(calcRemaining());
     const timer = setInterval(() => {
       setSecondsLeft(calcRemaining());
@@ -382,7 +382,7 @@ function PowerLadderTab({ rounds, currentRound }: { rounds: BepickRound[]; curre
                   <span className="text-xs text-muted-foreground">출발</span>
                   <span className={cn(
                     'text-2xl font-bold',
-                    pl.leftRight === 1 ? 'text-blue-400' : 'text-red-400'
+                    pl.leftRight === 1 ? 'text-blue-600' : 'text-red-600'
                   )}>
                     {leftRightLabel(pl.leftRight)}
                   </span>
@@ -446,7 +446,7 @@ function PowerLadderTab({ rounds, currentRound }: { rounds: BepickRound[]; curre
                         <td className="px-3 py-2 text-center">
                           <span className={cn(
                             'inline-block rounded px-2 py-0.5 text-xs font-bold',
-                            ladder.leftRight === 1 ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'
+                            ladder.leftRight === 1 ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                           )}>
                             {leftRightLabel(ladder.leftRight)}
                           </span>

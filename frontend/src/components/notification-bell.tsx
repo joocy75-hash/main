@@ -10,7 +10,7 @@ const PRIORITY_DOT: Record<string, string> = {
   urgent: 'bg-red-500',
   high: 'bg-orange-500',
   normal: 'bg-blue-500',
-  low: 'bg-gray-400',
+  low: 'bg-muted-foreground',
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -102,10 +102,10 @@ export function NotificationBell() {
                   key={item.id}
                   onClick={() => handleNotificationClick(item)}
                   className={`w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors border-b last:border-b-0 ${
-                    !item.is_read ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
+                    !item.is_read ? 'bg-primary/5' : ''
                   }`}
                 >
-                  <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${PRIORITY_DOT[item.priority] || 'bg-gray-400'}`} />
+                  <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${PRIORITY_DOT[item.priority] || 'bg-muted-foreground'}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium">
@@ -126,7 +126,7 @@ export function NotificationBell() {
           <div className="border-t px-4 py-2">
             <button
               onClick={handleViewAll}
-              className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:underline py-1"
+              className="w-full text-center text-sm text-primary hover:underline py-1"
             >
               전체 보기
             </button>

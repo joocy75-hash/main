@@ -2,6 +2,15 @@ import { PrismaClient, CoinType, NetworkType, TransactionStatus, Prisma } from '
 import bcryptjs from 'bcryptjs';
 const { compare } = bcryptjs;
 import { randomBytes } from 'crypto';
+import { config } from '../config.js';
+import {
+  getPaymentProvider,
+  mapNetworkToProvider,
+  normalizePaymentStatus,
+  normalizePayoutStatus,
+  type CreateInvoiceParams,
+  type CreatePayoutParams,
+} from './payment-provider.js';
 
 // Withdrawal fee table: coinType_network -> fee amount
 const WITHDRAWAL_FEES: Record<string, number> = {
@@ -188,21 +197,55 @@ export class WalletService {
       };
     }
 
-    // Generate a mock deposit address
-    const depositAddress = generateMockAddress(network);
+    const provider = getPaymentProvider();
+    const orderId = `dep_${userId}_${Date.now()}_${randomBytes(4).toString('hex')}`;
+    const providerNetwork = mapNetworkToProvider(network);
+    const webhookUrl = `${config.payment.webhookBaseUrl}/api/webhooks/deposit`;
 
+    // Call payment provider to create invoice
+    const invoiceParams: CreateInvoiceParams = {
+      amount: amount.toString(),
+      currency: coinType,
+      orderId,
+      network: providerNetwork,
+      urlCallback: webhookUrl,
+      lifetime: 3600,
+      additionalData: JSON.stringify({ userId, coinType, network }),
+    };
+
+    let invoiceResult;
+    try {
+      invoiceResult = await provider.createInvoice(invoiceParams);
+    } catch (err: any) {
+      throw {
+        statusCode: 502,
+        message: `결제 생성 실패: ${err.message}`,
+      };
+    }
+
+    // Save deposit record with provider info
     const deposit = await prisma.deposit.create({
       data: {
         userId,
         coinType,
         network,
         amount: new Prisma.Decimal(amount),
-        depositAddress,
+        depositAddress: invoiceResult.address,
         status: 'PENDING',
+        providerName: provider.name,
+        providerUuid: invoiceResult.uuid,
+        paymentUrl: invoiceResult.paymentUrl,
+        payerCurrency: invoiceResult.payerCurrency,
+        expiredAt: invoiceResult.expiredAt
+          ? new Date(invoiceResult.expiredAt * 1000)
+          : null,
       },
     });
 
-    return deposit;
+    return {
+      ...deposit,
+      paymentUrl: invoiceResult.paymentUrl,
+    };
   }
 
   async createWithdrawal(
@@ -279,7 +322,8 @@ export class WalletService {
         select: { balance: true },
       });
 
-      // Create withdrawal record
+      // Create withdrawal record (PENDING - will be sent to provider after)
+      const orderId = `wd_${userId}_${Date.now()}_${randomBytes(4).toString('hex')}`;
       const withdrawal = await tx.withdrawal.create({
         data: {
           userId,
@@ -289,6 +333,7 @@ export class WalletService {
           fee: new Prisma.Decimal(fee),
           address,
           status: 'PENDING',
+          providerName: getPaymentProvider().name,
         },
       });
 
@@ -304,10 +349,48 @@ export class WalletService {
         },
       });
 
-      return withdrawal;
+      return { withdrawal, orderId };
     });
 
-    return result;
+    // After transaction committed, send payout to provider
+    const provider = getPaymentProvider();
+    const providerNetwork = mapNetworkToProvider(network);
+    const webhookUrl = `${config.payment.webhookBaseUrl}/api/webhooks/withdrawal`;
+
+    try {
+      const payoutParams: CreatePayoutParams = {
+        amount: amount.toString(),
+        currency: coinType,
+        orderId: result.orderId,
+        address,
+        network: providerNetwork,
+        isSubtract: false, // fee already deducted from user
+        urlCallback: webhookUrl,
+      };
+
+      const payoutResult = await provider.createPayout(payoutParams);
+
+      // Update withdrawal with provider info
+      await prisma.withdrawal.update({
+        where: { id: result.withdrawal.id },
+        data: {
+          providerUuid: payoutResult.uuid,
+          payoutStatus: payoutResult.status,
+          txHash: payoutResult.txid,
+        },
+      });
+
+      return { ...result.withdrawal, providerUuid: payoutResult.uuid };
+    } catch (err: any) {
+      // Payout API failed - mark as pending for manual retry
+      // Balance already deducted, admin can retry or refund
+      await prisma.withdrawal.update({
+        where: { id: result.withdrawal.id },
+        data: { payoutStatus: 'api_error' },
+      });
+
+      return result.withdrawal;
+    }
   }
 
   async getTransactions(prisma: PrismaClient, userId: number, filters: TransactionFilters) {

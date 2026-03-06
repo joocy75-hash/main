@@ -67,26 +67,26 @@ export default function NewGamePage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
         >
           &larr; 뒤로
         </button>
         <div>
           <h1 className="text-2xl font-bold">게임 등록</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">새 게임을 등록합니다.</p>
+          <p className="text-sm text-muted-foreground">새 게임을 등록합니다.</p>
         </div>
       </div>
 
-      <div className="rounded-lg border p-6 dark:border-gray-700">
+      <div className="rounded-lg border p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">{error}</div>}
+          {error && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{error}</div>}
 
           <div className="space-y-2">
             <label className="text-sm font-medium">프로바이더 *</label>
             <select
               value={form.provider_id}
               onChange={(e) => setForm({ ...form, provider_id: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             >
               <option value="">프로바이더 선택</option>
               {providerData?.items.map((p) => (
@@ -101,7 +101,7 @@ export default function NewGamePage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="예: Baccarat Live"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -111,7 +111,7 @@ export default function NewGamePage() {
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
               placeholder="예: baccarat_live"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -119,7 +119,7 @@ export default function NewGamePage() {
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             >
               {CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -133,7 +133,7 @@ export default function NewGamePage() {
               min="0"
               value={form.sort_order}
               onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -143,7 +143,7 @@ export default function NewGamePage() {
               value={form.thumbnail_url}
               onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
               placeholder="https://..."
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm"
             />
           </div>
 
@@ -151,14 +151,14 @@ export default function NewGamePage() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {loading ? '등록 중...' : '게임 등록'}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+              className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
             >
               취소
             </button>

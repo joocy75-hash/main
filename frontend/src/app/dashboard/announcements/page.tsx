@@ -13,9 +13,9 @@ const TYPE_TABS = [
 ];
 
 const TYPE_STYLES: Record<string, { label: string; cls: string }> = {
-  notice: { label: '공지', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  popup: { label: '팝업', cls: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
-  banner: { label: '배너', cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
+  notice: { label: '공지', cls: 'bg-primary/10 text-primary' },
+  popup: { label: '팝업', cls: 'bg-orange-500/10 text-orange-500' },
+  banner: { label: '배너', cls: 'bg-green-500/10 text-green-500' },
 };
 
 const TARGET_LABELS: Record<string, string> = {
@@ -53,7 +53,7 @@ export default function AnnouncementsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">공지 관리</h1>
         <Link href="/dashboard/announcements/create">
-          <button className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+          <button className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90">
             + 새 공지
           </button>
         </Link>
@@ -66,8 +66,8 @@ export default function AnnouncementsPage() {
             key={tab.key}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               typeFilter === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => { setTypeFilter(tab.key); setPage(1); }}
           >
@@ -83,72 +83,72 @@ export default function AnnouncementsPage() {
           placeholder="제목 검색"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         />
       </div>
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">타입</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">제목</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">타겟</th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">기간</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">작성일</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">작업</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">타입</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">제목</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">타겟</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">기간</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">작성일</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">작업</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data?.items.map((item) => {
                 const typeStyle = TYPE_STYLES[item.type];
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.id}</td>
+                  <tr key={item.id} className="hover:bg-muted">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{item.id}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm">
-                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-muted text-foreground'}`}>
                         {typeStyle?.label || item.type}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm font-medium max-w-xs truncate">
-                      <Link href={`/dashboard/announcements/${item.id}`} className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                      <Link href={`/dashboard/announcements/${item.id}`} className="text-primary hover:text-primary/80">
                         {item.title}
                       </Link>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                       {TARGET_LABELS[item.target] || item.target}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                        item.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                        item.is_active ? 'bg-green-500/10 text-green-500' : 'bg-muted text-foreground'
                       }`}>
                         {item.is_active ? '활성' : '비활성'}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                       {item.start_date && item.end_date
                         ? `${new Date(item.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(item.end_date).toLocaleDateString('ko-KR')}`
                         : item.start_date
                         ? `${new Date(item.start_date).toLocaleDateString('ko-KR')} ~`
                         : '-'}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                       {new Date(item.created_at).toLocaleDateString('ko-KR')}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm">
                       <div className="flex gap-2">
                         <Link href={`/dashboard/announcements/${item.id}`}>
-                          <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400">수정</button>
+                          <button className="text-primary hover:text-primary/80">수정</button>
                         </Link>
                         <button
                           onClick={() => handleDelete(item.id, item.title)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400"
+                          className="text-destructive hover:text-destructive/80"
                         >
                           삭제
                         </button>
@@ -159,7 +159,7 @@ export default function AnnouncementsPage() {
               })}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                     등록된 공지가 없습니다
                   </td>
                 </tr>
@@ -172,12 +172,12 @@ export default function AnnouncementsPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">전체: {data.total}개</p>
+          <p className="text-sm text-muted-foreground">전체: {data.total}개</p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               이전
             </button>
@@ -187,7 +187,7 @@ export default function AnnouncementsPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               다음
             </button>

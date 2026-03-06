@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, createElement } from 'react';
 import { Loader2, Check, Gamepad2, Coins, Target, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
@@ -52,7 +52,7 @@ const MissionCard = ({
   return (
     <div
       className={cn(
-        'rounded-lg bg-white p-4 shadow-sm',
+        'rounded-lg bg-[#f5f5f7] p-4',
         isClaimed && 'opacity-60'
       )}
     >
@@ -62,42 +62,42 @@ const MissionCard = ({
             className={cn(
               'flex size-10 items-center justify-center rounded-lg',
               isClaimed
-                ? 'bg-green-50'
+                ? 'bg-green-100'
                 : isCompleted
-                  ? 'bg-amber-50'
-                  : 'bg-gray-100'
+                  ? 'bg-amber-100'
+                  : 'bg-[#e8e8e8]'
             )}
           >
-            <Icon
-              className={cn(
+            {createElement(Icon, {
+              className: cn(
                 'size-5',
                 isClaimed
                   ? 'text-green-500'
                   : isCompleted
-                    ? 'text-[#f4b53e]'
-                    : 'text-gray-400'
-              )}
-            />
+                    ? 'text-[#feb614]'
+                    : 'text-gray-500'
+              )
+            })}
           </div>
           <div>
             <p className="text-sm font-semibold text-[#252531]">{mission.name}</p>
-            <p className="text-xs text-[#707070]">{mission.description}</p>
+            <p className="text-xs text-[#6b7280]">{mission.description}</p>
           </div>
         </div>
-        <span className="shrink-0 text-sm font-medium text-[#707070]">
+        <span className="shrink-0 text-sm font-medium text-[#6b7280]">
           {mission.progress}/{mission.targetValue}
         </span>
       </div>
 
       <div className="mt-3 flex flex-col gap-1">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-[#e8e8e8]">
           <div
-            className="h-full rounded-full bg-[#f4b53e] transition-all"
+            className="h-full rounded-full bg-[#feb614] transition-all"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#707070]">{progressPercent}%</span>
+          <span className="text-[#6b7280]">{progressPercent}%</span>
           <span className="font-semibold text-[#252531]">
             보상: {Number(mission.rewardAmount).toLocaleString('ko-KR')}
             {mission.rewardType === 'point' ? 'P' : '원'}
@@ -171,22 +171,22 @@ export default function MissionsPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="rounded-lg bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
         <h1 className="text-lg font-bold text-[#252531]">퀘스트</h1>
-        <p className="mt-1 text-sm text-[#707070]">
+        <p className="mt-1 text-sm text-[#6b7280]">
           미션을 완료하고 보상을 수령하세요
         </p>
       </div>
 
       {/* Tab selector - kzkzb pill style */}
-      <div className="flex gap-2 rounded-lg bg-white p-2 shadow-sm">
+      <div className="flex gap-2 rounded-lg bg-[#f5f5f7] p-2">
         <button
           onClick={() => setMissionTab('daily')}
           className={cn(
             'flex-1 rounded-2xl px-4 py-2 text-sm font-semibold transition-all',
             missionTab === 'daily'
-              ? 'bg-[#f4b53e] text-white shadow-sm'
-              : 'text-[#707070] hover:bg-gray-50'
+              ? 'bg-[#feb614] text-white shadow-sm'
+              : 'text-[#6b7280] hover:bg-[#f0f0f2]'
           )}
         >
           일일 미션
@@ -196,8 +196,8 @@ export default function MissionsPage() {
           className={cn(
             'flex-1 rounded-2xl px-4 py-2 text-sm font-semibold transition-all',
             missionTab === 'weekly'
-              ? 'bg-[#f4b53e] text-white shadow-sm'
-              : 'text-[#707070] hover:bg-gray-50'
+              ? 'bg-[#feb614] text-white shadow-sm'
+              : 'text-[#6b7280] hover:bg-[#f0f0f2]'
           )}
         >
           주간 미션
@@ -205,8 +205,8 @@ export default function MissionsPage() {
       </div>
 
       {/* Progress summary */}
-      <div className="flex items-center justify-between rounded-lg bg-white px-5 py-3 shadow-sm">
-        <span className="text-sm text-[#707070]">
+      <div className="flex items-center justify-between rounded-lg bg-[#f5f5f7] px-5 py-3">
+        <span className="text-sm text-[#6b7280]">
           {missionTab === 'daily' ? '일일' : '주간'} 미션 진행
         </span>
         <span className="text-sm font-bold text-[#252531]">
@@ -216,7 +216,7 @@ export default function MissionsPage() {
 
       {/* Success/Error messages */}
       {claimSuccess && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-600">
+        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-700">
           {claimSuccess}
         </div>
       )}
@@ -230,22 +230,22 @@ export default function MissionsPage() {
       {isLoading ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-lg bg-white p-4 shadow-sm">
+            <div key={i} className="rounded-lg bg-[#f5f5f7] p-4">
               <div className="flex items-center gap-3">
-                <div className="size-10 animate-pulse rounded-lg bg-gray-100" />
+                <div className="size-10 animate-pulse rounded-lg bg-[#e8e8e8]" />
                 <div className="flex flex-col gap-1.5">
-                  <div className="h-4 w-32 animate-pulse rounded bg-gray-100" />
-                  <div className="h-3 w-48 animate-pulse rounded bg-gray-100" />
+                  <div className="h-4 w-32 animate-pulse rounded bg-[#e8e8e8]" />
+                  <div className="h-3 w-48 animate-pulse rounded bg-[#e8e8e8]" />
                 </div>
               </div>
-              <div className="mt-3 h-2 animate-pulse rounded-full bg-gray-100" />
+              <div className="mt-3 h-2 animate-pulse rounded-full bg-[#e8e8e8]" />
             </div>
           ))}
         </div>
       ) : filteredMissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-white py-12 text-center shadow-sm">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-[#f5f5f7] py-12 text-center">
           <span className="text-3xl">🎯</span>
-          <p className="text-sm text-[#707070]">
+          <p className="text-sm text-[#6b7280]">
             {missionTab === 'daily' ? '오늘의' : '이번 주'} 미션이 없습니다
           </p>
         </div>

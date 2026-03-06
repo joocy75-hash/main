@@ -14,10 +14,10 @@ const STATUS_LABELS: Record<string, string> = {
   pending: '대기', approved: '승인', rejected: '거부', completed: '완료',
 };
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  approved: 'bg-blue-100 text-blue-800',
-  rejected: 'bg-red-100 text-red-800',
-  completed: 'bg-blue-100 text-blue-800',
+  pending: 'bg-yellow-500/10 text-yellow-500',
+  approved: 'bg-blue-500/10 text-blue-500',
+  rejected: 'bg-red-500/10 text-red-500',
+  completed: 'bg-blue-500/10 text-blue-500',
 };
 
 function CopyBtn({ text }: { text: string }) {
@@ -29,7 +29,7 @@ function CopyBtn({ text }: { text: string }) {
   };
   return (
     <Button aria-label={copied ? '복사됨' : '복사'} variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={handleCopy}>
-      {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+      {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
     </Button>
   );
 }
@@ -43,7 +43,7 @@ function HashWithLink({ hash, network, type }: { hash: string; network?: string 
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline"
+          className="text-xs font-mono text-blue-400 hover:text-blue-500 hover:underline"
           title={`${getExplorerName(network)}에서 확인`}
         >
           {shortenHash(hash)}
@@ -53,7 +53,7 @@ function HashWithLink({ hash, network, type }: { hash: string; network?: string 
       )}
       <CopyBtn text={hash} />
       {url && (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-600">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-400">
           <ExternalLink className="h-3 w-3" />
         </a>
       )}
@@ -115,7 +115,7 @@ export default function TabTransactions({ userId }: Props) {
                 <tbody className="divide-y">
                   {depositData.items.map((tx) => (
                     <tr key={tx.id} className="hover:bg-muted/30">
-                      <td className="px-4 py-2 text-right font-mono text-blue-600">+{formatAmount(tx.amount)}</td>
+                      <td className="px-4 py-2 text-right font-mono text-blue-400">+{formatAmount(tx.amount)}</td>
                       <td className="px-4 py-2 text-center">
                         {tx.coin_type ? <Badge variant="outline" className="text-xs">{tx.coin_type}</Badge> : '-'}
                       </td>
@@ -190,7 +190,7 @@ export default function TabTransactions({ userId }: Props) {
                 <tbody className="divide-y">
                   {withdrawalData.items.map((tx) => (
                     <tr key={tx.id} className="hover:bg-muted/30">
-                      <td className="px-4 py-2 text-right font-mono text-red-600">-{formatAmount(tx.amount)}</td>
+                      <td className="px-4 py-2 text-right font-mono text-red-400">-{formatAmount(tx.amount)}</td>
                       <td className="px-4 py-2 text-center">
                         {tx.coin_type ? <Badge variant="outline" className="text-xs">{tx.coin_type}</Badge> : '-'}
                       </td>

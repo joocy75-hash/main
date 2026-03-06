@@ -50,10 +50,10 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
 };
 
 const PAYMENT_STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  approved: 'bg-blue-100 text-blue-800',
-  paid: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-500/10 text-yellow-500',
+  approved: 'bg-blue-500/10 text-blue-500',
+  paid: 'bg-green-500/10 text-green-500',
+  rejected: 'bg-red-500/10 text-red-500',
 };
 
 const MAIN_TABS = [
@@ -120,8 +120,8 @@ export default function SalaryPage() {
             key={tab.key}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               mainTab === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setMainTab(tab.key)}
           >
@@ -366,7 +366,7 @@ const ConfigTab = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge className="bg-purple-100 text-purple-800" variant="secondary">
+                    <Badge className="bg-purple-500/10 text-purple-500" variant="secondary">
                       {SALARY_TYPE_LABELS[item.salary_type] || item.salary_type}
                     </Badge>
                   </TableCell>
@@ -377,7 +377,7 @@ const ConfigTab = () => {
                   <TableCell className="text-right font-mono">{fmt(item.min_deposit_amount)}</TableCell>
                   <TableCell>
                     <Badge
-                      className={item.active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}
+                      className={item.active ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}
                       variant="secondary"
                     >
                       {item.active ? '활성' : '비활성'}
@@ -389,7 +389,7 @@ const ConfigTab = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-400 hover:text-red-500"
                         onClick={() => handleDelete(item)}
                       >
                         삭제
@@ -581,8 +581,8 @@ const PaymentTab = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 pt-0">
-            <div className="rounded-lg bg-yellow-100 p-3 dark:bg-yellow-900">
-              <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            <div className="rounded-lg bg-amber-500/10 p-3">
+              <Clock className="h-5 w-5 text-amber-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">대기중</p>
@@ -593,8 +593,8 @@ const PaymentTab = () => {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-4 pt-0">
-            <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900">
-              <CheckCircle2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="rounded-lg bg-primary/10 p-3">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">승인 대기</p>
@@ -605,8 +605,8 @@ const PaymentTab = () => {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-4 pt-0">
-            <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900">
-              <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="rounded-lg bg-emerald-500/10 p-3">
+              <DollarSign className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">이번달 지급 총액</p>
@@ -626,8 +626,8 @@ const PaymentTab = () => {
                 key={f.key}
                 className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                   statusFilter === f.key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent'
                 }`}
                 onClick={() => { setStatusFilter(f.key); setPage(1); }}
               >
@@ -705,7 +705,7 @@ const PaymentTab = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge className="bg-purple-100 text-purple-800" variant="secondary">
+                    <Badge className="bg-purple-500/10 text-purple-500" variant="secondary">
                       {SALARY_TYPE_LABELS[item.salary_type] || item.salary_type}
                     </Badge>
                   </TableCell>
@@ -713,12 +713,12 @@ const PaymentTab = () => {
                     {formatDate(item.period_start)} ~ {formatDate(item.period_end)}
                   </TableCell>
                   <TableCell className="text-right font-mono">{fmt(item.base_amount)}</TableCell>
-                  <TableCell className="text-right font-mono text-blue-600">{fmt(item.performance_bonus)}</TableCell>
-                  <TableCell className="text-right font-mono text-red-600">-{fmt(item.deductions)}</TableCell>
+                  <TableCell className="text-right font-mono text-blue-400">{fmt(item.performance_bonus)}</TableCell>
+                  <TableCell className="text-right font-mono text-red-400">-{fmt(item.deductions)}</TableCell>
                   <TableCell className="text-right font-mono font-bold">{fmt(item.total_amount)}</TableCell>
                   <TableCell>
                     <Badge
-                      className={PAYMENT_STATUS_COLORS[item.status] || 'bg-gray-100 text-gray-800'}
+                      className={PAYMENT_STATUS_COLORS[item.status] || 'bg-muted text-foreground'}
                       variant="secondary"
                     >
                       {PAYMENT_STATUS_LABELS[item.status] || item.status}
@@ -731,7 +731,7 @@ const PaymentTab = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-400 hover:text-blue-500"
                             onClick={() => openAction('approve', item)}
                           >
                             승인
@@ -739,7 +739,7 @@ const PaymentTab = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-red-600 hover:text-red-800"
+                            className="text-red-400 hover:text-red-500"
                             onClick={() => openAction('reject', item)}
                           >
                             거부
@@ -750,7 +750,7 @@ const PaymentTab = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-green-600 hover:text-green-800"
+                          className="text-green-400 hover:text-green-500"
                           onClick={() => openAction('pay', item)}
                         >
                           지급

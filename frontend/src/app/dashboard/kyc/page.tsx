@@ -52,11 +52,11 @@ import { useToast } from '@/components/toast-provider';
 // ─── Constants ───────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, { label: string; cls: string }> = {
-  pending: { label: '대기', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  approved: { label: '승인', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
-  rejected: { label: '거부', cls: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
-  expired: { label: '만료', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
-  resubmit_requested: { label: '재제출', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+  pending: { label: '대기', cls: 'bg-amber-500/10 text-amber-500' },
+  approved: { label: '승인', cls: 'bg-emerald-500/10 text-emerald-500' },
+  rejected: { label: '거부', cls: 'bg-red-500/10 text-red-500' },
+  expired: { label: '만료', cls: 'bg-muted text-muted-foreground' },
+  resubmit_requested: { label: '재제출', cls: 'bg-blue-500/10 text-blue-500' },
 };
 
 const DOC_TYPE_LABELS: Record<string, string> = {
@@ -251,7 +251,7 @@ function DocumentDetailPanel({
                     <p>검토일: {doc.reviewed_at ? formatDateTime(doc.reviewed_at) : '-'}</p>
                   </div>
                   {doc.reject_reason && (
-                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-950 rounded text-sm text-red-700 dark:text-red-300">
+                    <div className="mt-2 p-2 bg-destructive/10 rounded text-sm text-destructive">
                       거부 사유: {doc.reject_reason}
                     </div>
                   )}
@@ -350,7 +350,7 @@ export default function KycPage() {
                   <Clock className="h-4 w-4 text-amber-500" />
                   <p className="text-xs text-muted-foreground">대기</p>
                 </div>
-                <p className="text-2xl font-bold mt-1 text-amber-600">{stats?.pending?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-amber-400">{stats?.pending?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
@@ -359,7 +359,7 @@ export default function KycPage() {
                   <CheckCircle className="h-4 w-4 text-emerald-500" />
                   <p className="text-xs text-muted-foreground">승인</p>
                 </div>
-                <p className="text-2xl font-bold mt-1 text-emerald-600">{stats?.approved?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-emerald-400">{stats?.approved?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
@@ -368,16 +368,16 @@ export default function KycPage() {
                   <XCircle className="h-4 w-4 text-red-500" />
                   <p className="text-xs text-muted-foreground">거부</p>
                 </div>
-                <p className="text-2xl font-bold mt-1 text-red-600">{stats?.rejected?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-red-400">{stats?.rejected?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4 px-5">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-gray-400" />
+                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                   <p className="text-xs text-muted-foreground">만료</p>
                 </div>
-                <p className="text-2xl font-bold mt-1 text-gray-600">{stats?.expired?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-muted-foreground">{stats?.expired?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
@@ -386,7 +386,7 @@ export default function KycPage() {
                   <FileCheck className="h-4 w-4 text-blue-500" />
                   <p className="text-xs text-muted-foreground">오늘 접수</p>
                 </div>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{stats?.today_submitted?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-blue-400">{stats?.today_submitted?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
           </>

@@ -19,15 +19,15 @@ import { useEventStore } from '@/stores/event-store';
 
 const VIP_DISPLAY: Record<number, { name: string; nameKo: string; icon: string; gradient: string; textColor: string }> = {
   1: { name: 'Bronze', nameKo: '브론즈', icon: '🥉', gradient: 'from-amber-700 to-amber-500', textColor: 'text-amber-600' },
-  2: { name: 'Silver', nameKo: '실버', icon: '🥈', gradient: 'from-gray-500 to-gray-300', textColor: 'text-gray-400' },
-  3: { name: 'Gold', nameKo: '골드', icon: '🥇', gradient: 'from-yellow-600 to-yellow-400', textColor: 'text-yellow-500' },
-  4: { name: 'Platinum', nameKo: '플래티넘', icon: '💎', gradient: 'from-cyan-600 to-cyan-400', textColor: 'text-cyan-400' },
-  5: { name: 'Diamond', nameKo: '다이아몬드', icon: '👑', gradient: 'from-blue-600 to-blue-400', textColor: 'text-blue-400' },
-  6: { name: 'Master', nameKo: '마스터', icon: '🏆', gradient: 'from-purple-600 to-purple-400', textColor: 'text-purple-400' },
-  7: { name: 'Grand Master', nameKo: '그랜드마스터', icon: '⭐', gradient: 'from-yellow-500 to-amber-300', textColor: 'text-yellow-300' },
-  8: { name: 'Champion', nameKo: '챔피언', icon: '🌟', gradient: 'from-orange-600 to-orange-400', textColor: 'text-orange-400' },
-  9: { name: 'Legend', nameKo: '레전드', icon: '🔱', gradient: 'from-red-600 to-red-400', textColor: 'text-red-400' },
-  10: { name: 'Mythic', nameKo: '미시크', icon: '✨', gradient: 'from-pink-600 to-fuchsia-400', textColor: 'text-pink-400' },
+  2: { name: 'Silver', nameKo: '실버', icon: '🥈', gradient: 'from-gray-500 to-gray-300', textColor: 'text-gray-500' },
+  3: { name: 'Gold', nameKo: '골드', icon: '🥇', gradient: 'from-yellow-600 to-yellow-400', textColor: 'text-yellow-600' },
+  4: { name: 'Platinum', nameKo: '플래티넘', icon: '💎', gradient: 'from-cyan-600 to-cyan-400', textColor: 'text-cyan-600' },
+  5: { name: 'Diamond', nameKo: '다이아몬드', icon: '👑', gradient: 'from-blue-600 to-blue-400', textColor: 'text-blue-600' },
+  6: { name: 'Master', nameKo: '마스터', icon: '🏆', gradient: 'from-purple-600 to-purple-400', textColor: 'text-purple-600' },
+  7: { name: 'Grand Master', nameKo: '그랜드마스터', icon: '⭐', gradient: 'from-yellow-500 to-amber-300', textColor: 'text-yellow-600' },
+  8: { name: 'Champion', nameKo: '챔피언', icon: '🌟', gradient: 'from-orange-600 to-orange-400', textColor: 'text-orange-600' },
+  9: { name: 'Legend', nameKo: '레전드', icon: '🔱', gradient: 'from-red-600 to-red-400', textColor: 'text-red-600' },
+  10: { name: 'Mythic', nameKo: '미시크', icon: '✨', gradient: 'from-pink-600 to-fuchsia-400', textColor: 'text-pink-600' },
 };
 
 const FALLBACK_VIP_LEVELS = [
@@ -83,10 +83,11 @@ export default function VipPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (vipInfo?.currentLevel) {
+    if (vipInfo?.currentLevel && vipInfo.currentLevel !== selectedLevel) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLevel(vipInfo.currentLevel);
     }
-  }, [vipInfo]);
+  }, [vipInfo?.currentLevel]);
 
   const levels = vipLevels.length > 0 ? vipLevels : FALLBACK_VIP_LEVELS;
   const currentLevel = vipInfo?.currentLevel || 1;
@@ -106,11 +107,11 @@ export default function VipPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* VIP Header */}
-      <div className="rounded-lg bg-white p-5">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
         {/* User info */}
         <div className="mb-4">
           <p className="text-lg font-bold">VIP</p>
-          <p className="text-xs text-[#707070]">
+          <p className="text-xs text-[#6b7280]">
             현재 등급: {VIP_DISPLAY[currentLevel]?.nameKo || 'Bronze'} (VIP {currentLevel})
           </p>
         </div>
@@ -119,13 +120,13 @@ export default function VipPage() {
         <div className="relative">
           <button
             onClick={() => scrollCarousel('left')}
-            className="absolute -left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
+            className="absolute -left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#f5f5f7]/80 shadow-md backdrop-blur-sm transition-colors hover:bg-[#f5f5f7]"
           >
             <ChevronLeft className="size-4" />
           </button>
           <button
             onClick={() => scrollCarousel('right')}
-            className="absolute -right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
+            className="absolute -right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#f5f5f7]/80 shadow-md backdrop-blur-sm transition-colors hover:bg-[#f5f5f7]"
           >
             <ChevronRight className="size-4" />
           </button>
@@ -149,8 +150,8 @@ export default function VipPage() {
                     isActive
                       ? `bg-gradient-to-br ${vip.gradient} text-white shadow-lg`
                       : isSelected
-                        ? 'border-2 border-[#f4b53e] bg-[#edeef3]'
-                        : 'border border-[#dddddd] bg-[#edeef3]/50 hover:bg-[#edeef3]',
+                        ? 'border-2 border-[#feb614] bg-[#e8e8e8]'
+                        : 'border border-[#e8e8e8] bg-[#e8e8e8]/50 hover:bg-[#f0f0f2]',
                     isLocked && !isSelected && 'opacity-60'
                   )}
                 >
@@ -163,7 +164,7 @@ export default function VipPage() {
                   </span>
                   <span className={cn(
                     'text-xs',
-                    isActive ? 'text-white/80' : 'text-[#707070]'
+                    isActive ? 'text-white/80' : 'text-[#6b7280]'
                   )}>
                     {vip.nameKo}
                   </span>
@@ -180,65 +181,65 @@ export default function VipPage() {
 
         {/* Upgrade Requirements */}
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div>
               <p className="text-sm">승급 누적 입금 (30일)</p>
-              <p className="text-xs text-[#707070]">
+              <p className="text-xs text-[#6b7280]">
                 달성: 0 / {levels[selectedLevel - 1]?.requiredBet ? Number(levels[selectedLevel - 1].requiredBet).toLocaleString('ko-KR') : '0'}
               </p>
             </div>
             <span className={cn(
               'rounded-md px-2.5 py-1 text-xs font-semibold',
               currentLevel >= selectedLevel
-                ? 'bg-green-50 text-green-600'
-                : 'bg-[#edeef3] text-[#707070]'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-[#e8e8e8] text-[#6b7280]'
             )}>
               {currentLevel >= selectedLevel ? '달성' : '미달성'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div>
               <p className="text-sm">승급 턴오버 (30일)</p>
-              <p className="text-xs text-[#707070]">
+              <p className="text-xs text-[#6b7280]">
                 달성: 0 / {levels[selectedLevel - 1]?.requiredBet ? Number(levels[selectedLevel - 1].requiredBet).toLocaleString('ko-KR') : '0'}
               </p>
             </div>
             <span className={cn(
               'rounded-md px-2.5 py-1 text-xs font-semibold',
               currentLevel >= selectedLevel
-                ? 'bg-green-50 text-green-600'
-                : 'bg-[#edeef3] text-[#707070]'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-[#e8e8e8] text-[#6b7280]'
             )}>
               {currentLevel >= selectedLevel ? '달성' : '미달성'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div>
               <p className="text-sm">유지 누적 입금 (90일)</p>
-              <p className="text-xs text-[#707070]">유지 조건</p>
+              <p className="text-xs text-[#6b7280]">유지 조건</p>
             </div>
             <span className={cn(
               'rounded-md px-2.5 py-1 text-xs font-semibold',
               currentLevel >= selectedLevel
-                ? 'bg-green-50 text-green-600'
-                : 'bg-[#edeef3] text-[#707070]'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-[#e8e8e8] text-[#6b7280]'
             )}>
               {currentLevel >= selectedLevel ? '달성' : '미달성'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div>
               <p className="text-sm">유지 가입 일수 (90일)</p>
-              <p className="text-xs text-[#707070]">유지 조건</p>
+              <p className="text-xs text-[#6b7280]">유지 조건</p>
             </div>
             <span className={cn(
               'rounded-md px-2.5 py-1 text-xs font-semibold',
               currentLevel >= selectedLevel
-                ? 'bg-green-50 text-green-600'
-                : 'bg-[#edeef3] text-[#707070]'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-[#e8e8e8] text-[#6b7280]'
             )}>
               {currentLevel >= selectedLevel ? '달성' : '미달성'}
             </span>
@@ -248,7 +249,7 @@ export default function VipPage() {
         {/* Progress bar */}
         {currentLevel < 10 && (
           <div className="mt-4">
-            <div className="mb-1 flex items-center justify-between text-xs text-[#707070]">
+            <div className="mb-1 flex items-center justify-between text-xs text-[#6b7280]">
               <span>VIP {currentLevel} → VIP {currentLevel + 1}</span>
               <span>{vipInfo?.progress || 0}%</span>
             </div>
@@ -258,7 +259,7 @@ export default function VipPage() {
       </div>
 
       {/* VIP Exclusive Benefits */}
-      <div className="rounded-lg bg-white p-5">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
         <h3 className="mb-4 text-base font-semibold">
           VIP{selectedLevel} Exclusive
         </h3>
@@ -269,13 +270,13 @@ export default function VipPage() {
             return (
               <div
                 key={benefit.key}
-                className="flex flex-col items-center gap-2 rounded-xl border border-[#dddddd] bg-[#edeef3]/30 p-4 text-center"
+                className="flex flex-col items-center gap-2 rounded-xl border border-[#e8e8e8] bg-[#e8e8e8]/30 p-4 text-center"
               >
-                <div className="flex size-10 items-center justify-center rounded-full bg-[#f4b53e]/10">
-                  <Icon className="size-5 text-[#f4b53e]" />
+                <div className="flex size-10 items-center justify-center rounded-full bg-[#feb614]/10">
+                  <Icon className="size-5 text-[#feb614]" />
                 </div>
-                <p className="text-xs text-[#707070] leading-tight">{benefit.label}</p>
-                <p className="text-sm font-bold text-[#f4b53e]">{value}</p>
+                <p className="text-xs text-[#6b7280] leading-tight">{benefit.label}</p>
+                <p className="text-sm font-bold text-[#feb614]">{value}</p>
               </div>
             );
           })}
@@ -283,19 +284,19 @@ export default function VipPage() {
       </div>
 
       {/* All VIP Levels Comparison */}
-      <div className="rounded-lg bg-white p-5">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
         <h3 className="mb-4 text-base font-semibold">전체 VIP 등급 비교</h3>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-sm">
             <thead>
-              <tr className="border-b border-[#dddddd]">
-                <th className="px-3 py-2.5 text-left text-xs font-medium text-[#707070]">등급</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">필요 베팅</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">캐시백</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">일일 보너스</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">주간 보너스</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">월간 보너스</th>
-                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#707070]">생일 보너스</th>
+              <tr className="border-b border-[#e8e8e8]">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-[#6b7280]">등급</th>
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">필요 베팅</th>
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">캐시백</th>
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">일일 보너스</th>
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">주간 보너스</th>
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">월간 보너스</th>
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-[#6b7280]">생일 보너스</th>
               </tr>
             </thead>
             <tbody>
@@ -307,8 +308,8 @@ export default function VipPage() {
                   <tr
                     key={level.level}
                     className={cn(
-                      'border-b border-[#dddddd]/50 transition-colors hover:bg-[#edeef3]/50',
-                      isCurrent && 'bg-[#f4b53e]/5'
+                      'border-b border-[#e8e8e8]/50 transition-colors hover:bg-[#f0f0f2]/50',
+                      isCurrent && 'bg-[#feb614]/5'
                     )}
                   >
                     <td className="px-3 py-2.5">
@@ -318,14 +319,14 @@ export default function VipPage() {
                           VIP {level.level}
                         </span>
                         {isCurrent && (
-                          <span className="rounded bg-[#f4b53e]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#f4b53e]">현재</span>
+                          <span className="rounded bg-[#feb614]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#feb614]">현재</span>
                         )}
                       </div>
                     </td>
                     <td className="px-3 py-2.5 text-right">
                       {Number(level.requiredBet).toLocaleString('ko-KR')}
                     </td>
-                    <td className="px-3 py-2.5 text-right font-medium text-[#f4b53e]">{level.cashbackRate}%</td>
+                    <td className="px-3 py-2.5 text-right font-medium text-[#feb614]">{level.cashbackRate}%</td>
                     <td className="px-3 py-2.5 text-right">{values.dailyBonus}</td>
                     <td className="px-3 py-2.5 text-right">{values.weeklyBonus}</td>
                     <td className="px-3 py-2.5 text-right">{values.monthlyBonus}</td>

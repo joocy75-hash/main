@@ -114,7 +114,7 @@ export default function NewAgentPage() {
                 <Label htmlFor="role">역할 *</Label>
                 <select
                   id="role"
-                  className="w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-950"
+                  className="w-full border rounded-md px-3 py-2 text-sm bg-card"
                   value={form.role}
                   onChange={(e) => set('role', e.target.value)}
                 >

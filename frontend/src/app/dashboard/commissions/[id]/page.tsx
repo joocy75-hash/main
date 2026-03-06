@@ -112,8 +112,8 @@ export default function PolicyDetailPage() {
     refetchOverrides();
   };
 
-  if (loading) return <p className="text-gray-500">로딩 중...</p>;
-  if (!policy) return <p className="text-red-500">정책을 찾을 수 없습니다</p>;
+  if (loading) return <p className="text-muted-foreground">로딩 중...</p>;
+  if (!policy) return <p className="text-destructive">정책을 찾을 수 없습니다</p>;
 
   const levelKeys = Object.keys(levelRates).sort((a, b) => Number(a) - Number(b));
 
@@ -122,20 +122,20 @@ export default function PolicyDetailPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{policy.name}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {TYPE_LABELS[policy.type] || policy.type}
             {policy.game_category ? ` / ${policy.game_category}` : ' / 전체 카테고리'}
           </p>
         </div>
         <button
           onClick={() => router.push('/dashboard/commissions')}
-          className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="rounded-md border border-border px-4 py-2 text-sm hover:bg-accent"
         >
           목록으로
         </button>
       </div>
 
-      {error && <div className="rounded-md bg-red-50 p-4 text-red-700">{error}</div>}
+      {error && <div className="rounded-md bg-destructive/10 p-4 text-destructive">{error}</div>}
 
       {/* Tabs */}
       <div className="flex border-b">
@@ -144,7 +144,7 @@ export default function PolicyDetailPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium ${
-              tab === t ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'
+              tab === t ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {t === 'edit' ? '정책 설정' : `오버라이드 (${overrides.length})`}
@@ -154,23 +154,23 @@ export default function PolicyDetailPage() {
 
       {/* Edit Tab */}
       {tab === 'edit' && (
-        <div className="rounded-lg border bg-white p-6 space-y-4 dark:bg-gray-900 dark:border-gray-700">
+        <div className="rounded-lg border border-border bg-card p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">정책명</label>
+              <label className="block text-sm font-medium text-foreground">정책명</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">상태</label>
+              <label className="block text-sm font-medium text-foreground">상태</label>
               <select
                 value={active ? 'active' : 'inactive'}
                 onChange={(e) => setActive(e.target.value === 'active')}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
               >
                 <option value="active">활성</option>
                 <option value="inactive">비활성</option>
@@ -180,41 +180,41 @@ export default function PolicyDetailPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">최소 베팅금</label>
+              <label className="block text-sm font-medium text-foreground">최소 베팅금</label>
               <input
                 type="number"
                 value={minBetAmount}
                 onChange={(e) => setMinBetAmount(e.target.value)}
                 min="0"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">우선순위</label>
+              <label className="block text-sm font-medium text-foreground">우선순위</label>
               <input
                 type="number"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">단계별 비율 (%)</label>
+            <label className="block text-sm font-medium text-foreground mb-2">단계별 비율 (%)</label>
             <div className="space-y-2">
               {levelKeys.map((lvl) => (
                 <div key={lvl} className="flex items-center gap-3">
-                  <span className="w-20 text-sm text-gray-600 dark:text-gray-400">{lvl}단계:</span>
+                  <span className="w-20 text-sm text-muted-foreground">{lvl}단계:</span>
                   <input
                     type="number"
                     value={levelRates[lvl] || '0'}
                     onChange={(e) => setLevelRates({ ...levelRates, [lvl]: e.target.value })}
                     step="0.01"
                     min="0"
-                    className="w-32 rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                    className="w-32 rounded-md border border-border px-3 py-2 text-sm bg-background"
                   />
-                  <span className="text-sm text-gray-400">%</span>
+                  <span className="text-sm text-muted-foreground">%</span>
                 </div>
               ))}
             </div>
@@ -224,7 +224,7 @@ export default function PolicyDetailPage() {
                 const next = String(levelKeys.length + 1);
                 setLevelRates({ ...levelRates, [next]: '0' });
               }}
-              className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+              className="mt-2 text-sm text-primary hover:text-primary/80"
             >
               + 단계 추가
             </button>
@@ -233,7 +233,7 @@ export default function PolicyDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-md bg-blue-600 px-6 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-md bg-primary px-6 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? '저장 중...' : '변경사항 저장'}
           </button>
@@ -244,27 +244,27 @@ export default function PolicyDetailPage() {
       {tab === 'overrides' && (
         <div className="space-y-4">
           {/* Add override */}
-          <div className="rounded-lg border bg-white p-4 dark:bg-gray-900 dark:border-gray-700">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">에이전트 오버라이드 추가</h3>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h3 className="text-sm font-medium text-foreground mb-3">에이전트 오버라이드 추가</h3>
             <div className="flex gap-3 items-end">
               <div>
-                <label className="block text-xs text-gray-500 dark:text-gray-400">에이전트 ID</label>
+                <label className="block text-xs text-muted-foreground">에이전트 ID</label>
                 <input
                   type="number"
                   value={newAgentId}
                   onChange={(e) => setNewAgentId(e.target.value)}
                   placeholder="에이전트 ID"
-                  className="mt-1 w-28 rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                  className="mt-1 w-28 rounded-md border border-border px-3 py-2 text-sm bg-background"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-xs text-gray-500 dark:text-gray-400">커스텀 비율 (예: 1:0.8, 2:0.5, 3:0.2)</label>
+                <label className="block text-xs text-muted-foreground">커스텀 비율 (예: 1:0.8, 2:0.5, 3:0.2)</label>
                 <input
                   type="text"
                   value={newOverrideRates}
                   onChange={(e) => setNewOverrideRates(e.target.value)}
                   placeholder="1:0.8, 2:0.5, 3:0.2"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+                  className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
                 />
               </div>
               <button
@@ -278,22 +278,22 @@ export default function PolicyDetailPage() {
           </div>
 
           {/* Override list */}
-          <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">에이전트</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">코드</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">커스텀 비율</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">관리</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">에이전트</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">코드</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">커스텀 비율</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">상태</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">관리</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+              <tbody className="divide-y divide-border bg-card">
                 {overrides.map((o) => (
                   <tr key={o.id}>
                     <td className="px-4 py-3 text-sm">{o.agent_username || o.admin_user_id}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{o.agent_code}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">{o.agent_code}</td>
                     <td className="px-4 py-3 text-sm">
                       {o.custom_rates
                         ? Object.entries(o.custom_rates)
@@ -304,7 +304,7 @@ export default function PolicyDetailPage() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                        o.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        o.active ? 'bg-green-500/10 text-green-500' : 'bg-muted text-foreground'
                       }`}>
                         {o.active ? '활성' : '비활성'}
                       </span>
@@ -312,7 +312,7 @@ export default function PolicyDetailPage() {
                     <td className="px-4 py-3 text-sm">
                       <button
                         onClick={() => handleDeleteOverride(o.id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-400 hover:text-red-500"
                       >
                         삭제
                       </button>
@@ -321,7 +321,7 @@ export default function PolicyDetailPage() {
                 ))}
                 {overrides.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                    <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                       이 정책에 대한 오버라이드가 없습니다
                     </td>
                   </tr>

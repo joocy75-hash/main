@@ -71,28 +71,28 @@ export default function NewPolicyPage() {
       <h1 className="text-2xl font-bold">커미션 정책 등록</h1>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-4 text-red-700">{error}</div>
+        <div className="rounded-md bg-destructive/10 p-4 text-destructive">{error}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border bg-white p-6 dark:bg-gray-900 dark:border-gray-700">
+      <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">정책명 *</label>
+            <label className="block text-sm font-medium text-foreground">정책명 *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+              className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
               placeholder="예: 카지노 롤링"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">유형 *</label>
+            <label className="block text-sm font-medium text-foreground">유형 *</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+              className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
             >
               <option value="rolling">롤링 (베팅 기반)</option>
               <option value="losing">루징 / 죽장 (손실 기반)</option>
@@ -103,11 +103,11 @@ export default function NewPolicyPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">게임 카테고리</label>
+            <label className="block text-sm font-medium text-foreground">게임 카테고리</label>
             <select
               value={gameCategory}
               onChange={(e) => setGameCategory(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+              className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
             >
               {GAME_CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -115,39 +115,39 @@ export default function NewPolicyPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">최소 베팅금</label>
+            <label className="block text-sm font-medium text-foreground">최소 베팅금</label>
             <input
               type="number"
               value={minBetAmount}
               onChange={(e) => setMinBetAmount(e.target.value)}
               min="0"
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+              className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm bg-background"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">우선순위 (높을수록 우선)</label>
+          <label className="block text-sm font-medium text-foreground">우선순위 (높을수록 우선)</label>
           <input
             type="number"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            className="mt-1 w-32 rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600"
+            className="mt-1 w-32 rounded-md border border-border px-3 py-2 text-sm bg-background"
           />
         </div>
 
         {/* Level rates */}
         <div>
           <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-foreground">
               단계별 비율 ({type === 'losing' ? '손실금' : '베팅금'}의 %)
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">단계 수:</span>
+              <span className="text-xs text-muted-foreground">단계 수:</span>
               <select
                 value={levelCount}
                 onChange={(e) => handleLevelCountChange(Number(e.target.value))}
-                className="rounded border border-gray-300 px-2 py-1 text-sm"
+                className="rounded border border-border px-2 py-1 text-sm bg-background"
               >
                 {[1, 2, 3, 4, 5, 6].map((n) => (
                   <option key={n} value={n}>{n}</option>
@@ -158,7 +158,7 @@ export default function NewPolicyPage() {
           <div className="mt-2 space-y-2">
             {Array.from({ length: levelCount }, (_, i) => String(i + 1)).map((lvl) => (
               <div key={lvl} className="flex items-center gap-3">
-                <span className="w-20 text-sm text-gray-600 dark:text-gray-400">{lvl}단계:</span>
+                <span className="w-20 text-sm text-muted-foreground">{lvl}단계:</span>
                 <input
                   type="number"
                   value={rates[lvl] || '0'}
@@ -166,13 +166,13 @@ export default function NewPolicyPage() {
                   step="0.01"
                   min="0"
                   max="100"
-                  className="w-32 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="w-32 rounded-md border border-border px-3 py-2 text-sm bg-background"
                 />
-                <span className="text-sm text-gray-400">%</span>
+                <span className="text-sm text-muted-foreground">%</span>
               </div>
             ))}
           </div>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-muted-foreground">
             1단계 = 직속 에이전트, 2단계 = 상위, 3단계 = 상위의 상위, ...
           </p>
         </div>
@@ -182,14 +182,14 @@ export default function NewPolicyPage() {
           <button
             type="submit"
             disabled={saving || !name}
-            className="rounded-md bg-blue-600 px-6 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-md bg-primary px-6 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? '등록 중...' : '정책 등록'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-md border border-gray-300 px-6 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+            className="rounded-md border border-border px-6 py-2 text-sm hover:bg-accent"
           >
             취소
           </button>

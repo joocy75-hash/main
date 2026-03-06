@@ -33,9 +33,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const TYPE_BADGE_COLORS: Record<string, string> = {
-  rolling: 'bg-blue-100 text-blue-800',
-  losing: 'bg-red-100 text-red-800',
-  deposit: 'bg-green-100 text-green-800',
+  rolling: 'bg-blue-500/10 text-blue-500',
+  losing: 'bg-red-500/10 text-red-500',
+  deposit: 'bg-green-500/10 text-green-500',
 };
 
 export default function CommissionPoliciesPage() {
@@ -174,7 +174,7 @@ export default function CommissionPoliciesPage() {
                 <TableRow key={policy.id}>
                   <TableCell className="font-medium">{policy.name}</TableCell>
                   <TableCell>
-                    <Badge className={TYPE_BADGE_COLORS[policy.type] || 'bg-gray-100 text-gray-800'} variant="secondary">
+                    <Badge className={TYPE_BADGE_COLORS[policy.type] || 'bg-muted text-foreground'} variant="secondary">
                       {TYPE_LABELS[policy.type] || policy.type}
                     </Badge>
                   </TableCell>
@@ -186,7 +186,7 @@ export default function CommissionPoliciesPage() {
                   <TableCell className="text-muted-foreground">{formatRates(policy.level_rates)}</TableCell>
                   <TableCell>{Number(policy.min_bet_amount).toLocaleString()}</TableCell>
                   <TableCell>
-                    <Badge className={policy.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} variant="secondary">
+                    <Badge className={policy.active ? 'bg-green-500/10 text-green-500' : 'bg-muted text-foreground'} variant="secondary">
                       {policy.active ? '활성' : '비활성'}
                     </Badge>
                   </TableCell>
@@ -196,7 +196,7 @@ export default function CommissionPoliciesPage() {
                       <Link href={`/dashboard/commissions/${policy.id}`}>
                         <Button variant="ghost" size="xs">수정</Button>
                       </Link>
-                      <Button variant="ghost" size="xs" className="text-red-600 hover:text-red-800" onClick={() => handleDelete(policy)}>
+                      <Button variant="ghost" size="xs" className="text-red-400 hover:text-red-500" onClick={() => handleDelete(policy)}>
                         삭제
                       </Button>
                     </div>

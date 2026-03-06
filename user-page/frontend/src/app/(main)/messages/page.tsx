@@ -69,7 +69,7 @@ export default function MessagesPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="bg-white rounded-lg border border-[#dddddd] px-5 py-4">
+      <div className="bg-white rounded-lg border border-[#e8e8e8] px-5 py-4">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-[#252531] font-bold text-lg">
             <span>📩</span> 쪽지함
@@ -83,27 +83,27 @@ export default function MessagesPage() {
       </div>
 
       {/* Messages list */}
-      <div className="bg-white rounded-lg border border-[#dddddd]">
+      <div className="bg-white rounded-lg border border-[#e8e8e8]">
         {isLoading ? (
           <div className="flex flex-col gap-2 p-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="animate-pulse bg-[#edeef3] rounded h-14 w-full" />
+              <div key={i} className="animate-pulse bg-[#e8e8e8] rounded h-14 w-full" />
             ))}
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-12">
             <span className="text-4xl">📭</span>
-            <p className="text-sm text-[#707070]">새로운 쪽지가 없습니다</p>
+            <p className="text-sm text-[#6b7280]">새로운 쪽지가 없습니다</p>
           </div>
         ) : (
-          <div className="flex flex-col divide-y divide-[#dddddd]">
+          <div className="flex flex-col divide-y divide-[#e8e8e8]">
             {messages.map((msg) => (
               <div key={msg.id}>
                 <button
                   onClick={() => handleExpand(msg.id)}
                   className={cn(
-                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f8f9fc]',
-                    expandedId === msg.id && 'bg-[#f8f9fc]'
+                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f8f8fa]',
+                    expandedId === msg.id && 'bg-[#f8f8fa]'
                   )}
                 >
                   {/* Unread indicator */}
@@ -120,7 +120,7 @@ export default function MessagesPage() {
                     )}>
                       {msg.title}
                     </span>
-                    <span className="shrink-0 text-xs text-[#707070]">
+                    <span className="shrink-0 text-xs text-[#6b7280]">
                       {formatDateTime(msg.createdAt)}
                     </span>
                   </div>
@@ -128,8 +128,8 @@ export default function MessagesPage() {
 
                 {/* Expanded content */}
                 {expandedId === msg.id && (
-                  <div className="border-t border-[#dddddd] bg-[#f8f9fc] px-4 py-3">
-                    <p className="whitespace-pre-wrap text-sm text-[#707070]">
+                  <div className="border-t border-[#e8e8e8] bg-[#f8f8fa] px-4 py-3">
+                    <p className="whitespace-pre-wrap text-sm text-[#6b7280]">
                       {expandedMessage?.content || msg.title}
                     </p>
                     <div className="mt-3 flex justify-end">
@@ -156,7 +156,7 @@ export default function MessagesPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <button
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => p - 1)}
           >
@@ -171,8 +171,8 @@ export default function MessagesPage() {
                 className={cn(
                   'px-3 py-1.5 text-sm rounded-lg transition-colors',
                   currentPage === page
-                    ? 'bg-[#f4b53e] text-white font-bold'
-                    : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+                    ? 'bg-[#feb614] text-white font-bold'
+                    : 'border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa]'
                 )}
                 onClick={() => setCurrentPage(page)}
               >
@@ -181,7 +181,7 @@ export default function MessagesPage() {
             );
           })}
           <button
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
           >
@@ -202,7 +202,7 @@ export default function MessagesPage() {
           </DialogHeader>
           <DialogFooter>
             <button
-              className="px-4 py-2 text-sm text-[#707070] hover:bg-[#f8f9fc] rounded-lg"
+              className="px-4 py-2 text-sm text-[#6b7280] hover:bg-[#f8f8fa] rounded-lg"
               onClick={() => setDeleteConfirmId(null)}
             >
               취소

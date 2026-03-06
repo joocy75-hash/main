@@ -37,12 +37,12 @@ export default function BettingPermissionSection({ permissions, onToggle }: Prop
                 onClick={() => onToggle(cat, allowed)}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${
                   allowed
-                    ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950'
-                    : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950'
+                    ? 'border-blue-500/30 bg-blue-500/10'
+                    : 'border-red-500/30 bg-red-500/10'
                 }`}
               >
                 <span className="text-sm font-medium">{GAME_LABELS[cat]}</span>
-                <Badge className={allowed ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'} variant="secondary">
+                <Badge className={allowed ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'} variant="secondary">
                   {allowed ? '허용' : '차단'}
                 </Badge>
               </button>

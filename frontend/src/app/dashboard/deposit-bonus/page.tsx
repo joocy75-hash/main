@@ -19,8 +19,8 @@ import {
 const fmt = (n: number) => Intl.NumberFormat('ko-KR').format(n);
 
 const TYPE_STYLES: Record<string, { label: string; cls: string }> = {
-  first_deposit: { label: '첫입금', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  every_deposit: { label: '매입금', cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
+  first_deposit: { label: '첫입금', cls: 'bg-blue-500/10 text-blue-500' },
+  every_deposit: { label: '매입금', cls: 'bg-green-500/10 text-green-500' },
 };
 
 type FormData = {
@@ -100,22 +100,22 @@ export default function DepositBonusPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">입금보너스 설정</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">첫입금 및 매입금 보너스를 관리합니다.</p>
+          <p className="text-sm text-muted-foreground">첫입금 및 매입금 보너스를 관리합니다.</p>
         </div>
         <Button onClick={openCreate}>+ 추가</Button>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : data.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             등록된 입금보너스 설정이 없습니다
           </CardContent>
         </Card>
@@ -123,37 +123,37 @@ export default function DepositBonusPage() {
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">유형</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">보너스비율(%)</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">최대보너스</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">최소입금</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">롤오버(x배)</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">관리</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">유형</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">보너스비율(%)</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">최대보너스</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">최소입금</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">롤오버(x배)</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">관리</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {data.map((item) => {
                     const typeStyle = TYPE_STYLES[item.type];
                     return (
-                      <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={item.id} className="hover:bg-accent">
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
-                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-muted text-foreground'}`}>
                             {typeStyle?.label || item.type}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums">{item.bonus_percent}%</td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums">{fmt(item.max_bonus_amount)}</td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">{fmt(item.min_deposit_amount)}</td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">x{item.rollover_multiplier}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">{fmt(item.min_deposit_amount)}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">x{item.rollover_multiplier}</td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                           <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                             item.is_active
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                              ? 'bg-green-500/10 text-green-500'
+                              : 'bg-muted text-foreground'
                           }`}>
                             {item.is_active ? '활성' : '비활성'}
                           </span>
@@ -236,7 +236,7 @@ export default function DepositBonusPage() {
                 id="deposit-bonus-active"
                 checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-border"
               />
               <Label htmlFor="deposit-bonus-active">활성</Label>
             </div>

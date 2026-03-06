@@ -30,13 +30,13 @@ const MODULE_OPTIONS = [
 ];
 
 const ACTION_STYLES: Record<string, string> = {
-  create: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  update: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  delete: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  login: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-  logout: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-  approve: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
-  reject: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+  create: 'bg-green-500/10 text-green-500',
+  update: 'bg-primary/10 text-primary',
+  delete: 'bg-destructive/10 text-destructive',
+  login: 'bg-purple-500/10 text-purple-500',
+  logout: 'bg-muted text-foreground',
+  approve: 'bg-emerald-500/10 text-emerald-500',
+  reject: 'bg-orange-500/10 text-orange-500',
 };
 
 export default function AuditPage() {
@@ -80,12 +80,12 @@ export default function AuditPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">감사 로그</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">시스템 관리 행위를 조회합니다.</p>
+          <p className="text-sm text-muted-foreground">시스템 관리 행위를 조회합니다.</p>
         </div>
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="rounded-md border border-border bg-card px-4 py-2 text-sm hover:bg-muted disabled:opacity-50"
         >
           {exporting ? '내보내는 중...' : 'CSV 내보내기'}
         </button>
@@ -96,7 +96,7 @@ export default function AuditPage() {
         <select
           value={action}
           onChange={(e) => { setAction(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         >
           {ACTION_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -105,7 +105,7 @@ export default function AuditPage() {
         <select
           value={module}
           onChange={(e) => { setModule(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         >
           {MODULE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -115,70 +115,70 @@ export default function AuditPage() {
           type="date"
           value={startDate}
           onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         />
         <input
           type="date"
           value={endDate}
           onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+          className="rounded-md border border-border px-3 py-2 text-sm"
         />
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">관리자</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">액션</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">모듈</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">리소스</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">설명</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">일시</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상세</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">관리자</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">액션</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">모듈</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">리소스</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">설명</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">일시</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">상세</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data?.items.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{log.id}</td>
+                <tr key={log.id} className="hover:bg-muted">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{log.id}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
-                    {log.admin_username || <span className="text-gray-400">시스템</span>}
+                    {log.admin_username || <span className="text-muted-foreground">시스템</span>}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${ACTION_STYLES[log.action] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${ACTION_STYLES[log.action] || 'bg-muted text-foreground'}`}>
                       {log.action}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {log.module}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm font-mono text-muted-foreground">
                     {log.resource_id || '-'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                  <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate">
                     {log.description || '-'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                     {new Date(log.created_at).toLocaleString('ko-KR')}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
                     {(log.before_data || log.after_data) && (
                       <button
                         onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                        className="text-primary hover:text-primary/80"
                       >
                         {selectedLog?.id === log.id ? '닫기' : '보기'}
                       </button>
@@ -188,7 +188,7 @@ export default function AuditPage() {
               ))}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                     감사 로그가 없습니다
                   </td>
                 </tr>
@@ -200,46 +200,46 @@ export default function AuditPage() {
 
       {/* Detail Panel */}
       {selectedLog && (
-        <div className="rounded-lg border p-6 dark:border-gray-700 space-y-4">
+        <div className="rounded-lg border p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">감사 로그 상세 (ID: {selectedLog.id})</h3>
             <button
               onClick={() => setSelectedLog(null)}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="text-muted-foreground hover:text-muted-foreground"
             >
               닫기
             </button>
           </div>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-500 dark:text-gray-400">관리자:</span>{' '}
+              <span className="font-medium text-muted-foreground">관리자:</span>{' '}
               {selectedLog.admin_username || '시스템'}
             </div>
             <div>
-              <span className="font-medium text-gray-500 dark:text-gray-400">IP:</span>{' '}
+              <span className="font-medium text-muted-foreground">IP:</span>{' '}
               {selectedLog.ip_address || '-'}
             </div>
             <div>
-              <span className="font-medium text-gray-500 dark:text-gray-400">액션:</span>{' '}
+              <span className="font-medium text-muted-foreground">액션:</span>{' '}
               {selectedLog.action}
             </div>
             <div>
-              <span className="font-medium text-gray-500 dark:text-gray-400">모듈:</span>{' '}
+              <span className="font-medium text-muted-foreground">모듈:</span>{' '}
               {selectedLog.module}
             </div>
           </div>
           {selectedLog.before_data && (
             <div>
-              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">변경 전 (Before)</h4>
-              <pre className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 text-xs overflow-auto max-h-48 font-mono">
+              <h4 className="text-sm font-medium text-muted-foreground mb-1">변경 전 (Before)</h4>
+              <pre className="bg-muted rounded-md p-3 text-xs overflow-auto max-h-48 font-mono">
                 {JSON.stringify(selectedLog.before_data, null, 2)}
               </pre>
             </div>
           )}
           {selectedLog.after_data && (
             <div>
-              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">변경 후 (After)</h4>
-              <pre className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 text-xs overflow-auto max-h-48 font-mono">
+              <h4 className="text-sm font-medium text-muted-foreground mb-1">변경 후 (After)</h4>
+              <pre className="bg-muted rounded-md p-3 text-xs overflow-auto max-h-48 font-mono">
                 {JSON.stringify(selectedLog.after_data, null, 2)}
               </pre>
             </div>
@@ -250,12 +250,12 @@ export default function AuditPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">전체: {data.total}개</p>
+          <p className="text-sm text-muted-foreground">전체: {data.total}개</p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               이전
             </button>
@@ -265,7 +265,7 @@ export default function AuditPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               다음
             </button>

@@ -77,11 +77,11 @@ export default function AnnouncementDetailPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">로딩 중...</div>;
+    return <div className="flex items-center justify-center h-64 text-muted-foreground">로딩 중...</div>;
   }
 
   if (error || !announcement) {
-    return <div className="flex items-center justify-center h-64 text-red-500">{error || '공지를 찾을 수 없습니다'}</div>;
+    return <div className="flex items-center justify-center h-64 text-destructive">{error || '공지를 찾을 수 없습니다'}</div>;
   }
 
   return (
@@ -100,14 +100,14 @@ export default function AnnouncementDetailPage() {
         <CardHeader><CardTitle>공지 수정</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {saveError && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm">{saveError}</div>}
+            {saveError && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{saveError}</div>}
 
             <div className="space-y-2">
               <label className="text-sm font-medium">타입</label>
               <select
                 value={editForm.type}
                 onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 <option value="notice">공지</option>
                 <option value="popup">팝업</option>
@@ -129,7 +129,7 @@ export default function AnnouncementDetailPage() {
                 value={editForm.content}
                 onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
                 rows={6}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
             </div>
 
@@ -138,7 +138,7 @@ export default function AnnouncementDetailPage() {
               <select
                 value={editForm.target}
                 onChange={(e) => setEditForm({ ...editForm, target: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 <option value="all">전체</option>
                 <option value="agents">에이전트</option>
@@ -181,7 +181,7 @@ export default function AnnouncementDetailPage() {
                 id="is_active"
                 checked={editForm.is_active}
                 onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
-                className="rounded border-gray-300"
+                className="rounded border-border"
               />
               <label htmlFor="is_active" className="text-sm font-medium">활성</label>
             </div>

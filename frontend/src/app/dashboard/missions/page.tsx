@@ -20,10 +20,10 @@ import { useToast } from '@/components/toast-provider';
 const amountFormatter = new Intl.NumberFormat('ko-KR');
 
 const TYPE_STYLES: Record<string, { label: string; cls: string }> = {
-  daily: { label: '일일', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  weekly: { label: '주간', cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  monthly: { label: '월간', cls: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
-  special: { label: '특별', cls: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
+  daily: { label: '일일', cls: 'bg-blue-500/10 text-blue-500' },
+  weekly: { label: '주간', cls: 'bg-green-500/10 text-green-500' },
+  monthly: { label: '월간', cls: 'bg-purple-500/10 text-purple-500' },
+  special: { label: '특별', cls: 'bg-orange-500/10 text-orange-500' },
 };
 
 type FormData = {
@@ -167,7 +167,7 @@ export default function MissionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">미션 관리</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">미션을 관리합니다.</p>
+          <p className="text-sm text-muted-foreground">미션을 관리합니다.</p>
         </div>
         <Button onClick={openCreate}>+ 미션 등록</Button>
       </div>
@@ -176,27 +176,27 @@ export default function MissionsPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="py-4 px-5">
-            <p className="text-xs text-gray-500 dark:text-gray-400">전체</p>
+            <p className="text-xs text-muted-foreground">전체</p>
             <p className="text-2xl font-bold mt-1">{total}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4 px-5">
-            <p className="text-xs text-gray-500 dark:text-gray-400">활성</p>
-            <p className="text-2xl font-bold mt-1 text-green-600">{activeCount}</p>
+            <p className="text-xs text-muted-foreground">활성</p>
+            <p className="text-2xl font-bold mt-1 text-green-400">{activeCount}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4 px-5">
-            <p className="text-xs text-gray-500 dark:text-gray-400">비활성</p>
-            <p className="text-2xl font-bold mt-1 text-gray-500">{inactiveCount}</p>
+            <p className="text-xs text-muted-foreground">비활성</p>
+            <p className="text-2xl font-bold mt-1 text-muted-foreground">{inactiveCount}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
@@ -226,7 +226,7 @@ export default function MissionsPage() {
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={3}
                   placeholder="미션 설명"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
@@ -236,7 +236,7 @@ export default function MissionsPage() {
                   onChange={(e) => setForm({ ...form, rules: e.target.value })}
                   rows={3}
                   placeholder="미션 규칙"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -244,7 +244,7 @@ export default function MissionsPage() {
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 >
                   <option value="daily">일일</option>
                   <option value="weekly">주간</option>
@@ -275,7 +275,7 @@ export default function MissionsPage() {
                 <select
                   value={form.is_active ? 'true' : 'false'}
                   onChange={(e) => setForm({ ...form, is_active: e.target.value === 'true' })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm"
                 >
                   <option value="true">활성</option>
                   <option value="false">비활성</option>
@@ -310,47 +310,47 @@ export default function MissionsPage() {
 
       {/* Table */}
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : data.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             등록된 미션이 없습니다
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">미션명</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">유형</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">보너스</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">최대참여</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">기간</th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">작업</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">미션명</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">유형</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">보너스</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">최대참여</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">기간</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">작업</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            <tbody className="divide-y divide-border bg-card">
               {data.map((item) => {
                 const typeStyle = TYPE_STYLES[item.type];
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr key={item.id} className="hover:bg-accent">
                     <td className="whitespace-nowrap px-4 py-3 text-sm font-medium max-w-xs truncate">
                       {item.name}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm">
-                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-muted text-foreground'}`}>
                         {typeStyle?.label || item.type}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums">
                       {amountFormatter.format(item.bonus_amount)}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">
                       {item.max_participants > 0 ? amountFormatter.format(item.max_participants) : '무제한'}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                       {item.starts_at && item.ends_at
                         ? `${new Date(item.starts_at).toLocaleDateString('ko-KR')} ~ ${new Date(item.ends_at).toLocaleDateString('ko-KR')}`
                         : item.starts_at
@@ -360,8 +360,8 @@ export default function MissionsPage() {
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                         item.is_active
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                          ? 'bg-green-500/10 text-green-500'
+                          : 'bg-muted text-foreground'
                       }`}>
                         {item.is_active ? '활성' : '비활성'}
                       </span>
@@ -370,13 +370,13 @@ export default function MissionsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => openEdit(item)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                          className="text-primary hover:text-primary"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => handleDelete(item)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400"
+                          className="text-destructive hover:text-destructive"
                         >
                           삭제
                         </button>
@@ -392,8 +392,8 @@ export default function MissionsPage() {
 
       {/* Pagination */}
       {total > 0 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+          <p className="text-sm text-muted-foreground">
             {total}건 중 {(page - 1) * pageSize + 1}~{Math.min(page * pageSize, total)}건
           </p>
           <div className="flex gap-2">

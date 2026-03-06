@@ -49,17 +49,17 @@ import { useToast } from '@/components/toast-provider';
 // ─── Constants ───────────────────────────────────────────────────
 
 const SEVERITY_STYLES: Record<string, { label: string; cls: string }> = {
-  critical: { label: 'Critical', cls: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
-  high: { label: 'High', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
-  medium: { label: 'Medium', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  low: { label: 'Low', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+  critical: { label: 'Critical', cls: 'bg-red-500/10 text-red-500' },
+  high: { label: 'High', cls: 'bg-orange-500/10 text-orange-500' },
+  medium: { label: 'Medium', cls: 'bg-amber-500/10 text-amber-500' },
+  low: { label: 'Low', cls: 'bg-blue-500/10 text-blue-500' },
 };
 
 const STATUS_STYLES: Record<string, { label: string; cls: string }> = {
-  open: { label: '미처리', cls: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400' },
-  investigating: { label: '조사중', cls: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400' },
-  resolved: { label: '해결', cls: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400' },
-  false_positive: { label: '오탐', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  open: { label: '미처리', cls: 'bg-red-500/10 text-red-400' },
+  investigating: { label: '조사중', cls: 'bg-amber-500/10 text-amber-400' },
+  resolved: { label: '해결', cls: 'bg-emerald-500/10 text-emerald-400' },
+  false_positive: { label: '오탐', cls: 'bg-muted text-muted-foreground' },
 };
 
 const SEVERITY_FILTERS = [
@@ -349,19 +349,19 @@ function AlertsTab() {
             <Card>
               <CardContent className="py-4 px-5">
                 <p className="text-xs text-muted-foreground">Critical</p>
-                <p className="text-2xl font-bold mt-1 text-red-600">{stats?.critical?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-red-400">{stats?.critical?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4 px-5">
                 <p className="text-xs text-muted-foreground">High</p>
-                <p className="text-2xl font-bold mt-1 text-orange-600">{stats?.high?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-orange-400">{stats?.high?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4 px-5">
                 <p className="text-xs text-muted-foreground">조사중</p>
-                <p className="text-2xl font-bold mt-1 text-amber-600">{stats?.investigating?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-amber-400">{stats?.investigating?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
           </>
@@ -635,7 +635,7 @@ function RulesTab() {
                             title={rule.is_active ? '비활성화' : '활성화'}
                           >
                             {rule.is_active ? (
-                              <ToggleRight className="h-3.5 w-3.5 text-emerald-600" />
+                              <ToggleRight className="h-3.5 w-3.5 text-emerald-400" />
                             ) : (
                               <ToggleLeft className="h-3.5 w-3.5 text-muted-foreground" />
                             )}
@@ -643,7 +643,7 @@ function RulesTab() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
+                            className="h-7 w-7 p-0 text-red-500 hover:text-red-500"
                             onClick={() => handleDelete(rule.id)}
                             title="삭제"
                           >

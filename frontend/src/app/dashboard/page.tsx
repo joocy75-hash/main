@@ -36,11 +36,11 @@ function SkeletonCard() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-20 animate-pulse rounded bg-accent" />
+        <div className="h-4 w-4 animate-pulse rounded bg-accent" />
       </CardHeader>
       <CardContent>
-        <div className="h-7 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-7 w-24 animate-pulse rounded bg-accent" />
       </CardContent>
     </Card>
   );
@@ -50,7 +50,7 @@ function SkeletonTable() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div key={i} className="h-8 animate-pulse rounded bg-accent" />
       ))}
     </div>
   );
@@ -83,8 +83,8 @@ export default function DashboardPage() {
       </div>
 
       {statsError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950">
-          <p className="text-sm font-medium text-red-800 dark:text-red-200">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <p className="text-sm font-medium text-destructive">
             데이터를 불러오는 중 오류가 발생했습니다: {statsError}
           </p>
         </div>
@@ -115,13 +115,13 @@ export default function DashboardPage() {
       {stats && (stats.pending_deposits > 0 || stats.pending_withdrawals > 0) && (
         <div className="flex gap-4">
           {stats.pending_deposits > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm font-medium text-amber-500">
               <ArrowDownCircle className="h-4 w-4" />
               대기중 입금: {stats.pending_deposits}건
             </span>
           )}
           {stats.pending_withdrawals > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1 text-sm font-medium text-orange-500">
               <ArrowUpCircle className="h-4 w-4" />
               대기중 출금: {stats.pending_withdrawals}건
             </span>
@@ -155,15 +155,15 @@ export default function DashboardPage() {
                   </thead>
                   <tbody className="divide-y">
                     {transactions.map((tx) => (
-                      <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={tx.id} className="hover:bg-accent">
                         <td className="py-2 font-medium">{tx.user_username || '-'}</td>
                         <td className="py-2">
                           <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
                             tx.type === 'deposit'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              ? 'bg-emerald-500/10 text-emerald-500'
                               : tx.type === 'withdrawal'
-                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              ? 'bg-destructive/10 text-destructive'
+                              : 'bg-muted text-foreground'
                           }`}>
                             {TYPE_LABELS[tx.type] || tx.type}
                           </span>
@@ -172,10 +172,10 @@ export default function DashboardPage() {
                         <td className="py-2">
                           <span className={`text-xs ${
                             tx.status === 'approved' || tx.status === 'completed'
-                              ? 'text-green-600 dark:text-green-400'
+                              ? 'text-emerald-500'
                               : tx.status === 'pending'
-                              ? 'text-yellow-600 dark:text-yellow-400'
-                              : 'text-red-600 dark:text-red-400'
+                              ? 'text-amber-500'
+                              : 'text-destructive'
                           }`}>
                             {STATUS_LABELS[tx.status] || tx.status}
                           </span>
@@ -213,13 +213,13 @@ export default function DashboardPage() {
                   </thead>
                   <tbody className="divide-y">
                     {commissions.map((c) => (
-                      <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={c.id} className="hover:bg-accent">
                         <td className="py-2 font-medium">{c.agent_username || '-'}</td>
                         <td className="py-2">
                           <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
                             c.type === 'rolling'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                              ? 'bg-primary/10 text-primary'
+                              : 'bg-purple-500/10 text-purple-500'
                           }`}>
                             {TYPE_LABELS[c.type] || c.type}
                           </span>

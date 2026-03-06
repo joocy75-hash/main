@@ -15,17 +15,13 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth-store';
 import { useGameStore } from '@/stores/game-store';
 import type { Game } from '../../../../shared/types/game';
+import { formatUSDT } from '@/lib/utils';
 
 interface GameLaunchModalProps {
   game: Game | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const formatKRW = (amount: string | number) => {
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('ko-KR').format(num);
-};
 
 const getPlatform = (): 1 | 2 => {
   if (typeof window === 'undefined') return 1;
@@ -124,7 +120,7 @@ export const GameLaunchModal = ({
           <div className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-3">
             <span className="text-sm text-muted-foreground">보유 잔액</span>
             <span className="text-base font-bold">
-              {formatKRW(user.balance)} 원
+              USDT {formatUSDT(user.balance)}
             </span>
           </div>
         )}

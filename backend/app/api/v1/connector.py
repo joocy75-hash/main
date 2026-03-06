@@ -37,7 +37,7 @@ async def list_connectors(
 
     items = []
     for p in providers:
-        count_stmt = select(func.count()).where(
+        count_stmt = select(func.count()).select_from(Game).where(
             Game.provider_id == p.id, Game.is_active == True
         )
         game_count = (await session.execute(count_stmt)).scalar() or 0
@@ -200,26 +200,30 @@ async def receive_webhook(
         raise HTTPException(status_code=404, detail="Provider not found")
 
     # Verify HMAC signature (api_key used as secret for webhook verification)
-    signature = request.headers.get("X-Signature", "")
-    if provider.api_key:
-        if not signature:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Missing X-Signature header",
-            )
-        raw_body = await request.body()
-        connector = get_connector(
-            category=provider.category,
-            provider_id=provider.id,
-            api_url=provider.api_url or "",
-            api_key=provider.api_key,
-            api_secret=provider.api_key,
+    if not provider.api_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Webhook not configured for this provider",
         )
-        if not connector.verify_webhook_signature(raw_body, signature):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid webhook signature",
-            )
+    signature = request.headers.get("X-Signature", "")
+    if not signature:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Missing X-Signature header",
+        )
+    raw_body = await request.body()
+    connector = get_connector(
+        category=provider.category,
+        provider_id=provider.id,
+        api_url=provider.api_url or "",
+        api_key=provider.api_key,
+        api_secret=provider.api_key,
+    )
+    if not connector.verify_webhook_signature(raw_body, signature):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid webhook signature",
+        )
 
     return {
         "status": "received",

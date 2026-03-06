@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 
@@ -21,9 +20,9 @@ const PROMO_CARDS = [
     subtitle: 'and earn up to $50,000\nRewards!',
     href: '/promotions/attendance',
     category: 'checkin',
-    gradient: 'from-white to-blue-50',
+    gradient: 'from-[#2c2d33] to-blue-900/40',
     emoji: '📅',
-    dark: false,
+    dark: true,
   },
   {
     id: 2,
@@ -108,12 +107,7 @@ const PROMO_CARDS = [
 ];
 
 export default function PromotionsHubPage() {
-  const {
-    promotions,
-    promotionCategory,
-    fetchPromotions,
-    setPromotionCategory,
-  } = useEventStore();
+  const { fetchPromotions, setPromotionCategory } = useEventStore();
 
   const [activeFilter, setActiveFilter] = useState('all');
 
@@ -133,16 +127,16 @@ export default function PromotionsHubPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Category tab filter - kzkzb style */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+      <div className="flex items-center gap-6 overflow-x-auto no-scrollbar py-2 border-b border-[#e8e8e8]/50">
         {CATEGORY_FILTERS.map((filter) => (
           <button
             key={filter.value}
             onClick={() => handleFilter(filter.value)}
             className={cn(
-              'shrink-0 rounded-2xl px-4 py-1.5 text-xs font-medium transition-all',
+              'shrink-0 px-4 py-2 text-[15px] font-bold transition-all whitespace-nowrap',
               activeFilter === filter.value
-                ? 'bg-[#f4b53e] text-black'
-                : 'bg-[#edeef3]/50 text-[#707070] hover:bg-[#edeef3]'
+                ? 'bg-[#feb614] text-white rounded-full shadow-sm'
+                : 'text-[#6b7280] hover:text-[#252531]'
             )}
           >
             {filter.label}
@@ -151,52 +145,49 @@ export default function PromotionsHubPage() {
       </div>
 
       {/* 2-column promotion cards grid - kzkzb style */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredCards.map((card) => (
           <Link
             key={card.id}
             href={card.href}
-            className="group relative overflow-hidden rounded-xl transition-transform hover:scale-[1.02]"
+            className="group relative overflow-hidden rounded-[16px] shadow-sm transition-transform hover:scale-[1.02]"
           >
             <div
               className={cn(
-                'relative flex min-h-[200px] flex-col justify-center bg-gradient-to-br p-6',
+                'relative flex min-h-[180px] flex-col justify-center bg-gradient-to-br px-8 py-6',
                 card.gradient
               )}
             >
               {/* Large emoji decoration */}
-              <div className="absolute right-4 bottom-4 text-6xl opacity-30">
+              <div className="absolute right-4 bottom-4 text-[100px] opacity-20 drop-shadow-md">
                 {card.emoji}
               </div>
 
               {/* Card content */}
               <div className={cn(
-                'relative z-10',
-                card.dark ? 'text-white' : 'text-[#252531]'
+                'relative z-10 w-[70%]',
+                card.dark ? 'text-white' : 'text-white'
               )}>
                 {card.id === 1 ? (
                   <>
-                    <h3 className="text-3xl font-extrabold leading-tight md:text-4xl">
+                    <h3 className="text-[40px] font-black leading-tight tracking-tight">
                       {card.title}
                     </h3>
-                    <p className="mt-1 whitespace-pre-line text-sm opacity-80 md:text-base">
+                    <p className="mt-2 text-[15px] font-medium opacity-80 leading-snug">
                       {card.subtitle}
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-2xl font-extrabold md:text-3xl">
-                      {card.title.match(/^\d/) ? `₩ ${card.title}` : card.title}
+                    <p className="text-[28px] font-black tracking-tight leading-none mb-1">
+                      {card.title.match(/^\d/) ? `$ ${card.title}` : card.title}
                     </p>
-                    <p className="mt-1 whitespace-pre-line text-sm font-bold uppercase tracking-wide md:text-base">
+                    <p className="whitespace-pre-line text-[14px] font-bold uppercase tracking-wide leading-tight">
                       {card.subtitle}
                     </p>
                   </>
                 )}
               </div>
-
-              {/* Subtle overlay for depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
           </Link>
         ))}
@@ -206,7 +197,7 @@ export default function PromotionsHubPage() {
       {filteredCards.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <span className="text-4xl">🎉</span>
-          <p className="mt-2 text-sm text-[#707070]">
+          <p className="mt-2 text-sm text-[#6b7280]">
             해당 카테고리에 프로모션이 없습니다
           </p>
         </div>

@@ -67,17 +67,17 @@ const TABS = [
 // ─── Helpers ─────────────────────────────────────────────────────
 
 const getQuotaColor = (percentage: number) => {
-  if (percentage >= 100) return { bar: 'bg-red-600', text: 'text-red-600', bg: 'bg-red-50 dark:bg-red-950 border-red-300 dark:border-red-800' };
+  if (percentage >= 100) return { bar: 'bg-red-600', text: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' };
   if (percentage >= 95) return { bar: 'bg-red-500', text: 'text-red-500', bg: '' };
   if (percentage >= 80) return { bar: 'bg-amber-500', text: 'text-amber-500', bg: '' };
   return { bar: 'bg-blue-500', text: 'text-blue-500', bg: '' };
 };
 
 const getStatusBadge = (percentage: number) => {
-  if (percentage >= 100) return { label: '차단됨', className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' };
-  if (percentage >= 95) return { label: '위험', className: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' };
-  if (percentage >= 80) return { label: '경고', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' };
-  return { label: '정상', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' };
+  if (percentage >= 100) return { label: '차단됨', className: 'bg-red-500/10 text-red-500' };
+  if (percentage >= 95) return { label: '위험', className: 'bg-red-500/10 text-red-500' };
+  if (percentage >= 80) return { label: '경고', className: 'bg-amber-500/10 text-amber-500' };
+  return { label: '정상', className: 'bg-emerald-500/10 text-emerald-500' };
 };
 
 const fmt = (n: number) => Intl.NumberFormat('ko-KR').format(n);
@@ -112,7 +112,7 @@ const QuotaCard = ({ quota }: { quota: QuotaStatus }) => {
             </span>
           </div>
           {/* Progress bar */}
-          <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${colors.bar}`}
               style={{ width: `${Math.min(quota.percentage, 100)}%` }}
@@ -226,11 +226,11 @@ const CasinoTab = () => {
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{fmt(syncResult.new_count)}</p>
+                <p className="text-2xl font-bold text-blue-400">{fmt(syncResult.new_count)}</p>
                 <p className="text-xs text-muted-foreground">신규 추가</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-amber-600">{fmt(syncResult.updated_count)}</p>
+                <p className="text-2xl font-bold text-amber-400">{fmt(syncResult.updated_count)}</p>
                 <p className="text-xs text-muted-foreground">갱신</p>
               </div>
               <div className="text-center">
@@ -311,8 +311,8 @@ const SportsTab = () => {
               key={opt.key}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                 statusFilter === opt.key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-accent'
               }`}
               onClick={() => setStatusFilter(opt.key)}
             >
@@ -376,7 +376,7 @@ const SportsTab = () => {
               <div className="flex items-center gap-4 min-w-0">
                 <div className="flex flex-col items-center shrink-0 w-16">
                   {statusFilter === 'LIVE' && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 mb-1">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-red-400 mb-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
                       LIVE
                     </span>
@@ -410,17 +410,17 @@ const SportsTab = () => {
                 {(event.odds_home || event.odds_draw || event.odds_away) && (
                   <div className="flex gap-1.5">
                     {event.odds_home != null && (
-                      <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-blue-50 dark:bg-blue-950 text-xs font-mono font-medium text-blue-700 dark:text-blue-300 min-w-[44px]">
+                      <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-blue-500/10 text-xs font-mono font-medium text-blue-500 min-w-[44px]">
                         {event.odds_home.toFixed(2)}
                       </span>
                     )}
                     {event.odds_draw != null && (
-                      <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono font-medium text-gray-700 dark:text-gray-300 min-w-[44px]">
+                      <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-muted text-xs font-mono font-medium text-foreground min-w-[44px]">
                         {event.odds_draw.toFixed(2)}
                       </span>
                     )}
                     {event.odds_away != null && (
-                      <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-orange-50 dark:bg-orange-950 text-xs font-mono font-medium text-orange-700 dark:text-orange-300 min-w-[44px]">
+                      <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-orange-500/10 text-xs font-mono font-medium text-orange-500 min-w-[44px]">
                         {event.odds_away.toFixed(2)}
                       </span>
                     )}
@@ -534,7 +534,7 @@ const EsportsTab = () => {
                   className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent/50 transition-colors"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 shrink-0">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-red-400 shrink-0">
                       <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
                       LIVE
                     </span>
@@ -622,7 +622,7 @@ export default function ExternalApiPage() {
               <button
                 onClick={() => handleResetQuota(quota.api_name)}
                 disabled={resettingQuota === quota.api_name}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent"
                 title="쿼터 리셋"
               >
                 <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${resettingQuota === quota.api_name ? 'animate-spin' : ''}`} />
@@ -647,7 +647,7 @@ export default function ExternalApiPage() {
       </div>
 
       {/* Cost Info Banner */}
-      <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/30 p-3 flex items-center gap-3">
+      <div className="rounded-lg border border-blue-500/30 bg-blue-500/10/50 p-3 flex items-center gap-3">
         <Zap className="h-4 w-4 text-blue-500 shrink-0" />
         <p className="text-xs text-muted-foreground">
           <span className="font-medium text-foreground">비용 정보</span>: 현재 무료 플랜 운영 중.
@@ -665,8 +665,8 @@ export default function ExternalApiPage() {
               key={tab.key}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.key
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
               onClick={() => setActiveTab(tab.key)}
             >

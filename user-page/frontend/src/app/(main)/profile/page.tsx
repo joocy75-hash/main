@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { formatAmount } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
 const VIP_NAMES: Record<number, { name: string; icon: string }> = {
@@ -47,10 +48,10 @@ const VIP_NAMES: Record<number, { name: string; icon: string }> = {
 };
 
 const QUICK_ACTIONS = [
-  { name: '입금', href: '/wallet/deposit', icon: ArrowDownToLine, color: 'text-emerald-400' },
-  { name: '출금', href: '/wallet/withdraw', icon: ArrowUpFromLine, color: 'text-blue-400' },
-  { name: '거래내역', href: '/wallet/transactions', icon: FileText, color: 'text-purple-400' },
-  { name: 'VIP', href: '/promotions/vip', icon: Trophy, color: 'text-amber-400' },
+  { name: '입금', href: '/wallet/deposit', icon: ArrowDownToLine, color: 'text-emerald-600' },
+  { name: '출금', href: '/wallet/withdraw', icon: ArrowUpFromLine, color: 'text-blue-600' },
+  { name: '거래내역', href: '/wallet/transactions', icon: FileText, color: 'text-purple-600' },
+  { name: 'VIP', href: '/promotions/vip', icon: Trophy, color: 'text-amber-600' },
 ];
 
 const PROMO_BANNERS = [
@@ -62,26 +63,23 @@ const PROMO_BANNERS = [
 ];
 
 const GENERAL_MENU = [
-  { name: '프로필 설정', desc: '개인정보 수정', href: '/profile', icon: User, color: 'text-blue-400' },
-  { name: '내 지갑', desc: '잔액 · 포인트', href: '/wallet/deposit', icon: Wallet, color: 'text-emerald-400' },
-  { name: '입금', desc: '암호화폐 입금', href: '/wallet/deposit', icon: ArrowDownToLine, color: 'text-green-400' },
-  { name: '출금', desc: '암호화폐 출금', href: '/wallet/withdraw', icon: ArrowUpFromLine, color: 'text-orange-400' },
-  { name: '거래 내역', desc: '입출금 · 보너스', href: '/wallet/transactions', icon: CreditCard, color: 'text-purple-400' },
-  { name: '베팅 내역', desc: '베팅 기록 · 상태', href: '/profile/bets', icon: FileText, color: 'text-red-400' },
-  { name: '포인트 내역', desc: '적립 · 사용 현황', href: '/promotions/points', icon: Gem, color: 'text-cyan-400' },
+  { name: '프로필 설정', desc: '개인정보 수정', href: '/profile', icon: User, color: 'text-blue-600' },
+  { name: '내 지갑', desc: '잔액 · 포인트', href: '/wallet/deposit', icon: Wallet, color: 'text-emerald-600' },
+  { name: '입금', desc: '암호화폐 입금', href: '/wallet/deposit', icon: ArrowDownToLine, color: 'text-green-600' },
+  { name: '출금', desc: '암호화폐 출금', href: '/wallet/withdraw', icon: ArrowUpFromLine, color: 'text-orange-600' },
+  { name: '거래 내역', desc: '입출금 · 보너스', href: '/wallet/transactions', icon: CreditCard, color: 'text-purple-600' },
+  { name: '베팅 내역', desc: '베팅 기록 · 상태', href: '/profile/bets', icon: FileText, color: 'text-red-600' },
+  { name: '포인트 내역', desc: '적립 · 사용 현황', href: '/promotions/points', icon: Gem, color: 'text-cyan-600' },
 ];
 
 const SERVICE_MENU = [
-  { name: '추천/커미션', desc: '어필리에이트', href: '/affiliate', icon: Users, color: 'text-amber-400' },
-  { name: '쪽지함', desc: '알림 · 공지', href: '/messages', icon: Mail, color: 'text-blue-400' },
-  { name: '고객센터', desc: '문의 · 도움말', href: '/support', icon: Headset, color: 'text-green-400' },
-  { name: '출석체크', desc: '매일 보상 받기', href: '/promotions/attendance', icon: CalendarCheck, color: 'text-pink-400' },
-  { name: '미션', desc: '미션 완료 보상', href: '/promotions/missions', icon: Target, color: 'text-orange-400' },
+  { name: '추천/커미션', desc: '어필리에이트', href: '/affiliate', icon: Users, color: 'text-amber-600' },
+  { name: '쪽지함', desc: '알림 · 공지', href: '/messages', icon: Mail, color: 'text-blue-600' },
+  { name: '고객센터', desc: '문의 · 도움말', href: '/support', icon: Headset, color: 'text-green-600' },
+  { name: '출석체크', desc: '매일 보상 받기', href: '/promotions/attendance', icon: CalendarCheck, color: 'text-pink-600' },
+  { name: '미션', desc: '미션 완료 보상', href: '/promotions/missions', icon: Target, color: 'text-orange-600' },
   { name: '도움말', desc: '자주 묻는 질문', href: '/support', icon: HelpCircle, color: 'text-slate-400' },
 ];
-
-const formatAmount = (value: string) =>
-  new Intl.NumberFormat('ko-KR').format(Number(value));
 
 const formatDateTime = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -119,6 +117,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditNickname(profile.nickname);
       setEditPhone(profile.phone);
     }
@@ -171,7 +170,7 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col gap-4">
       {/* User Header Card */}
-      <div className="rounded-lg bg-white p-4 md:p-5">
+      <div className="rounded-lg bg-[#f5f5f7] p-4 md:p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Left: Avatar + Info */}
           <div className="flex items-center gap-4">
@@ -182,22 +181,22 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-[#252531]">{profile.username}</span>
-                <span className="bg-[#f4b53e]/90 px-2 py-0.5 text-xs font-bold text-black rounded-md">
+                <span className="bg-[#feb614]/90 px-2 py-0.5 text-xs font-bold text-black rounded-md">
                   VIP {profile.vipLevel}
                 </span>
               </div>
-              <p className="text-xs text-[#707070]">
+              <p className="text-xs text-[#6b7280]">
                 마지막 접속: {formatDateTime(profile.lastLoginAt)}
               </p>
               <div className="mt-1 flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-[#707070]">잔액</span>
-                  <span className="text-sm font-bold text-[#f4b53e]">{formatAmount(profile.balance)}</span>
+                  <span className="text-xs text-[#6b7280]">잔액</span>
+                  <span className="text-sm font-bold text-[#feb614]">{formatAmount(profile.balance)}</span>
                 </div>
-                <div className="h-3 w-px bg-[#dddddd]" />
+                <div className="h-3 w-px bg-[#e8e8e8]" />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-[#707070]">포인트</span>
-                  <span className="text-sm font-bold text-[#f4b53e]">{formatAmount(profile.points)}</span>
+                  <span className="text-xs text-[#6b7280]">포인트</span>
+                  <span className="text-sm font-bold text-[#feb614]">{formatAmount(profile.points)}</span>
                 </div>
               </div>
             </div>
@@ -211,9 +210,9 @@ export default function ProfilePage() {
                 <Link
                   key={action.href + action.name}
                   href={action.href}
-                  className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors hover:bg-[#edeef3]"
+                  className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors hover:bg-[#f0f0f2]"
                 >
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#edeef3]">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#e8e8e8]">
                     <Icon className={`size-5 ${action.color}`} />
                   </div>
                   <span className="text-xs text-[#252531]">{action.name}</span>
@@ -225,11 +224,11 @@ export default function ProfilePage() {
 
         {/* VIP Progress */}
         <div className="mt-4 flex items-center gap-3">
-          <span className="text-xs text-[#707070]">
+          <span className="text-xs text-[#6b7280]">
             {vipData.icon} {vipData.name}
           </span>
           <Progress value={vipProgress} className="h-1.5 flex-1" />
-          <span className="text-xs text-[#707070]">
+          <span className="text-xs text-[#6b7280]">
             {profile.vipLevel < 10 ? `Next: ${VIP_NAMES[(profile.vipLevel + 1) as keyof typeof VIP_NAMES]?.name || ''}` : 'MAX'}
           </span>
         </div>
@@ -253,8 +252,8 @@ export default function ProfilePage() {
       </div>
 
       {/* General Section */}
-      <div className="rounded-lg bg-white p-5">
-        <h3 className="mb-5 border-l-4 border-[#f4b53e] pl-4 text-lg font-bold text-[#252531]">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
+        <h3 className="mb-5 border-l-4 border-[#feb614] pl-4 text-lg font-bold text-[#252531]">
           General
         </h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -264,14 +263,14 @@ export default function ProfilePage() {
               <Link
                 key={item.href + item.name}
                 href={item.href}
-                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[#edeef3]"
+                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[#f0f0f2]"
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#edeef3]">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#e8e8e8]">
                   <Icon className={`size-5 ${item.color}`} />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#252531]">{item.name}</p>
-                  <p className="truncate text-xs text-[#707070]">{item.desc}</p>
+                  <p className="truncate text-xs text-[#6b7280]">{item.desc}</p>
                 </div>
               </Link>
             );
@@ -280,8 +279,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Service Section */}
-      <div className="rounded-lg bg-white p-5">
-        <h3 className="mb-5 border-l-4 border-[#f4b53e] pl-4 text-lg font-bold text-[#252531]">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
+        <h3 className="mb-5 border-l-4 border-[#feb614] pl-4 text-lg font-bold text-[#252531]">
           Service
         </h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -291,14 +290,14 @@ export default function ProfilePage() {
               <Link
                 key={item.href + item.name}
                 href={item.href}
-                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[#edeef3]"
+                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[#f0f0f2]"
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#edeef3]">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#e8e8e8]">
                   <Icon className={`size-5 ${item.color}`} />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#252531]">{item.name}</p>
-                  <p className="truncate text-xs text-[#707070]">{item.desc}</p>
+                  <p className="truncate text-xs text-[#6b7280]">{item.desc}</p>
                 </div>
               </Link>
             );
@@ -307,41 +306,41 @@ export default function ProfilePage() {
       </div>
 
       {/* Account Section */}
-      <div className="rounded-lg bg-white p-5">
-        <h3 className="mb-5 border-l-4 border-[#f4b53e] pl-4 text-lg font-bold text-[#252531]">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
+        <h3 className="mb-5 border-l-4 border-[#feb614] pl-4 text-lg font-bold text-[#252531]">
           Account
         </h3>
         <div className="flex flex-col gap-4">
           {/* Username */}
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div className="flex items-center gap-3">
-              <User className="size-4 text-[#707070]" />
-              <label className="text-sm text-[#707070]">아이디</label>
+              <User className="size-4 text-[#6b7280]" />
+              <label className="text-sm text-[#6b7280]">아이디</label>
             </div>
             <span className="text-sm font-medium text-[#252531]">{profile.username}</span>
           </div>
 
           {/* Nickname */}
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div className="flex items-center gap-3">
-              <User className="size-4 text-[#707070]" />
-              <label className="text-sm text-[#707070]">닉네임</label>
+              <User className="size-4 text-[#6b7280]" />
+              <label className="text-sm text-[#6b7280]">닉네임</label>
             </div>
             {isEditingNickname ? (
               <div className="flex items-center gap-2">
                 <input
                   value={editNickname}
                   onChange={(e) => setEditNickname(e.target.value)}
-                  className="h-9 w-32 rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                  className="h-9 w-32 rounded-md border border-[#e8e8e8] bg-[#f5f5f7] px-3 text-sm text-[#252531] focus:border-[#feb614] focus:outline-none"
                 />
                 <button
-                  className="bg-[#f4b53e] text-black font-medium rounded-md px-4 py-2 hover:bg-[#f4b53e]/90 text-sm"
+                  className="bg-[#feb614] text-black font-medium rounded-md px-4 py-2 hover:bg-[#feb614]/90 text-sm"
                   onClick={handleSaveNickname}
                 >
                   저장
                 </button>
                 <button
-                  className="text-[#707070] hover:bg-[#edeef3] rounded-md px-3 py-1 text-sm"
+                  className="text-[#6b7280] hover:bg-[#f0f0f2] rounded-md px-3 py-1 text-sm"
                   onClick={() => setIsEditingNickname(false)}
                 >
                   취소
@@ -351,7 +350,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-[#252531]">{profile.nickname}</span>
                 <button
-                  className="text-[#f4b53e] hover:bg-[#f4b53e]/10 text-xs h-7 px-2 rounded"
+                  className="text-[#feb614] hover:bg-[#feb614]/10 text-xs h-7 px-2 rounded"
                   onClick={() => setIsEditingNickname(true)}
                 >
                   수정
@@ -361,26 +360,26 @@ export default function ProfilePage() {
           </div>
 
           {/* Phone */}
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div className="flex items-center gap-3">
-              <User className="size-4 text-[#707070]" />
-              <label className="text-sm text-[#707070]">전화번호</label>
+              <User className="size-4 text-[#6b7280]" />
+              <label className="text-sm text-[#6b7280]">전화번호</label>
             </div>
             {isEditingPhone ? (
               <div className="flex items-center gap-2">
                 <input
                   value={editPhone}
                   onChange={(e) => setEditPhone(e.target.value)}
-                  className="h-9 w-36 rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                  className="h-9 w-36 rounded-md border border-[#e8e8e8] bg-[#f5f5f7] px-3 text-sm text-[#252531] focus:border-[#feb614] focus:outline-none"
                 />
                 <button
-                  className="bg-[#f4b53e] text-black font-medium rounded-md px-4 py-2 hover:bg-[#f4b53e]/90 text-sm"
+                  className="bg-[#feb614] text-black font-medium rounded-md px-4 py-2 hover:bg-[#feb614]/90 text-sm"
                   onClick={handleSavePhone}
                 >
                   저장
                 </button>
                 <button
-                  className="text-[#707070] hover:bg-[#edeef3] rounded-md px-3 py-1 text-sm"
+                  className="text-[#6b7280] hover:bg-[#f0f0f2] rounded-md px-3 py-1 text-sm"
                   onClick={() => setIsEditingPhone(false)}
                 >
                   취소
@@ -390,7 +389,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-[#252531]">{profile.phone}</span>
                 <button
-                  className="text-[#f4b53e] hover:bg-[#f4b53e]/10 text-xs h-7 px-2 rounded"
+                  className="text-[#feb614] hover:bg-[#feb614]/10 text-xs h-7 px-2 rounded"
                   onClick={() => setIsEditingPhone(true)}
                 >
                   수정
@@ -400,15 +399,15 @@ export default function ProfilePage() {
           </div>
 
           {/* Referral Code */}
-          <div className="flex items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3">
             <div className="flex items-center gap-3">
-              <Users className="size-4 text-[#707070]" />
-              <label className="text-sm text-[#707070]">추천코드</label>
+              <Users className="size-4 text-[#6b7280]" />
+              <label className="text-sm text-[#6b7280]">추천코드</label>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-bold text-[#f4b53e]">{profile.myReferralCode}</span>
+              <span className="font-mono text-sm font-bold text-[#feb614]">{profile.myReferralCode}</span>
               <button
-                className="text-[#707070] hover:bg-[#edeef3] rounded-md px-3 py-1 h-7"
+                className="text-[#6b7280] hover:bg-[#f0f0f2] rounded-md px-3 py-1 h-7"
                 onClick={handleCopyReferralCode}
               >
                 {copiedCode ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
@@ -420,23 +419,23 @@ export default function ProfilePage() {
           <div className="flex gap-3">
             <Link
               href="/profile/login-history"
-              className="flex flex-1 items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3 transition-colors hover:bg-[#edeef3]"
+              className="flex flex-1 items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3 transition-colors hover:bg-[#f0f0f2]"
             >
               <div className="flex items-center gap-3">
-                <History className="size-4 text-[#707070]" />
+                <History className="size-4 text-[#6b7280]" />
                 <span className="text-sm text-[#252531]">접속 내역</span>
               </div>
-              <ChevronRight className="size-4 text-[#707070]" />
+              <ChevronRight className="size-4 text-[#6b7280]" />
             </Link>
 
             <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex flex-1 items-center justify-between rounded-lg bg-[#edeef3]/50 px-4 py-3 transition-colors hover:bg-[#edeef3]">
+                <button className="flex flex-1 items-center justify-between rounded-lg bg-[#e8e8e8]/50 px-4 py-3 transition-colors hover:bg-[#f0f0f2]">
                   <div className="flex items-center gap-3">
-                    <Lock className="size-4 text-[#707070]" />
+                    <Lock className="size-4 text-[#6b7280]" />
                     <span className="text-sm text-[#252531]">비밀번호 변경</span>
                   </div>
-                  <ChevronRight className="size-4 text-[#707070]" />
+                  <ChevronRight className="size-4 text-[#6b7280]" />
                 </button>
               </DialogTrigger>
               <DialogContent>
@@ -445,38 +444,38 @@ export default function ProfilePage() {
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
                   <div>
-                    <label className="text-sm text-[#707070]">현재 비밀번호</label>
+                    <label className="text-sm text-[#6b7280]">현재 비밀번호</label>
                     <input
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="mt-1 h-9 w-full rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                      className="mt-1 h-9 w-full rounded-md border border-[#e8e8e8] bg-[#f5f5f7] px-3 text-sm text-[#252531] focus:border-[#feb614] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-[#707070]">새 비밀번호</label>
+                    <label className="text-sm text-[#6b7280]">새 비밀번호</label>
                     <input
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="mt-1 h-9 w-full rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                      className="mt-1 h-9 w-full rounded-md border border-[#e8e8e8] bg-[#f5f5f7] px-3 text-sm text-[#252531] focus:border-[#feb614] focus:outline-none"
                       placeholder="8자 이상, 영문+숫자"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-[#707070]">새 비밀번호 확인</label>
+                    <label className="text-sm text-[#6b7280]">새 비밀번호 확인</label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="mt-1 h-9 w-full rounded-md border border-[#dddddd] bg-white px-3 text-sm text-[#252531] focus:border-[#f4b53e] focus:outline-none"
+                      className="mt-1 h-9 w-full rounded-md border border-[#e8e8e8] bg-[#f5f5f7] px-3 text-sm text-[#252531] focus:border-[#feb614] focus:outline-none"
                     />
                   </div>
                   {passwordError && (
                     <p className="text-sm text-red-500">{passwordError}</p>
                   )}
                   <button
-                    className="w-full bg-[#f4b53e] text-black font-medium rounded-md py-2 hover:bg-[#f4b53e]/90"
+                    className="w-full bg-[#feb614] text-black font-medium rounded-md py-2 hover:bg-[#feb614]/90"
                     onClick={handleChangePassword}
                   >
                     변경하기

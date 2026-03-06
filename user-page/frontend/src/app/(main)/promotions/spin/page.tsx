@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   Dialog,
@@ -42,7 +42,7 @@ export default function SpinPage() {
     fetchSpinStatus();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const prizes = spinStatus?.prizes || [];
+  const prizes = useMemo(() => spinStatus?.prizes || [], [spinStatus?.prizes]);
   const segmentCount = prizes.length || 8;
   const segmentAngle = 360 / segmentCount;
 
@@ -85,40 +85,40 @@ export default function SpinPage() {
 
   const todayCount = spinStatus?.todayCount || 0;
   const maxCount = spinStatus?.maxCount || 3;
-  const canSpin = todayCount < maxCount && !isSpinning && !isAnimatingRef.current;
+  const canSpin = todayCount < maxCount && !isSpinning;
 
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="rounded-lg bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
         <h1 className="text-lg font-bold text-[#252531]">럭키스핀</h1>
         <div className="mt-2 flex items-center justify-between">
-          <p className="text-sm text-[#707070]">오늘 남은 횟수</p>
+          <p className="text-sm text-[#6b7280]">오늘 남은 횟수</p>
           <p className="text-lg font-bold text-[#252531]">
             <span className={cn(todayCount >= maxCount && 'text-red-500')}>
               {maxCount - todayCount}
             </span>
-            <span className="text-[#999]">/{maxCount}</span>
+            <span className="text-[#6b7280]">/{maxCount}</span>
           </p>
         </div>
       </div>
 
       {/* Spin wheel */}
-      <div className="flex flex-col items-center gap-6 rounded-lg bg-white p-6 shadow-sm">
+      <div className="flex flex-col items-center gap-6 rounded-lg bg-[#f5f5f7] p-6">
         {/* Wheel container */}
         <div className="relative">
           {/* Pointer triangle */}
           <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
-            <div className="size-0 border-x-[12px] border-t-[20px] border-x-transparent border-t-[#f4b53e]" />
+            <div className="size-0 border-x-[12px] border-t-[20px] border-x-transparent border-t-[#feb614]" />
           </div>
 
           {/* Wheel */}
           <div
             ref={wheelRef}
-            className="relative size-[280px] overflow-hidden rounded-full border-4 border-[#f4b53e]/60 shadow-lg sm:size-[320px]"
+            className="relative size-[280px] overflow-hidden rounded-full border-4 border-[#feb614]/60 shadow-lg sm:size-[320px]"
             style={{
               transform: `rotate(${rotation}deg)`,
-              transition: isSpinning || isAnimatingRef.current
+              transition: isSpinning
                 ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)'
                 : 'none',
             }}
@@ -191,7 +191,7 @@ export default function SpinPage() {
             )}
 
             {/* Center circle */}
-            <div className="absolute left-1/2 top-1/2 z-10 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[#f4b53e] bg-white shadow-lg sm:size-14">
+            <div className="absolute left-1/2 top-1/2 z-10 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[#feb614] bg-white shadow-lg sm:size-14">
               <span className="text-lg font-bold">🎡</span>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default function SpinPage() {
         {/* Spin button */}
         <button
           onClick={handleSpin}
-          disabled={!canSpin}
+          disabled={!canSpin || isSpinning}
           className="w-full max-w-xs rounded-full bg-gradient-to-b from-[#ffd651] to-[#fe960e] px-8 py-3 text-base font-bold text-white shadow-md transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {isSpinning ? (
@@ -224,21 +224,21 @@ export default function SpinPage() {
       </div>
 
       {/* Today's spin history */}
-      <div className="rounded-lg bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-[#f5f5f7] p-5">
         <h2 className="mb-3 text-base font-bold text-[#252531]">오늘의 당첨 기록</h2>
         {spinHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
             <span className="text-2xl">🏆</span>
-            <p className="text-sm text-[#707070]">아직 스핀 기록이 없습니다</p>
+            <p className="text-sm text-[#6b7280]">아직 스핀 기록이 없습니다</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
             {spinHistory.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between rounded-lg bg-[#f1f2f7] px-3 py-2"
+                className="flex items-center justify-between rounded-lg bg-[#e8e8e8] px-3 py-2"
               >
-                <span className="text-sm text-[#707070]">{i + 1}회</span>
+                <span className="text-sm text-[#6b7280]">{i + 1}회</span>
                 <span className="text-sm font-semibold text-[#252531]">
                   {item.name} ({Number(item.amount).toLocaleString('ko-KR')}P)
                 </span>
@@ -250,15 +250,15 @@ export default function SpinPage() {
 
       {/* Prize list */}
       {prizes.length > 0 && (
-        <div className="rounded-lg bg-white p-5 shadow-sm">
+        <div className="rounded-lg bg-[#f5f5f7] p-5">
           <h2 className="mb-3 text-base font-bold text-[#252531]">상품 목록</h2>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {prizes.map((prize, i) => (
               <div
                 key={i}
-                className="flex flex-col items-center gap-1 rounded-lg border border-gray-200 bg-[#f1f2f7] p-3"
+                className="flex flex-col items-center gap-1 rounded-lg border border-[#e8e8e8] bg-[#f8f8fa] p-3"
               >
-                <span className="text-xs text-[#707070]">{prize.name}</span>
+                <span className="text-xs text-[#6b7280]">{prize.name}</span>
                 <span className="text-sm font-bold text-[#252531]">
                   {Number(prize.amount).toLocaleString('ko-KR')}
                   {prize.rewardType === 'point' ? 'P' : prize.rewardType === 'cash' ? '원' : ''}
@@ -285,7 +285,7 @@ export default function SpinPage() {
               {lastSpinResult?.prizeName}
             </p>
             {lastSpinResult?.rewardType !== 'none' && (
-              <p className="text-2xl font-bold text-[#f4b53e]">
+              <p className="text-2xl font-bold text-[#feb614]">
                 +{Number(lastSpinResult?.amount || 0).toLocaleString('ko-KR')}
                 {lastSpinResult?.rewardType === 'point' ? 'P' : '원'}
               </p>

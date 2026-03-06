@@ -225,7 +225,7 @@ export default function AgentDetailPage() {
               <div className="space-y-2">
                 <Label>상태</Label>
                 <select
-                  className="w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-950"
+                  className="w-full border rounded-md px-3 py-2 text-sm bg-card"
                   value={editForm.status || ''}
                   onChange={(e) => set('status', e.target.value)}
                 >
@@ -311,7 +311,7 @@ export default function AgentDetailPage() {
                       onClick={() => router.push(`/dashboard/agents/${c.id}`)}
                     >
                       <TableCell className="font-mono text-xs">{c.agent_code}</TableCell>
-                      <TableCell className="font-medium text-blue-600">{c.username}</TableCell>
+                      <TableCell className="font-medium text-blue-400">{c.username}</TableCell>
                       <TableCell><Badge variant="outline">{ROLE_LABELS[c.role] || c.role}</Badge></TableCell>
                       <TableCell><Badge variant={c.status === 'active' ? 'default' : 'destructive'}>{c.status}</Badge></TableCell>
                       <TableCell className="text-right font-mono">{Number(c.balance).toLocaleString()}</TableCell>
@@ -335,7 +335,7 @@ export default function AgentDetailPage() {
                 {ancestors.map((a, i) => (
                   <div
                     key={a.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-accent"
                     style={{ marginLeft: `${i * 24}px` }}
                     onClick={() => router.push(`/dashboard/agents/${a.id}`)}
                   >
@@ -346,10 +346,10 @@ export default function AgentDetailPage() {
                   </div>
                 ))}
                 <div
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-blue-50 dark:bg-blue-950"
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-blue-500/10"
                   style={{ marginLeft: `${ancestors.length * 24}px` }}
                 >
-                  <span className="text-blue-600 text-xs font-bold">현재</span>
+                  <span className="text-blue-400 text-xs font-bold">현재</span>
                   <span className="font-mono text-xs">{agent.agent_code}</span>
                   <span className="font-medium">{agent.username}</span>
                 </div>

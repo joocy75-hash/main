@@ -26,18 +26,18 @@ const TYPE_LABELS: Record<string, string> = {
   deposit: '입금', withdrawal: '출금', adjustment: '조정', commission: '커미션',
 };
 const TYPE_COLORS: Record<string, string> = {
-  deposit: 'bg-blue-100 text-blue-800',
-  withdrawal: 'bg-red-100 text-red-800',
-  adjustment: 'bg-purple-100 text-purple-800',
-  commission: 'bg-green-100 text-green-800',
+  deposit: 'bg-blue-500/10 text-blue-500',
+  withdrawal: 'bg-red-500/10 text-red-500',
+  adjustment: 'bg-purple-500/10 text-purple-500',
+  commission: 'bg-green-500/10 text-green-500',
 };
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기', approved: '승인', rejected: '거부',
 };
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  approved: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-500/10 text-yellow-500',
+  approved: 'bg-green-500/10 text-green-500',
+  rejected: 'bg-red-500/10 text-red-500',
 };
 
 function CopyButton({ text }: { text: string }) {
@@ -49,7 +49,7 @@ function CopyButton({ text }: { text: string }) {
   };
   return (
     <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={handleCopy}>
-      {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+      {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
     </Button>
   );
 }
@@ -64,7 +64,7 @@ function TxHashLink({ txHash, network }: { txHash: string; network?: string | nu
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline"
+          className="text-xs font-mono text-blue-400 hover:text-blue-500 hover:underline"
           title={`${name}에서 확인`}
         >
           {shortenHash(txHash)}
@@ -74,7 +74,7 @@ function TxHashLink({ txHash, network }: { txHash: string; network?: string | nu
       )}
       <CopyButton text={txHash} />
       {url && (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-600">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-400">
           <ExternalLink className="h-3 w-3" />
         </a>
       )}
@@ -153,7 +153,7 @@ function TxDetailDialog({ tx, open, onClose }: { tx: Transaction | null; open: b
                       href={txUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 mt-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                      className="inline-flex items-center gap-1 mt-1 text-xs text-blue-400 hover:text-blue-500 hover:underline"
                     >
                       <ExternalLink className="h-3 w-3" />
                       {explorerName}에서 확인
@@ -174,7 +174,7 @@ function TxDetailDialog({ tx, open, onClose }: { tx: Transaction | null; open: b
                       href={addrUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 mt-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                      className="inline-flex items-center gap-1 mt-1 text-xs text-blue-400 hover:text-blue-500 hover:underline"
                     >
                       <ExternalLink className="h-3 w-3" />
                       {explorerName}에서 확인
@@ -299,22 +299,22 @@ export default function TransactionsPage() {
       {/* Summary */}
       {data && (
         <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
+          <Card className="bg-primary/10 border-primary/30">
             <CardContent className="pt-4 pb-4">
-              <p className="text-xs text-blue-600 dark:text-blue-400">전체 건수</p>
-              <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{data.total}</p>
+              <p className="text-xs text-primary">전체 건수</p>
+              <p className="text-xl font-bold text-primary">{data.total}</p>
             </CardContent>
           </Card>
-          <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900">
+          <Card className="bg-emerald-500/10 border-emerald-500/30">
             <CardContent className="pt-4 pb-4">
-              <p className="text-xs text-green-600 dark:text-green-400">총 금액 (필터)</p>
-              <p className="text-xl font-bold text-green-700 dark:text-green-300">{Number(data.total_amount).toLocaleString()}</p>
+              <p className="text-xs text-emerald-500">총 금액 (필터)</p>
+              <p className="text-xl font-bold text-emerald-500">{Number(data.total_amount).toLocaleString()}</p>
             </CardContent>
           </Card>
-          <Card className="bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900">
+          <Card className="bg-amber-500/10 border-amber-500/30">
             <CardContent className="pt-4 pb-4">
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">현재 페이지</p>
-              <p className="text-xl font-bold text-yellow-700 dark:text-yellow-300">{data.items.length}건</p>
+              <p className="text-xs text-amber-500">현재 페이지</p>
+              <p className="text-xl font-bold text-amber-500">{data.items.length}건</p>
             </CardContent>
           </Card>
         </div>
@@ -398,7 +398,7 @@ export default function TransactionsPage() {
                     {tx.user_username || tx.user_id}
                   </TableCell>
                   <TableCell>
-                    <Badge className={TYPE_COLORS[tx.type] || 'bg-gray-100 text-gray-800'} variant="secondary">
+                    <Badge className={TYPE_COLORS[tx.type] || 'bg-muted text-foreground'} variant="secondary">
                       {TYPE_LABELS[tx.type] || tx.type}
                     </Badge>
                   </TableCell>
@@ -417,7 +417,7 @@ export default function TransactionsPage() {
                     {Number(tx.balance_after).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    <Badge className={STATUS_COLORS[tx.status] || 'bg-gray-100 text-gray-800'} variant="secondary">
+                    <Badge className={STATUS_COLORS[tx.status] || 'bg-muted text-foreground'} variant="secondary">
                       {STATUS_LABELS[tx.status] || tx.status}
                     </Badge>
                   </TableCell>

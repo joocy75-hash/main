@@ -57,8 +57,8 @@ const StepIndicator = ({ currentStep }: { currentStep: number }) => (
         key={i}
         className={`h-2 rounded-full transition-all duration-300 ${
           i <= currentStep
-            ? 'w-8 bg-[#f4b53e]'
-            : 'w-2 bg-[#edeef3]'
+            ? 'w-8 bg-[#feb614]'
+            : 'w-2 bg-[#e8e8e8]'
         }`}
       />
     ))}
@@ -75,9 +75,9 @@ const ValidationItem = ({ valid, message }: ValidationItemProps) => (
     {valid ? (
       <Check className="size-3 text-green-500" />
     ) : (
-      <X className="size-3 text-[#707070]" />
+      <X className="size-3 text-[#6b7280]" />
     )}
-    <span className={valid ? 'text-green-500' : 'text-[#707070]'}>
+    <span className={valid ? 'text-green-500' : 'text-[#6b7280]'}>
       {message}
     </span>
   </div>
@@ -215,7 +215,7 @@ const RegisterPage = () => {
           <h1 className="bg-gradient-to-r from-[#ffd651] to-[#fe960e] bg-clip-text text-2xl font-bold tracking-tight text-transparent">
             회원가입
           </h1>
-          <p className="mt-1 text-base text-[#707070]">
+          <p className="mt-1 text-base text-[#6b7280]">
             {stepTitles[step]}
           </p>
         </div>
@@ -229,14 +229,14 @@ const RegisterPage = () => {
               <div className="space-y-2">
                 <label htmlFor="username" className="text-sm font-medium text-[#252531]">아이디</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
                   <input
                     id="username"
                     type="text"
                     placeholder="영문 소문자 + 숫자, 4~20자"
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                    className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                    className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                     autoComplete="username"
                     autoFocus
                   />
@@ -263,21 +263,21 @@ const RegisterPage = () => {
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-[#252531]">비밀번호</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="8자 이상, 영문 + 숫자"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                    className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                     autoComplete="new-password"
                     autoFocus
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] transition-colors hover:text-[#252531]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] transition-colors hover:text-[#252531]"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -298,7 +298,7 @@ const RegisterPage = () => {
                                   ? strengthColors[passwordStrength.level]
                                   : i === 2 && passwordStrength.level === 'strong'
                                     ? strengthColors[passwordStrength.level]
-                                    : 'bg-[#edeef3]'
+                                    : 'bg-[#e8e8e8]'
                             }`}
                           />
                         ))}
@@ -325,20 +325,20 @@ const RegisterPage = () => {
               <div className="space-y-2">
                 <label htmlFor="passwordConfirm" className="text-sm font-medium text-[#252531]">비밀번호 확인</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
                   <input
                     id="passwordConfirm"
                     type={showPasswordConfirm ? 'text' : 'password'}
                     placeholder="비밀번호를 다시 입력하세요"
                     value={passwordConfirm}
                     onChange={(e) => setPasswordConfirm(e.target.value)}
-                    className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                    className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] transition-colors hover:text-[#252531]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] transition-colors hover:text-[#252531]"
                     tabIndex={-1}
                   >
                     {showPasswordConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -360,14 +360,14 @@ const RegisterPage = () => {
               <div className="space-y-2">
                 <label htmlFor="nickname" className="text-sm font-medium text-[#252531]">닉네임</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
                   <input
                     id="nickname"
                     type="text"
                     placeholder="2~20자"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
-                    className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                    className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                     autoFocus
                   />
                 </div>
@@ -379,14 +379,14 @@ const RegisterPage = () => {
               <div className="space-y-2">
                 <label htmlFor="phone" className="text-sm font-medium text-[#252531]">전화번호</label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+                  <Phone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
                   <input
                     id="phone"
                     type="tel"
                     placeholder="01012345678"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                    className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                    className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                     maxLength={11}
                   />
                 </div>
@@ -405,14 +405,14 @@ const RegisterPage = () => {
                   추천코드 <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Gift className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#707070]" />
+                  <Gift className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6b7280]" />
                   <input
                     id="referrerCode"
                     type="text"
                     placeholder="추천코드를 입력하세요"
                     value={referrerCode}
                     onChange={(e) => setReferrerCode(e.target.value)}
-                    className="h-11 w-full rounded-lg border border-[#dddddd] bg-white pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#707070]/50 focus:border-[#f4b53e] focus:outline-none"
+                    className="h-11 w-full rounded-lg border border-[#e8e8e8] bg-[#f5f5f7] pl-10 pr-10 text-sm text-[#252531] placeholder:text-[#666] focus:border-[#feb614] focus:outline-none"
                     autoFocus
                   />
                 </div>
@@ -421,7 +421,7 @@ const RegisterPage = () => {
                     추천코드가 입력되었습니다
                   </p>
                 ) : (
-                  <p className="text-xs text-[#707070]">
+                  <p className="text-xs text-[#6b7280]">
                     추천코드는 필수 입력 항목입니다
                   </p>
                 )}
@@ -439,7 +439,7 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={handlePrev}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#dddddd] bg-white py-3 text-base font-medium text-[#252531] hover:border-[#f4b53e] disabled:opacity-50"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#e8e8e8] bg-[#f0f0f2] py-3 text-base font-medium text-[#252531] hover:border-[#feb614] disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 <ArrowLeft className="size-4" />
@@ -476,11 +476,11 @@ const RegisterPage = () => {
             )}
           </div>
 
-          <p className="mt-4 text-center text-sm text-[#707070]">
+          <p className="mt-4 text-center text-sm text-[#6b7280]">
             이미 계정이 있으신가요?{' '}
             <Link
               href="/login"
-              className="font-medium text-[#f4b53e] hover:underline"
+              className="font-medium text-[#feb614] hover:underline"
             >
               로그인
             </Link>

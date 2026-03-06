@@ -19,9 +19,9 @@ import {
 const fmt = (n: number) => Intl.NumberFormat('ko-KR').format(n);
 
 const REWARD_TYPE_STYLES: Record<string, { label: string; cls: string }> = {
-  cash: { label: '캐시', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  bonus: { label: '보너스', cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  point: { label: '포인트', cls: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
+  cash: { label: '캐시', cls: 'bg-blue-500/10 text-blue-500' },
+  bonus: { label: '보너스', cls: 'bg-green-500/10 text-green-500' },
+  point: { label: '포인트', cls: 'bg-purple-500/10 text-purple-500' },
 };
 
 type FormData = {
@@ -93,22 +93,22 @@ export default function AttendancePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">출석 보상 설정</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">1~30일 출석 보상을 관리합니다.</p>
+          <p className="text-sm text-muted-foreground">1~30일 출석 보상을 관리합니다.</p>
         </div>
         <Button onClick={openCreate}>+ 추가</Button>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : data.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             등록된 출석 보상이 없습니다
           </CardContent>
         </Card>
@@ -116,21 +116,21 @@ export default function AttendancePage() {
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">일차</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">보상금액</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">보상유형</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">관리</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">일차</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">보상금액</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">보상유형</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">관리</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {data.map((item) => {
                     const typeStyle = REWARD_TYPE_STYLES[item.reward_type];
                     return (
-                      <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={item.id} className="hover:bg-accent">
                         <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
                           {item.day_number}일차
                         </td>
@@ -138,15 +138,15 @@ export default function AttendancePage() {
                           {fmt(item.reward_amount)}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
-                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-muted text-foreground'}`}>
                             {typeStyle?.label || item.reward_type}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                           <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                             item.is_active
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                              ? 'bg-green-500/10 text-green-500'
+                              : 'bg-muted text-foreground'
                           }`}>
                             {item.is_active ? '활성' : '비활성'}
                           </span>
@@ -207,7 +207,7 @@ export default function AttendancePage() {
                 id="attendance-active"
                 checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-border"
               />
               <Label htmlFor="attendance-active">활성</Label>
             </div>

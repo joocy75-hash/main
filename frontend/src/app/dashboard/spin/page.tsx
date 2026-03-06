@@ -131,22 +131,22 @@ export default function SpinPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">럭키스핀 설정</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">럭키스핀 경품 및 확률을 관리합니다.</p>
+          <p className="text-sm text-muted-foreground">럭키스핀 경품 및 확률을 관리합니다.</p>
         </div>
         <Button onClick={openCreate}>+ 추가</Button>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/30 dark:text-red-400">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500">로딩 중...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : data.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-gray-400">
+          <CardContent className="py-8 text-center text-muted-foreground">
             등록된 스핀 설정이 없습니다
           </CardContent>
         </Card>
@@ -154,27 +154,27 @@ export default function SpinPage() {
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">이름</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">경품수</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">일일스핀</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">활성</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">관리</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">이름</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">경품수</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">일일스핀</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">활성</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">관리</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {data.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <tr key={item.id} className="hover:bg-accent">
                       <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">{item.name}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-center">{item.prizes.length}개</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-center font-mono">{item.max_spins_daily}회</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                         <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                           item.is_active
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                            ? 'bg-green-500/10 text-green-500'
+                            : 'bg-muted text-foreground'
                         }`}>
                           {item.is_active ? '활성' : '비활성'}
                         </span>
@@ -223,7 +223,7 @@ export default function SpinPage() {
                 id="spin-active"
                 checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-border"
               />
               <Label htmlFor="spin-active">활성</Label>
             </div>
@@ -232,25 +232,25 @@ export default function SpinPage() {
               <div className="flex items-center justify-between">
                 <Label>경품 목록</Label>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs ${totalProbability === 100 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`text-xs ${totalProbability === 100 ? 'text-green-400' : 'text-red-400'}`}>
                     확률 합계: {totalProbability}%
                   </span>
                   <Button variant="outline" size="sm" onClick={addPrize}>경품 추가</Button>
                 </div>
               </div>
 
-              <div className="border rounded-md overflow-hidden dark:border-gray-700">
+              <div className="border rounded-md overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 dark:bg-gray-800">
+                  <thead className="bg-muted">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">라벨</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">값</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">유형</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">확률(%)</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">라벨</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">값</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">유형</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">확률(%)</th>
                       <th className="px-3 py-2 w-12"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-border">
                     {form.prizes.map((prize, idx) => (
                       <tr key={`prize-${idx}`}>
                         <td className="px-3 py-1.5">
@@ -293,7 +293,7 @@ export default function SpinPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 w-7 p-0 text-red-600 hover:text-red-800"
+                            className="h-7 w-7 p-0 text-red-400 hover:text-red-500"
                             onClick={() => removePrize(idx)}
                           >
                             X

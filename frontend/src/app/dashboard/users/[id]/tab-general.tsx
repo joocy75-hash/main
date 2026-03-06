@@ -333,9 +333,9 @@ export default function TabGeneral({ detail, userId, onRefetch }: Props) {
         <Card>
           <CardHeader><CardTitle className="text-base">입금 주소 (시스템 할당)</CardTitle></CardHeader>
           <CardContent>
-            <div className="p-3 rounded-lg border border-dashed bg-green-50 dark:bg-green-950/20">
+            <div className="p-3 rounded-lg border border-dashed bg-green-500/10">
               <div className="flex items-center gap-2 mb-1">
-                <Badge variant="secondary" className="bg-green-100 text-green-800">{user.deposit_network || 'TRC20'}</Badge>
+                <Badge variant="secondary" className="bg-green-500/10 text-green-500">{user.deposit_network || 'TRC20'}</Badge>
               </div>
               <div className="flex items-center gap-2">
                 <code className="text-sm font-mono break-all">{user.deposit_address}</code>
@@ -394,7 +394,7 @@ export default function TabGeneral({ detail, userId, onRefetch }: Props) {
                       <Badge variant="outline" className="text-xs">{w.coin_type}</Badge>
                       <Badge variant="secondary" className="text-xs">{w.network}</Badge>
                       {w.label && <span className="text-xs text-muted-foreground">{w.label}</span>}
-                      {w.is_primary && <Badge className="bg-blue-100 text-blue-800" variant="secondary">대표</Badge>}
+                      {w.is_primary && <Badge className="bg-blue-500/10 text-blue-500" variant="secondary">대표</Badge>}
                     </div>
                     <div className="flex items-center gap-1">
                       <code className="text-xs font-mono text-muted-foreground truncate">{w.address}</code>

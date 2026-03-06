@@ -27,25 +27,25 @@ import type { LiveTransaction, ActiveAlert } from '@/hooks/use-monitoring';
 // ─── Constants ───────────────────────────────────────────────────
 
 const TX_TYPE_STYLES: Record<string, { label: string; cls: string }> = {
-  deposit: { label: '입금', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
-  withdrawal: { label: '출금', cls: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
-  bet: { label: '베팅', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  win: { label: '당첨', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  commission: { label: '커미션', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
-  transfer: { label: '이체', cls: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+  deposit: { label: '입금', cls: 'bg-emerald-500/10 text-emerald-500' },
+  withdrawal: { label: '출금', cls: 'bg-red-500/10 text-red-500' },
+  bet: { label: '베팅', cls: 'bg-blue-500/10 text-blue-500' },
+  win: { label: '당첨', cls: 'bg-amber-500/10 text-amber-500' },
+  commission: { label: '커미션', cls: 'bg-purple-500/10 text-purple-500' },
+  transfer: { label: '이체', cls: 'bg-muted text-foreground' },
 };
 
 const SEVERITY_STYLES: Record<string, { cls: string }> = {
-  critical: { cls: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
-  high: { cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
-  medium: { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  low: { cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+  critical: { cls: 'bg-red-500/10 text-red-500' },
+  high: { cls: 'bg-orange-500/10 text-orange-500' },
+  medium: { cls: 'bg-amber-500/10 text-amber-500' },
+  low: { cls: 'bg-blue-500/10 text-blue-500' },
 };
 
 const HEALTH_STYLES: Record<string, { label: string; dot: string; text: string }> = {
-  ok: { label: '정상', dot: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
-  degraded: { label: '저하', dot: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400' },
-  down: { label: '중단', dot: 'bg-red-500', text: 'text-red-600 dark:text-red-400' },
+  ok: { label: '정상', dot: 'bg-emerald-500', text: 'text-emerald-400' },
+  degraded: { label: '저하', dot: 'bg-amber-500', text: 'text-amber-400' },
+  down: { label: '중단', dot: 'bg-red-500', text: 'text-red-400' },
 };
 
 function formatTime(dateStr: string): string {
@@ -100,8 +100,8 @@ export default function MonitoringPage() {
           <>
             <Card>
               <CardContent className="py-4 px-5 flex items-center gap-4">
-                <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950">
-                  <Users className="h-5 w-5 text-blue-600" />
+                <div className="p-2.5 rounded-lg bg-blue-500/10 ">
+                  <Users className="h-5 w-5 text-blue-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">현재 접속자</p>
@@ -111,8 +111,8 @@ export default function MonitoringPage() {
             </Card>
             <Card>
               <CardContent className="py-4 px-5 flex items-center gap-4">
-                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950">
-                  <ArrowDownCircle className="h-5 w-5 text-emerald-600" />
+                <div className="p-2.5 rounded-lg bg-emerald-500/10 ">
+                  <ArrowDownCircle className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">대기중 입금</p>
@@ -122,8 +122,8 @@ export default function MonitoringPage() {
             </Card>
             <Card>
               <CardContent className="py-4 px-5 flex items-center gap-4">
-                <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950">
-                  <ArrowUpCircle className="h-5 w-5 text-red-600" />
+                <div className="p-2.5 rounded-lg bg-red-500/10 ">
+                  <ArrowUpCircle className="h-5 w-5 text-red-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">대기중 출금</p>
@@ -133,8 +133,8 @@ export default function MonitoringPage() {
             </Card>
             <Card>
               <CardContent className="py-4 px-5 flex items-center gap-4">
-                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950">
-                  <TrendingUp className="h-5 w-5 text-amber-600" />
+                <div className="p-2.5 rounded-lg bg-amber-500/10 ">
+                  <TrendingUp className="h-5 w-5 text-amber-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">오늘 수익</p>
@@ -264,12 +264,12 @@ function TransactionRow({ tx }: { tx: LiveTransaction }) {
   const style = TX_TYPE_STYLES[tx.type];
   return (
     <div className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/30 transition-colors">
-      <Badge variant="secondary" className={`text-[10px] px-1.5 ${style?.cls || 'bg-gray-100 text-gray-700'}`}>
+      <Badge variant="secondary" className={`text-[10px] px-1.5 ${style?.cls || 'bg-muted text-foreground'}`}>
         {style?.label || tx.type}
       </Badge>
       <span className="text-sm font-medium min-w-[80px]">{tx.username}</span>
       <span className={`text-sm font-mono tabular-nums ml-auto ${
-        tx.type === 'deposit' || tx.type === 'win' ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'
+        tx.type === 'deposit' || tx.type === 'win' ? 'text-emerald-400' : 'text-foreground'
       }`}>
         {tx.type === 'deposit' || tx.type === 'win' ? '+' : ''}{tx.amount.toLocaleString()}
       </span>

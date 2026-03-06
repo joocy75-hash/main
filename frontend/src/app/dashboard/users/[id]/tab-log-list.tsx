@@ -44,24 +44,24 @@ type LogListProps = {
 
 const COLOR_MAP = {
   blue: {
-    card: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900',
-    label: 'text-blue-600 dark:text-blue-400',
-    value: 'text-blue-700 dark:text-blue-300',
+    card: 'bg-blue-500/10 border-blue-500/30',
+    label: 'text-blue-400',
+    value: 'text-blue-500',
   },
   green: {
-    card: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900',
-    label: 'text-green-600 dark:text-green-400',
-    value: 'text-green-700 dark:text-green-300',
+    card: 'bg-green-500/10 border-green-500/30',
+    label: 'text-green-400',
+    value: 'text-green-500',
   },
   red: {
-    card: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900',
-    label: 'text-red-600 dark:text-red-400',
-    value: 'text-red-700 dark:text-red-300',
+    card: 'bg-red-500/10 border-red-500/30',
+    label: 'text-red-400',
+    value: 'text-red-500',
   },
   purple: {
-    card: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900',
-    label: 'text-purple-600 dark:text-purple-400',
-    value: 'text-purple-700 dark:text-purple-300',
+    card: 'bg-purple-500/10 border-purple-500/30',
+    label: 'text-purple-400',
+    value: 'text-purple-500',
   },
 } as const;
 
@@ -168,7 +168,7 @@ export default function LogList({
                           {typeLabels[log.type] || log.type}
                         </Badge>
                       </td>
-                      <td className={`px-4 py-2 text-right font-mono ${log.amount >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                      <td className={`px-4 py-2 text-right font-mono ${log.amount >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
                         {log.amount >= 0 ? '+' : ''}{formatAmount(log.amount)}
                       </td>
                       <td className="px-4 py-2 text-right font-mono text-muted-foreground">{formatAmount(log.balance_before)}</td>

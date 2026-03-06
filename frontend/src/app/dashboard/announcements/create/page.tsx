@@ -70,14 +70,14 @@ export default function CreateAnnouncementPage() {
         <CardHeader><CardTitle>공지 정보</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm">{error}</div>}
+            {error && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{error}</div>}
 
             <div className="space-y-2">
               <label className="text-sm font-medium">타입 *</label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 <option value="notice">공지</option>
                 <option value="popup">팝업</option>
@@ -101,7 +101,7 @@ export default function CreateAnnouncementPage() {
                 onChange={(e) => setForm({ ...form, content: e.target.value })}
                 rows={6}
                 placeholder="내용을 입력하세요"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
             </div>
 
@@ -110,7 +110,7 @@ export default function CreateAnnouncementPage() {
               <select
                 value={form.target}
                 onChange={(e) => setForm({ ...form, target: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm"
               >
                 <option value="all">전체</option>
                 <option value="agents">에이전트</option>
@@ -153,7 +153,7 @@ export default function CreateAnnouncementPage() {
                 id="is_active"
                 checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="rounded border-gray-300"
+                className="rounded border-border"
               />
               <label htmlFor="is_active" className="text-sm font-medium">활성</label>
             </div>

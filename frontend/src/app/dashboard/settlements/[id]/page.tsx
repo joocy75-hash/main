@@ -17,10 +17,10 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-blue-100 text-blue-800',
-  paid: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
+  draft: 'bg-yellow-500/10 text-yellow-500',
+  confirmed: 'bg-blue-500/10 text-blue-500',
+  paid: 'bg-green-500/10 text-green-500',
+  rejected: 'bg-red-500/10 text-red-500',
 };
 
 export default function SettlementDetailPage() {
@@ -63,8 +63,8 @@ export default function SettlementDetailPage() {
     }
   };
 
-  if (loading) return <p className="text-gray-500">로딩 중...</p>;
-  if (!settlement) return <p className="text-red-500">정산을 찾을 수 없습니다</p>;
+  if (loading) return <p className="text-muted-foreground">로딩 중...</p>;
+  if (!settlement) return <p className="text-destructive">정산을 찾을 수 없습니다</p>;
 
   const formatDate = (dt: string) =>
     new Date(dt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -77,18 +77,18 @@ export default function SettlementDetailPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">정산 #{settlement.id}</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {settlement.agent_username} ({settlement.agent_code}) /
             {formatDate(settlement.period_start)} ~ {formatDate(settlement.period_end)}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${STATUS_COLORS[settlement.status] || 'bg-gray-100'}`}>
+          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${STATUS_COLORS[settlement.status] || 'bg-muted'}`}>
             {STATUS_LABELS[settlement.status] || settlement.status}
           </span>
           <button
             onClick={() => router.push('/dashboard/settlements')}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-accent"
           >
             목록으로
           </button>
@@ -97,64 +97,64 @@ export default function SettlementDetailPage() {
 
       {/* Amount cards */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="rounded-lg border bg-blue-50 p-4">
-          <p className="text-xs text-blue-600">롤링</p>
-          <p className="text-xl font-bold text-blue-800">
+        <div className="rounded-lg border bg-primary/10 p-4">
+          <p className="text-xs text-primary">롤링</p>
+          <p className="text-xl font-bold text-primary">
             {Number(settlement.rolling_total).toLocaleString()}
           </p>
         </div>
-        <div className="rounded-lg border bg-red-50 p-4">
-          <p className="text-xs text-red-600">루징</p>
-          <p className="text-xl font-bold text-red-800">
+        <div className="rounded-lg border bg-destructive/10 p-4">
+          <p className="text-xs text-destructive">루징</p>
+          <p className="text-xl font-bold text-destructive">
             {Number(settlement.losing_total).toLocaleString()}
           </p>
         </div>
-        <div className="rounded-lg border bg-gray-50 p-4">
-          <p className="text-xs text-gray-600">공제액</p>
-          <p className="text-xl font-bold text-gray-800">
+        <div className="rounded-lg border bg-muted p-4">
+          <p className="text-xs text-muted-foreground">공제액</p>
+          <p className="text-xl font-bold text-foreground">
             {Number(settlement.deductions).toLocaleString()}
           </p>
         </div>
-        <div className="rounded-lg border bg-green-50 p-4">
-          <p className="text-xs text-green-600">순합계</p>
-          <p className="text-2xl font-bold text-green-800">
+        <div className="rounded-lg border bg-emerald-500/10 p-4">
+          <p className="text-xs text-emerald-500">순합계</p>
+          <p className="text-2xl font-bold text-emerald-500">
             {Number(settlement.net_total).toLocaleString()}
           </p>
         </div>
       </div>
 
       {/* Details */}
-      <div className="rounded-lg border bg-white p-6 dark:bg-gray-900 dark:border-gray-700">
-        <h2 className="mb-4 font-medium text-gray-700 dark:text-gray-300">상세 정보</h2>
+      <div className="rounded-lg border border-border bg-card p-6">
+        <h2 className="mb-4 font-medium text-foreground">상세 정보</h2>
         <dl className="grid grid-cols-2 gap-4">
           <div>
-            <dt className="text-xs text-gray-500 dark:text-gray-400">총합계</dt>
+            <dt className="text-xs text-muted-foreground">총합계</dt>
             <dd className="font-medium">{Number(settlement.gross_total).toLocaleString()}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500 dark:text-gray-400">입금 합계</dt>
+            <dt className="text-xs text-muted-foreground">입금 합계</dt>
             <dd className="font-medium">{Number(settlement.deposit_total).toLocaleString()}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500 dark:text-gray-400">생성일</dt>
+            <dt className="text-xs text-muted-foreground">생성일</dt>
             <dd>{formatDateTime(settlement.created_at)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500 dark:text-gray-400">확인자</dt>
+            <dt className="text-xs text-muted-foreground">확인자</dt>
             <dd>{settlement.confirmed_by_username || '-'}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500 dark:text-gray-400">확인일</dt>
+            <dt className="text-xs text-muted-foreground">확인일</dt>
             <dd>{formatDateTime(settlement.confirmed_at)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500 dark:text-gray-400">지급일</dt>
+            <dt className="text-xs text-muted-foreground">지급일</dt>
             <dd>{formatDateTime(settlement.paid_at)}</dd>
           </div>
           {settlement.memo && (
             <div className="col-span-2">
-              <dt className="text-xs text-gray-500 dark:text-gray-400">메모</dt>
-              <dd className="text-gray-600">{settlement.memo}</dd>
+              <dt className="text-xs text-muted-foreground">메모</dt>
+              <dd className="text-muted-foreground">{settlement.memo}</dd>
             </div>
           )}
         </dl>
@@ -166,7 +166,7 @@ export default function SettlementDetailPage() {
           <>
             <button
               onClick={handleConfirm}
-              className="rounded-md bg-blue-600 px-6 py-2 text-sm text-white hover:bg-blue-700"
+              className="rounded-md bg-primary px-6 py-2 text-sm text-primary-foreground hover:bg-primary/90"
             >
               확인
             </button>

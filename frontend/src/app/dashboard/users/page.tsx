@@ -12,16 +12,16 @@ import Link from 'next/link';
 
 // ── Lookup tables ──────────────────────────────────────────────
 const RANK_STYLES: Record<string, { label: string; cls: string }> = {
-  sub_hq:      { label: '부본사', cls: 'bg-red-50 text-red-700 border border-red-200' },
-  distributor: { label: '총판',   cls: 'bg-amber-50 text-amber-700 border border-amber-200' },
-  agency:      { label: '대리점', cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+  sub_hq:      { label: '부본사', cls: 'bg-red-500/10 text-red-500 border border-red-500/30' },
+  distributor: { label: '총판',   cls: 'bg-amber-500/10 text-amber-500 border border-amber-500/30' },
+  agency:      { label: '대리점', cls: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30' },
 };
 
 const STATUS_STYLES: Record<string, { label: string; cls: string; dot: string }> = {
-  active:    { label: '정상', cls: 'text-emerald-700', dot: 'bg-emerald-400' },
-  suspended: { label: '정지', cls: 'text-amber-600',  dot: 'bg-amber-400' },
-  banned:    { label: '차단', cls: 'text-red-600',    dot: 'bg-red-400' },
-  pending:   { label: '대기', cls: 'text-blue-600',   dot: 'bg-blue-400' },
+  active:    { label: '정상', cls: 'text-emerald-500', dot: 'bg-emerald-400' },
+  suspended: { label: '정지', cls: 'text-amber-400',  dot: 'bg-amber-400' },
+  banned:    { label: '차단', cls: 'text-red-400',    dot: 'bg-red-400' },
+  pending:   { label: '대기', cls: 'text-blue-400',   dot: 'bg-blue-400' },
 };
 
 
@@ -38,7 +38,7 @@ function TreeConnectorSVG({ connectorLines, isLastChild }: { connectorLines: boo
   const sw = 1.5;
 
   return (
-    <svg width={w} height={ROW_H} className="text-slate-300 dark:text-slate-500" style={{ display: 'block', flexShrink: 0, overflow: 'visible' }} aria-hidden>
+    <svg width={w} height={ROW_H} className="text-border" style={{ display: 'block', flexShrink: 0, overflow: 'visible' }} aria-hidden>
       {connectorLines.map((show, i) =>
         show ? <line key={i} x1={i * SLOT_W + SLOT_W / 2} y1={-B} x2={i * SLOT_W + SLOT_W / 2} y2={ROW_H + B} stroke="currentColor" strokeWidth={sw} /> : null
       )}
@@ -110,8 +110,8 @@ export default function UsersPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="py-4 px-5 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950">
-              <Users className="h-5 w-5 text-blue-600" />
+            <div className="p-2.5 rounded-lg bg-primary/10">
+              <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">전체회원</p>
@@ -121,8 +121,8 @@ export default function UsersPage() {
         </Card>
         <Card>
           <CardContent className="py-4 px-5 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950">
-              <UserCheck className="h-5 w-5 text-emerald-600" />
+            <div className="p-2.5 rounded-lg bg-emerald-500/10">
+              <UserCheck className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">정상회원</p>
@@ -132,8 +132,8 @@ export default function UsersPage() {
         </Card>
         <Card>
           <CardContent className="py-4 px-5 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950">
-              <DollarSign className="h-5 w-5 text-amber-600" />
+            <div className="p-2.5 rounded-lg bg-amber-500/10">
+              <DollarSign className="h-5 w-5 text-amber-400" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">총 보유금</p>
@@ -260,14 +260,14 @@ export default function UsersPage() {
                           <div style={{ height: ROW_H, display: 'flex', alignItems: 'center', paddingRight: 8, overflow: 'hidden' }}>
                             {depth > 0 ? <TreeConnectorSVG connectorLines={user.connectorLines} isLastChild={user.isLastChild} /> : <div style={{ width: 8 }} />}
                             <span
-                              className={`hover:underline underline-offset-2 truncate text-sm ${depth === 0 ? 'text-foreground font-semibold' : 'text-blue-600 dark:text-blue-400 hover:text-blue-800'}`}
+                              className={`hover:underline underline-offset-2 truncate text-sm ${depth === 0 ? 'text-foreground font-semibold' : 'text-primary hover:text-primary/80'}`}
                               style={{ maxWidth: 140 }}
                             >
                               {user.username}
                             </span>
                             {user.real_name && <span className="text-muted-foreground/50 text-[11px] ml-1.5 shrink-0 truncate" style={{ maxWidth: 60 }}>{user.real_name}</span>}
                             {isCollapsed && user.hasChildren && (
-                              <span className="ml-1.5 shrink-0 text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-px rounded-full font-medium leading-snug">+{user.childCount}</span>
+                              <span className="ml-1.5 shrink-0 text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-px rounded-full font-medium leading-snug">+{user.childCount}</span>
                             )}
                           </div>
                         </td>

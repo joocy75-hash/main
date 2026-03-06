@@ -44,12 +44,12 @@ const STATUS_TABS = [
 ];
 
 const TYPE_STYLES: Record<string, { label: string; cls: string }> = {
-  first_deposit: { label: '첫충', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  reload: { label: '재충', cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  cashback: { label: '캐시백', cls: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
-  event: { label: '이벤트', cls: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
-  attendance: { label: '출석', cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
-  referral: { label: '추천', cls: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300' },
+  first_deposit: { label: '첫충', cls: 'bg-blue-500/10 text-blue-500' },
+  reload: { label: '재충', cls: 'bg-green-500/10 text-green-500' },
+  cashback: { label: '캐시백', cls: 'bg-purple-500/10 text-purple-500' },
+  event: { label: '이벤트', cls: 'bg-orange-500/10 text-orange-500' },
+  attendance: { label: '출석', cls: 'bg-yellow-500/10 text-yellow-500' },
+  referral: { label: '추천', cls: 'bg-pink-500/10 text-pink-500' },
 };
 
 const BONUS_TYPE_LABELS: Record<string, string> = {
@@ -100,8 +100,8 @@ export default function PromotionsPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="py-4 px-5 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950">
-              <Gift className="h-5 w-5 text-blue-600" />
+            <div className="p-2.5 rounded-lg bg-blue-500/10">
+              <Gift className="h-5 w-5 text-blue-400" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">활성 프로모션</p>
@@ -115,8 +115,8 @@ export default function PromotionsPage() {
         </Card>
         <Card>
           <CardContent className="py-4 px-5 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950">
-              <Users className="h-5 w-5 text-emerald-600" />
+            <div className="p-2.5 rounded-lg bg-emerald-500/10">
+              <Users className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">총 참여 수</p>
@@ -130,8 +130,8 @@ export default function PromotionsPage() {
         </Card>
         <Card>
           <CardContent className="py-4 px-5 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950">
-              <DollarSign className="h-5 w-5 text-amber-600" />
+            <div className="p-2.5 rounded-lg bg-amber-500/10">
+              <DollarSign className="h-5 w-5 text-amber-400" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">총 보너스 지급액</p>
@@ -170,8 +170,8 @@ export default function PromotionsPage() {
             key={tab.key}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               typeFilter === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'border-blue-600 text-blue-400'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => { setTypeFilter(tab.key); setPage(1); }}
           >
@@ -220,52 +220,52 @@ export default function PromotionsPage() {
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">이름</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">유형</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">보너스</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">최소입금</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">최대보너스</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">배팅요구</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">참여수</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">기간</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">상태</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">액션</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">이름</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">유형</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">보너스</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">최소입금</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">최대보너스</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">배팅요구</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">참여수</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">기간</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">상태</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">액션</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-card">
                   {data!.items.map((promo) => {
                     const typeStyle = TYPE_STYLES[promo.type];
                     return (
-                      <tr key={promo.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr key={promo.id} className="hover:bg-accent">
                         <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
-                          <Link href={`/dashboard/promotions/${promo.id}`} className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                          <Link href={`/dashboard/promotions/${promo.id}`} className="text-primary hover:text-primary/80">
                             {promo.name}
                           </Link>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm">
-                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${typeStyle?.cls || 'bg-muted text-foreground'}`}>
                             {typeStyle?.label || promo.type}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums">
                           {formatBonusValue(promo.bonus_type, promo.bonus_value)}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">
                           {amountFormatter.format(promo.min_deposit)} {BONUS_TYPE_LABELS.fixed}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">
                           {amountFormatter.format(promo.max_bonus)} {BONUS_TYPE_LABELS.fixed}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-gray-600 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-right font-mono tabular-nums text-muted-foreground">
                           x{promo.wagering_multiplier}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                           <span className="font-medium">{promo.total_claims.toLocaleString()}</span>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                           {promo.start_date && promo.end_date
                             ? `${new Date(promo.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(promo.end_date).toLocaleDateString('ko-KR')}`
                             : promo.start_date
@@ -275,8 +275,8 @@ export default function PromotionsPage() {
                         <td className="whitespace-nowrap px-4 py-3 text-sm text-center">
                           <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                             promo.is_active
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                              ? 'bg-green-500/10 text-green-500'
+                              : 'bg-muted text-foreground'
                           }`}>
                             {promo.is_active ? '활성' : '비활성'}
                           </span>
@@ -295,11 +295,11 @@ export default function PromotionsPage() {
                               title={promo.is_active ? '비활성화' : '활성화'}
                               onClick={() => handleToggle(promo.id)}
                             >
-                              <Power className={`h-3.5 w-3.5 ${promo.is_active ? 'text-green-600' : 'text-gray-400'}`} />
+                              <Power className={`h-3.5 w-3.5 ${promo.is_active ? 'text-green-400' : 'text-muted-foreground'}`} />
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600 hover:text-red-800" title="삭제">
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-500" title="삭제">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -336,14 +336,14 @@ export default function PromotionsPage() {
       {/* Pagination */}
       {data && data.total > data.page_size && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             전체: {data.total}개
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               이전
             </button>
@@ -353,7 +353,7 @@ export default function PromotionsPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= Math.ceil(data.total / data.page_size)}
-              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
             >
               다음
             </button>

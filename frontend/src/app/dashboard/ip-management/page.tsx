@@ -404,19 +404,19 @@ export default function IpManagementPage() {
             <Card>
               <CardContent className="py-4 px-5">
                 <p className="text-xs text-muted-foreground">블랙리스트</p>
-                <p className="text-2xl font-bold mt-1 text-red-600">{stats?.blacklist_total?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-red-400">{stats?.blacklist_total?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4 px-5">
                 <p className="text-xs text-muted-foreground">활성</p>
-                <p className="text-2xl font-bold mt-1 text-emerald-600">{stats?.active?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-emerald-400">{stats?.active?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4 px-5">
                 <p className="text-xs text-muted-foreground">비활성</p>
-                <p className="text-2xl font-bold mt-1 text-gray-500">{stats?.inactive?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold mt-1 text-muted-foreground">{stats?.inactive?.toLocaleString() ?? '0'}</p>
               </CardContent>
             </Card>
           </>
@@ -442,11 +442,11 @@ export default function IpManagementPage() {
             {checkResult && (
               <div className="flex items-center gap-2">
                 {checkResult.allowed ? (
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                  <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500">
                     <CheckCircle className="mr-1 h-3 w-3" />허용
                   </Badge>
                 ) : (
-                  <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+                  <Badge variant="secondary" className="bg-red-500/10 text-red-500">
                     <XCircle className="mr-1 h-3 w-3" />차단
                   </Badge>
                 )}
@@ -521,8 +521,8 @@ export default function IpManagementPage() {
                           variant="secondary"
                           className={
                             item.type === 'whitelist'
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
-                              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                              ? 'bg-emerald-500/10 text-emerald-500'
+                              : 'bg-red-500/10 text-red-500'
                           }
                         >
                           {item.type === 'whitelist' ? '화이트' : '블랙'}
@@ -558,7 +558,7 @@ export default function IpManagementPage() {
                             title={item.is_active ? '비활성화' : '활성화'}
                           >
                             {item.is_active ? (
-                              <ToggleRight className="h-3.5 w-3.5 text-emerald-600" />
+                              <ToggleRight className="h-3.5 w-3.5 text-emerald-400" />
                             ) : (
                               <ToggleLeft className="h-3.5 w-3.5 text-muted-foreground" />
                             )}
@@ -566,7 +566,7 @@ export default function IpManagementPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
+                            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                             onClick={() => handleDelete(item.id)}
                             title="삭제"
                           >

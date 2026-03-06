@@ -16,9 +16,6 @@ from app.connectors.rapidapi_casino_connector import (
     RapidAPICasinoConnector,
 )
 from app.connectors.rapidapi_sports_connector import (
-    ESPORTS_CATEGORIES,
-    ODDS_HOST,
-    SPORT_HOST,
     RapidAPISportsConnector,
 )
 from app.database import get_session
@@ -27,10 +24,13 @@ from app.models.game import Game, GameProvider
 from app.services.cache_service import cache_delete_pattern
 from app.services.quota_service import QuotaExceededError, QuotaService
 from app.services.rapidapi_client import RapidAPIError
+from app.services.sports_api_service import SportsApiService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/external-api", tags=["external-api"])
+
+_sports_svc = SportsApiService()
 
 
 class GameLaunchRequest(BaseModel):
@@ -220,7 +220,7 @@ async def sync_games(
 
     await cache_delete_pattern("games:list")
 
-    total_stmt = select(func.count()).where(Game.provider_id == provider.id)
+    total_stmt = select(func.count()).select_from(Game).where(Game.provider_id == provider.id)
     total = (await session.execute(total_stmt)).scalar() or 0
 
     return {
@@ -259,11 +259,9 @@ async def sync_all_games(
             games = await connector.get_games()
         except QuotaExceededError:
             errors.append({"provider": provider.code, "error": "Quota exceeded"})
-            await connector.close()
             break
         except RapidAPIError as exc:
             errors.append({"provider": provider.code, "error": exc.message})
-            await connector.close()
             continue
         finally:
             await connector.close()
@@ -380,11 +378,12 @@ async def launch_game(
 
 
 # ═══════════════════════════════════════════════════════════════════
-# Sports Events (Odds Feed)
+# Sports Events (PandaScore + API-Football)
 # ═══════════════════════════════════════════════════════════════════
 
 
 def _sports_connector() -> RapidAPISportsConnector:
+    """RapidAPI sports connector (fallback for odds)."""
     return RapidAPISportsConnector(
         provider_id=0,
         api_url="https://rapidapi.com",
@@ -395,17 +394,16 @@ def _sports_connector() -> RapidAPISportsConnector:
 @router.get("/sports/events")
 async def get_sports_events(
     status: str = "LIVE",
+    sport: str | None = None,
     current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
 ):
-    connector = _sports_connector()
     try:
-        return await connector.get_live_events(status)
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
+        if status == "LIVE":
+            return await _sports_svc.get_live_events(sport)
+        return await _sports_svc.get_scheduled_events(sport)
+    except Exception as exc:
+        logger.exception("Failed to fetch sports events")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @router.get("/sports/odds/{event_id}")
@@ -429,78 +427,22 @@ async def get_sport_live(
     sport: str,
     current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
 ):
-    connector = _sports_connector()
     try:
-        return await connector.get_sport_live(sport)
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
+        return await _sports_svc.get_live_events(sport)
+    except Exception as exc:
+        logger.exception("Failed to fetch live events for %s", sport)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-# ═══════════════════════════════════════════════════════════════════
-# Sports Aggregator (Odds + SportAPI7 combined)
-# ═══════════════════════════════════════════════════════════════════
-
-
-@router.get("/sports/enriched/{sport}")
-async def get_enriched_sport_events(
-    sport: str,
+@router.get("/sports/categories")
+async def get_sport_categories(
     current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
 ):
-    connector = _sports_connector()
-    try:
-        sport7_events = await connector.get_sport_live(sport)
-        odds_events = await connector.get_live_events("LIVE")
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
-
-    odds_by_teams: dict[str, dict] = {}
-    for event in odds_events:
-        if not isinstance(event, dict):
-            continue
-        home = event.get("homeTeam", event.get("home", {}))
-        away = event.get("awayTeam", event.get("away", {}))
-        home_name = home.get("name", "") if isinstance(home, dict) else str(home)
-        away_name = away.get("name", "") if isinstance(away, dict) else str(away)
-        if home_name and away_name:
-            key = f"{home_name.lower()}|{away_name.lower()}"
-            odds_by_teams[key] = event
-
-    enriched: list[dict] = []
-    for event in sport7_events:
-        if not isinstance(event, dict):
-            continue
-        home_team = event.get("homeTeam", event.get("home", {}))
-        away_team = event.get("awayTeam", event.get("away", {}))
-        home_name = home_team.get("name", "") if isinstance(home_team, dict) else str(home_team)
-        away_name = away_team.get("name", "") if isinstance(away_team, dict) else str(away_team)
-
-        matched_odds = None
-        if home_name and away_name:
-            key = f"{home_name.lower()}|{away_name.lower()}"
-            matched_odds = odds_by_teams.get(key)
-
-        combined = {**event}
-        if matched_odds:
-            combined["odds_data"] = matched_odds
-            combined["odds_matched"] = True
-        else:
-            combined["odds_matched"] = False
-
-        enriched.append(combined)
-
-    return enriched
+    return _sports_svc.get_sport_categories()
 
 
 # ═══════════════════════════════════════════════════════════════════
-# E-Sports
+# E-Sports (PandaScore)
 # ═══════════════════════════════════════════════════════════════════
 
 
@@ -508,22 +450,29 @@ async def get_enriched_sport_events(
 async def get_esports_live(
     current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
 ):
-    connector = _sports_connector()
     try:
-        return await connector.get_sport_live("esports")
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
+        return await _sports_svc.get_esports_live()
+    except Exception as exc:
+        logger.exception("Failed to fetch esports live")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@router.get("/esports/upcoming")
+async def get_esports_upcoming(
+    current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
+):
+    try:
+        return await _sports_svc.get_esports_upcoming()
+    except Exception as exc:
+        logger.exception("Failed to fetch esports upcoming")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @router.get("/esports/categories")
 async def get_esports_categories(
     current_user: AdminUser = Depends(PermissionChecker("game_provider.view")),
 ):
-    return ESPORTS_CATEGORIES
+    return _sports_svc.get_esports_categories()
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -626,17 +575,16 @@ async def proxy_casino_launch(
 @user_proxy_router.get("/sports/events")
 async def proxy_sports_events(
     status: str = "LIVE",
+    sport: str | None = None,
     _: str = Depends(verify_service_token),
 ):
-    connector = _sports_connector()
     try:
-        return await connector.get_live_events(status)
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
+        if status == "LIVE":
+            return await _sports_svc.get_live_events(sport)
+        return await _sports_svc.get_scheduled_events(sport)
+    except Exception as exc:
+        logger.exception("Proxy sports events failed")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @user_proxy_router.get("/sports/odds/{event_id}")
@@ -660,84 +608,36 @@ async def proxy_sport_live(
     sport: str,
     _: str = Depends(verify_service_token),
 ):
-    connector = _sports_connector()
     try:
-        return await connector.get_sport_live(sport)
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
+        return await _sports_svc.get_live_events(sport)
+    except Exception as exc:
+        logger.exception("Proxy sport live failed")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@user_proxy_router.get("/sports/enriched/{sport}")
-async def proxy_enriched_events(
-    sport: str,
-    _: str = Depends(verify_service_token),
-):
-    connector = _sports_connector()
-    try:
-        sport7_events = await connector.get_sport_live(sport)
-        odds_events = await connector.get_live_events("LIVE")
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
-
-    odds_by_teams: dict[str, dict] = {}
-    for event in odds_events:
-        if not isinstance(event, dict):
-            continue
-        home = event.get("homeTeam", event.get("home", {}))
-        away = event.get("awayTeam", event.get("away", {}))
-        home_name = home.get("name", "") if isinstance(home, dict) else str(home)
-        away_name = away.get("name", "") if isinstance(away, dict) else str(away)
-        if home_name and away_name:
-            key = f"{home_name.lower()}|{away_name.lower()}"
-            odds_by_teams[key] = event
-
-    enriched: list[dict] = []
-    for event in sport7_events:
-        if not isinstance(event, dict):
-            continue
-        home_team = event.get("homeTeam", event.get("home", {}))
-        away_team = event.get("awayTeam", event.get("away", {}))
-        home_name = home_team.get("name", "") if isinstance(home_team, dict) else str(home_team)
-        away_name = away_team.get("name", "") if isinstance(away_team, dict) else str(away_team)
-
-        matched_odds = None
-        if home_name and away_name:
-            key = f"{home_name.lower()}|{away_name.lower()}"
-            matched_odds = odds_by_teams.get(key)
-
-        combined = {**event}
-        if matched_odds:
-            combined["odds_data"] = matched_odds
-            combined["odds_matched"] = True
-        else:
-            combined["odds_matched"] = False
-
-        enriched.append(combined)
-
-    return enriched
+@user_proxy_router.get("/sports/categories")
+async def proxy_sport_categories(_: str = Depends(verify_service_token)):
+    return _sports_svc.get_sport_categories()
 
 
 @user_proxy_router.get("/esports/live")
 async def proxy_esports_live(_: str = Depends(verify_service_token)):
-    connector = _sports_connector()
     try:
-        return await connector.get_sport_live("esports")
-    except QuotaExceededError as exc:
-        raise HTTPException(status_code=429, detail=str(exc)) from exc
-    except RapidAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.message) from exc
-    finally:
-        await connector.close()
+        return await _sports_svc.get_esports_live()
+    except Exception as exc:
+        logger.exception("Proxy esports live failed")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@user_proxy_router.get("/esports/upcoming")
+async def proxy_esports_upcoming(_: str = Depends(verify_service_token)):
+    try:
+        return await _sports_svc.get_esports_upcoming()
+    except Exception as exc:
+        logger.exception("Proxy esports upcoming failed")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @user_proxy_router.get("/esports/categories")
 async def proxy_esports_categories(_: str = Depends(verify_service_token)):
-    return ESPORTS_CATEGORIES
+    return _sports_svc.get_esports_categories()

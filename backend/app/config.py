@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     RAPIDAPI_STREAM_QUOTA: int = 99
     USER_PAGE_SERVICE_TOKEN: str = ""
 
+    # PandaScore (e-sports)
+    PANDASCORE_API_KEY: str = ""
+
+    # API-Football (sports)
+    API_FOOTBALL_KEY: str = ""
+
     # DB connection pool
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20

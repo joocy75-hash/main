@@ -5,7 +5,7 @@ from sqlmodel import Field, SQLModel
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class AdminLoginLog(SQLModel, table=True):

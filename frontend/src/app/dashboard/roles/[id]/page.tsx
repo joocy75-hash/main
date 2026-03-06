@@ -122,11 +122,11 @@ export default function RoleDetailPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">로딩 중...</div>;
+    return <div className="flex items-center justify-center h-64 text-muted-foreground">로딩 중...</div>;
   }
 
   if (error || !role) {
-    return <div className="flex items-center justify-center h-64 text-red-500">{error || '역할을 찾을 수 없습니다'}</div>;
+    return <div className="flex items-center justify-center h-64 text-destructive">{error || '역할을 찾을 수 없습니다'}</div>;
   }
 
   return (
@@ -139,7 +139,7 @@ export default function RoleDetailPage() {
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight">{role.display_name || role.name}</h2>
             {role.is_system && (
-              <span className="inline-flex rounded-full bg-purple-100 px-2 py-1 text-xs font-semibold text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+              <span className="inline-flex rounded-full bg-purple-500/10 px-2 py-1 text-xs font-semibold text-purple-500">
                 시스템
               </span>
             )}
@@ -148,7 +148,7 @@ export default function RoleDetailPage() {
         </div>
       </div>
 
-      {saveError && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-md text-sm">{saveError}</div>}
+      {saveError && <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{saveError}</div>}
 
       {/* Role Info */}
       <Card>
@@ -193,22 +193,22 @@ export default function RoleDetailPage() {
         </CardHeader>
         <CardContent>
           {permLoading ? (
-            <p className="text-gray-500">권한 로딩 중...</p>
+            <p className="text-muted-foreground">권한 로딩 중...</p>
           ) : (
             <div className="space-y-6">
               {grouped.map(([module, perms]) => (
                 <div key={module} className="space-y-2">
-                  <div className="flex items-center gap-2 border-b pb-2 dark:border-gray-700">
+                  <div className="flex items-center gap-2 border-b pb-2">
                     <input
                       type="checkbox"
                       checked={perms.every((p) => selectedPerms.has(p.id))}
                       onChange={() => toggleModule(perms)}
-                      className="rounded border-gray-300"
+                      className="rounded border-border"
                     />
-                    <span className="text-sm font-semibold uppercase text-gray-700 dark:text-gray-300">
+                    <span className="text-sm font-semibold uppercase text-foreground">
                       {module}
                     </span>
-                    <span className="text-xs text-gray-400">({perms.length})</span>
+                    <span className="text-xs text-muted-foreground">({perms.length})</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pl-6">
                     {perms.map((perm) => (
@@ -217,11 +217,11 @@ export default function RoleDetailPage() {
                           type="checkbox"
                           checked={selectedPerms.has(perm.id)}
                           onChange={() => togglePerm(perm.id)}
-                          className="rounded border-gray-300"
+                          className="rounded border-border"
                         />
-                        <span className="text-gray-700 dark:text-gray-300">{perm.name}</span>
+                        <span className="text-foreground">{perm.name}</span>
                         {perm.description && (
-                          <span className="text-xs text-gray-400">{perm.description}</span>
+                          <span className="text-xs text-muted-foreground">{perm.description}</span>
                         )}
                       </label>
                     ))}

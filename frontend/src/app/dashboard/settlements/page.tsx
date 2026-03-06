@@ -20,10 +20,10 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-blue-100 text-blue-800',
-  paid: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
+  draft: 'bg-yellow-500/10 text-yellow-500',
+  confirmed: 'bg-blue-500/10 text-blue-500',
+  paid: 'bg-green-500/10 text-green-500',
+  rejected: 'bg-red-500/10 text-red-500',
 };
 
 export default function SettlementsPage() {
@@ -129,7 +129,7 @@ export default function SettlementsPage() {
                     {Number(s.net_total).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    <Badge className={STATUS_COLORS[s.status] || 'bg-gray-100 text-gray-800'} variant="secondary">
+                    <Badge className={STATUS_COLORS[s.status] || 'bg-muted text-foreground'} variant="secondary">
                       {STATUS_LABELS[s.status] || s.status}
                     </Badge>
                   </TableCell>

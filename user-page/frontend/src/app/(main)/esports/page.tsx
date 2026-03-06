@@ -58,8 +58,8 @@ export default function EsportsPage() {
           className={cn(
             'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors',
             selectedEsportGame === 'all'
-              ? 'bg-[#f4b53e] text-white'
-              : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+              ? 'bg-[#feb614] text-white'
+              : 'border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa]'
           )}
         >
           전체
@@ -71,8 +71,8 @@ export default function EsportsPage() {
             className={cn(
               'shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-colors flex items-center gap-1',
               selectedEsportGame === cat.code
-                ? 'bg-[#f4b53e] text-white'
-                : 'border border-[#dddddd] text-[#707070] hover:bg-[#f8f9fc]'
+                ? 'bg-[#feb614] text-white'
+                : 'border border-[#e8e8e8] text-[#6b7280] hover:bg-[#f8f8fa]'
             )}
           >
             <span>{cat.icon}</span>
@@ -85,16 +85,16 @@ export default function EsportsPage() {
       <div className="flex flex-col gap-3">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-lg border border-[#dddddd] p-4">
-              <div className="mb-2 h-5 w-32 rounded bg-[#edeef3] animate-pulse" />
-              <div className="mb-2 h-8 w-full rounded bg-[#edeef3] animate-pulse" />
-              <div className="h-6 w-48 rounded bg-[#edeef3] animate-pulse" />
+            <div key={i} className="bg-white rounded-lg border border-[#e8e8e8] p-4">
+              <div className="mb-2 h-5 w-32 rounded bg-[#e8e8e8] animate-pulse" />
+              <div className="mb-2 h-8 w-full rounded bg-[#e8e8e8] animate-pulse" />
+              <div className="h-6 w-48 rounded bg-[#e8e8e8] animate-pulse" />
             </div>
           ))
         ) : esportsEvents.length === 0 ? (
-          <div className="bg-white rounded-lg border border-[#dddddd] flex flex-col items-center gap-2 py-12">
+          <div className="bg-white rounded-lg border border-[#e8e8e8] flex flex-col items-center gap-2 py-12">
             <span className="text-4xl">🎮</span>
-            <p className="text-sm text-[#707070]">
+            <p className="text-sm text-[#6b7280]">
               현재 진행 중이거나 예정된 e스포츠 경기가 없습니다
             </p>
           </div>
@@ -102,7 +102,7 @@ export default function EsportsPage() {
           esportsEvents.map((event) => (
             <div
               key={event.id}
-              className="bg-white rounded-lg border border-[#dddddd] p-4 hover:border-[#f4b53e] transition-colors"
+              className="bg-white rounded-lg border border-[#e8e8e8] p-4 hover:border-[#feb614] transition-colors shadow-sm"
             >
               {/* Game, tournament, and status */}
               <div className="mb-2 flex items-center justify-between">
@@ -118,16 +118,16 @@ export default function EsportsPage() {
                       LIVE
                     </span>
                   ) : (
-                    <span className="bg-[#edeef3] text-[#707070] text-[10px] px-2 py-0.5 rounded-full">
+                    <span className="bg-[#e8e8e8] text-[#6b7280] text-[10px] px-2 py-0.5 rounded-full">
                       예정
                     </span>
                   )}
-                  <span className="text-xs text-[#707070]">
+                  <span className="text-xs text-[#6b7280]">
                     {event.leagueKo}
                   </span>
                 </div>
                 {event.period && (
-                  <span className="border border-[#dddddd] text-[#707070] text-[10px] px-2 py-0.5 rounded-full">
+                  <span className="border border-[#e8e8e8] text-[#6b7280] text-[10px] px-2 py-0.5 rounded-full">
                     {event.period}
                   </span>
                 )}
@@ -146,7 +146,7 @@ export default function EsportsPage() {
                     {event.homeTeam.score !== undefined && (
                       <span className={cn(
                         'text-lg font-bold',
-                        event.status === 'LIVE' ? 'text-[#f4b53e]' : 'text-[#252531]'
+                        event.status === 'LIVE' ? 'text-[#feb614]' : 'text-[#252531]'
                       )}>
                         {event.homeTeam.score}
                       </span>
@@ -162,7 +162,7 @@ export default function EsportsPage() {
                     {event.awayTeam.score !== undefined && (
                       <span className={cn(
                         'text-lg font-bold',
-                        event.status === 'LIVE' ? 'text-[#f4b53e]' : 'text-[#252531]'
+                        event.status === 'LIVE' ? 'text-[#feb614]' : 'text-[#252531]'
                       )}>
                         {event.awayTeam.score}
                       </span>
@@ -173,14 +173,14 @@ export default function EsportsPage() {
 
               {/* Elapsed info for live */}
               {event.status === 'LIVE' && event.elapsed && (
-                <p className="mb-3 text-xs text-[#707070]">
+                <p className="mb-3 text-xs text-[#6b7280]">
                   {event.elapsed}
                 </p>
               )}
 
               {/* Start time for scheduled */}
               {event.status === 'SCHEDULED' && (
-                <p className="mb-3 text-xs text-[#707070]">
+                <p className="mb-3 text-xs text-[#6b7280]">
                   시작 시간: {formatTime(event.startTime)}
                 </p>
               )}
