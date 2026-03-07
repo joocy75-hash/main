@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     API_FOOTBALL_KEY: str = ""
 
     # DB connection pool
-    DB_POOL_SIZE: int = 10
+    DB_POOL_SIZE: int = 25
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_RECYCLE: int = 3600
 

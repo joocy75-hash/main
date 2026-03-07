@@ -782,28 +782,36 @@ async def update_rolling_rates(
                 detail=f"{item.game_category} 롤링율은 최대 {max_rate}%입니다 (입력: {item.rolling_rate}%)",
             )
 
-    # Validate child <= parent (referrer) rate
+    # Validate child <= parent (referrer) rate — batch fetch all parent rates
     if user.referrer_id:
+        parent_stmt = select(UserGameRollingRate).where(
+            UserGameRollingRate.user_id == user.referrer_id,
+        )
+        parent_result = await session.execute(parent_stmt)
+        parent_rates = {
+            (r.game_category, r.provider): r.rolling_rate
+            for r in parent_result.scalars().all()
+        }
         for item in body:
-            stmt = select(UserGameRollingRate).where(
-                UserGameRollingRate.user_id == user.referrer_id,
-                UserGameRollingRate.game_category == item.game_category,
-                UserGameRollingRate.provider == item.provider,
-            )
-            parent_rate_row = (await session.execute(stmt)).scalar_one_or_none()
-            if parent_rate_row and item.rolling_rate > parent_rate_row.rolling_rate:
+            parent_rate = parent_rates.get((item.game_category, item.provider))
+            if parent_rate is not None and item.rolling_rate > parent_rate:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"{item.game_category} 롤링율이 상위 회원({parent_rate_row.rolling_rate}%)보다 높을 수 없습니다",
+                    detail=f"{item.game_category} 롤링율이 상위 회원({parent_rate}%)보다 높을 수 없습니다",
                 )
 
+    # Batch fetch all existing rates for this user
+    existing_stmt = select(UserGameRollingRate).where(
+        UserGameRollingRate.user_id == user_id,
+    )
+    existing_result = await session.execute(existing_stmt)
+    existing_rates = {
+        (r.game_category, r.provider): r
+        for r in existing_result.scalars().all()
+    }
+
     for item in body:
-        stmt = select(UserGameRollingRate).where(
-            UserGameRollingRate.user_id == user_id,
-            UserGameRollingRate.game_category == item.game_category,
-            UserGameRollingRate.provider == item.provider,
-        )
-        existing = (await session.execute(stmt)).scalar_one_or_none()
+        existing = existing_rates.get((item.game_category, item.provider))
         if existing:
             existing.rolling_rate = item.rolling_rate
             existing.updated_at = datetime.now(timezone.utc)

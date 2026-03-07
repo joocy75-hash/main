@@ -1,6 +1,6 @@
 """Closure Table operations for agent hierarchy."""
 
-from sqlalchemy import and_, delete, func, select
+from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.admin_user import AdminUser, AdminUserTree
@@ -164,13 +164,14 @@ async def move_node(session: AsyncSession, node_id: int, new_parent_id: int) -> 
     node.depth = new_parent.depth + 1
     session.add(node)
 
-    # Update depth for all subtree descendants
-    for sid in subtree_ids:
-        if sid == node_id:
-            continue
-        desc = await session.get(AdminUser, sid)
-        desc.depth += depth_diff
-        session.add(desc)
+    # Update depth for all subtree descendants (batch UPDATE, no N+1)
+    other_ids = [sid for sid in subtree_ids if sid != node_id]
+    if other_ids:
+        await session.execute(
+            update(AdminUser)
+            .where(AdminUser.id.in_(other_ids))
+            .values(depth=AdminUser.depth + depth_diff)
+        )
 
 
 async def is_ancestor(session: AsyncSession, ancestor_id: int, descendant_id: int) -> bool:

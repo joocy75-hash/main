@@ -68,6 +68,57 @@ async def _build_response(session: AsyncSession, s: Settlement) -> SettlementRes
     )
 
 
+async def _build_responses_batch(
+    session: AsyncSession, settlements: list[Settlement]
+) -> list[SettlementResponse]:
+    """Batch-build responses to avoid N+1 queries."""
+    if not settlements:
+        return []
+
+    admin_ids = set()
+    for s in settlements:
+        if s.agent_id:
+            admin_ids.add(s.agent_id)
+        if s.confirmed_by:
+            admin_ids.add(s.confirmed_by)
+
+    admin_map = {}
+    if admin_ids:
+        result = await session.execute(
+            select(AdminUser).where(AdminUser.id.in_(admin_ids))
+        )
+        admin_map = {u.id: u for u in result.scalars().all()}
+
+    items = []
+    for s in settlements:
+        agent = admin_map.get(s.agent_id)
+        confirmed_user = admin_map.get(s.confirmed_by) if s.confirmed_by else None
+        items.append(SettlementResponse(
+            id=s.id,
+            uuid=str(s.uuid),
+            agent_id=s.agent_id,
+            period_start=s.period_start,
+            period_end=s.period_end,
+            rolling_total=s.rolling_total,
+            losing_total=s.losing_total,
+            deposit_total=s.deposit_total,
+            sub_level_total=s.sub_level_total,
+            gross_total=s.gross_total,
+            deductions=s.deductions,
+            net_total=s.net_total,
+            status=s.status,
+            confirmed_by=s.confirmed_by,
+            confirmed_at=s.confirmed_at,
+            paid_at=s.paid_at,
+            memo=s.memo,
+            created_at=s.created_at,
+            agent_username=agent.username if agent else None,
+            agent_code=agent.agent_code if agent else None,
+            confirmed_by_username=confirmed_user.username if confirmed_user else None,
+        ))
+    return items
+
+
 # ─── List ─────────────────────────────────────────────────────────
 
 @router.get("", response_model=SettlementListResponse)
@@ -94,9 +145,7 @@ async def list_settlements(
     result = await session.execute(stmt)
     settlements = result.scalars().all()
 
-    items = []
-    for s in settlements:
-        items.append(await _build_response(session, s))
+    items = await _build_responses_batch(session, settlements)
 
     return SettlementListResponse(items=items, total=total, page=page, page_size=page_size)
 

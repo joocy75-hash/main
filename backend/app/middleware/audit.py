@@ -1,5 +1,6 @@
 """Audit log middleware — records all mutating API requests."""
 
+import asyncio
 from datetime import datetime, timezone
 
 from sqlalchemy import insert
@@ -60,22 +61,38 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
         parts = path.rstrip("/").split("/")
         resource_id = parts[-1] if parts[-1].isdigit() else None
 
-        try:
-            async with async_session() as session:
-                stmt = insert(AuditLog).values(
-                    admin_user_id=admin_user_id,
-                    ip_address=request.client.host if request.client else None,
-                    user_agent=request.headers.get("user-agent"),
-                    action=action,
-                    module=module,
-                    resource_type=module.rstrip("s") if module != "unknown" else None,
-                    resource_id=resource_id,
-                    description=f"{request.method} {path}",
-                    created_at=datetime.now(timezone.utc),
-                )
-                await session.execute(stmt)
-                await session.commit()
-        except Exception:
-            pass  # Audit logging should never break the request
+        # Fire-and-forget: audit logging runs in background, doesn't block response
+        asyncio.create_task(_write_audit_log(
+            admin_user_id=admin_user_id,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            action=action,
+            module=module,
+            resource_id=resource_id,
+            method=request.method,
+            path=path,
+        ))
 
         return response
+
+
+async def _write_audit_log(
+    *, admin_user_id, ip_address, user_agent, action, module, resource_id, method, path
+):
+    try:
+        async with async_session() as session:
+            stmt = insert(AuditLog).values(
+                admin_user_id=admin_user_id,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                action=action,
+                module=module,
+                resource_type=module.rstrip("s") if module != "unknown" else None,
+                resource_id=resource_id,
+                description=f"{method} {path}",
+                created_at=datetime.now(timezone.utc),
+            )
+            await session.execute(stmt)
+            await session.commit()
+    except Exception:
+        pass  # Audit logging should never break the application
