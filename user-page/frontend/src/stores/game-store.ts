@@ -1,219 +1,180 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api-client';
-import type {
-  GameCategory,
-  GameProvider,
-  Game,
-  GameLaunchResponse,
-} from '../../../shared/types/game';
 
-interface BackendPaginated<T> {
-  items: T[];
+export interface GameCategory {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+export interface GameProvider {
+  code: string;
+  name: string;
+  ko: boolean;
   total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  categories: Record<string, number>;
+}
+
+export interface Game {
+  uid: string;
+  name: string;
+  provider: string;
+  providerName: string;
+  type: string;
+  category: string;
+  ko: boolean;
+  status: number;
 }
 
 interface GameState {
-  categories: { code: GameCategory; name: string; icon: string }[];
+  categories: GameCategory[];
   providers: GameProvider[];
   games: Game[];
-  popularGames: Game[];
-  recentGames: Game[];
-  selectedCategory: GameCategory | null;
-  selectedProvider: string | null;
+  totalGames: number;
+  selectedCategory: string;
+  selectedProvider: string;
   searchQuery: string;
   isLoading: boolean;
-  isLoadingMore: boolean;
-  currentPage: number;
-  hasMore: boolean;
-  totalGames: number;
+  isLaunching: boolean;
+  hasFetchedProviders: boolean;
+  hasFetchedAll: boolean;
 
-  fetchProviders: (category?: GameCategory) => Promise<void>;
-  fetchGames: (providerCode?: string, page?: number, limit?: number) => Promise<void>;
-  loadMoreGames: () => Promise<void>;
-  searchGames: (query: string, category?: GameCategory) => Promise<void>;
-  fetchPopularGames: () => Promise<void>;
-  fetchRecentGames: () => Promise<void>;
-  launchGame: (gameId: string, platform: 1 | 2) => Promise<GameLaunchResponse>;
-  launchDemoGame: (gameId: string, platform: 1 | 2) => Promise<GameLaunchResponse>;
-  setSelectedCategory: (category: GameCategory | null) => void;
-  setSelectedProvider: (providerCode: string | null) => void;
+  fetchCategories: () => Promise<void>;
+  fetchProvidersOnly: () => Promise<void>;
+  fetchAllGames: () => Promise<void>;
+  searchGames: (q?: string, category?: string, provider?: string) => Promise<Game[]>;
+  launchGame: (gameUid: string, platform?: 1 | 2) => Promise<string>;
+  launchDemo: (gameUid: string, platform?: 1 | 2) => Promise<string>;
+  setSelectedCategory: (category: string) => void;
+  setSelectedProvider: (provider: string) => void;
   setSearchQuery: (query: string) => void;
-  reset: () => void;
-}
 
-const PAGE_SIZE = 20;
+  // Computed getters
+  filteredGames: () => Game[];
+}
 
 export const useGameStore = create<GameState>((set, get) => ({
   categories: [],
   providers: [],
   games: [],
-  popularGames: [],
-  recentGames: [],
-  selectedCategory: null,
-  selectedProvider: null,
+  totalGames: 0,
+  selectedCategory: 'all',
+  selectedProvider: '',
   searchQuery: '',
   isLoading: false,
-  isLoadingMore: false,
-  currentPage: 1,
-  hasMore: true,
-  totalGames: 0,
+  isLaunching: false,
+  hasFetchedProviders: false,
+  hasFetchedAll: false,
 
-  fetchProviders: async (category?) => {
+  fetchCategories: async () => {
     try {
-      const params: Record<string, string> = {};
-      if (category) params.category = category;
-      const providers = await api.get<GameProvider[]>('/api/games/providers', params);
-      set({ providers: Array.isArray(providers) ? providers : [] });
+      const data = await api.get<GameCategory[]>('/api/games/categories');
+      set({ categories: data });
     } catch {
-      set({ providers: [] });
+      // ignore
     }
   },
 
-  fetchGames: async (providerCode?, page = 1, limit = PAGE_SIZE) => {
+  fetchProvidersOnly: async () => {
+    if (get().hasFetchedProviders) return;
     set({ isLoading: true });
     try {
-      const { selectedCategory, searchQuery } = get();
-      const params: Record<string, string> = {
-        page: String(page),
-        limit: String(limit),
-      };
-      if (providerCode) params.provider = providerCode;
-      if (selectedCategory) params.category = selectedCategory;
-      if (searchQuery) params.q = searchQuery;
-
-      const paginated = await api.get<BackendPaginated<Game>>('/api/games/search', params);
+      const data = await api.get<{ providers: GameProvider[] }>('/api/games/providers-stats');
       set({
-        games: paginated.items,
-        currentPage: paginated.page,
-        hasMore: paginated.page < paginated.totalPages,
-        totalGames: paginated.total,
+        providers: data.providers,
+        hasFetchedProviders: true,
         isLoading: false,
       });
     } catch {
-      set({ games: [], isLoading: false, hasMore: false });
+      set({ isLoading: false });
     }
   },
 
-  loadMoreGames: async () => {
-    const { isLoadingMore, hasMore, currentPage, selectedProvider, selectedCategory, searchQuery, games } = get();
-    if (isLoadingMore || !hasMore) return;
-
-    set({ isLoadingMore: true });
+  fetchAllGames: async () => {
+    if (get().hasFetchedAll) return;
+    set({ isLoading: true });
     try {
-      const nextPage = currentPage + 1;
-      const params: Record<string, string> = {
-        page: String(nextPage),
-        limit: String(PAGE_SIZE),
-      };
-      if (selectedProvider) params.provider = selectedProvider;
-      if (selectedCategory) params.category = selectedCategory;
-      if (searchQuery) params.q = searchQuery;
-
-      const paginated = await api.get<BackendPaginated<Game>>('/api/games/search', params);
+      const data = await api.get<{
+        totalProviders: number;
+        totalGames: number;
+        providers: GameProvider[];
+        games: Game[];
+      }>('/api/games/all');
       set({
-        games: [...games, ...paginated.items],
-        currentPage: paginated.page,
-        hasMore: paginated.page < paginated.totalPages,
-        isLoadingMore: false,
-      });
-    } catch {
-      set({ isLoadingMore: false });
-    }
-  },
-
-  searchGames: async (query, category?) => {
-    set({ searchQuery: query, isLoading: true });
-    try {
-      const params: Record<string, string> = {
-        q: query,
-        page: '1',
-        limit: String(PAGE_SIZE),
-      };
-      if (category) params.category = category;
-
-      const paginated = await api.get<BackendPaginated<Game>>('/api/games/search', params);
-      set({
-        games: paginated.items,
-        currentPage: 1,
-        hasMore: paginated.page < paginated.totalPages,
-        totalGames: paginated.total,
+        providers: data.providers,
+        games: data.games,
+        totalGames: data.totalGames,
+        hasFetchedProviders: true,
+        hasFetchedAll: true,
         isLoading: false,
       });
     } catch {
-      set({ games: [], isLoading: false, hasMore: false });
+      set({ isLoading: false });
     }
   },
 
-  fetchPopularGames: async () => {
+  searchGames: async (q, category, provider) => {
+    const params: Record<string, string> = {};
+    if (q) params.q = q;
+    if (category && category !== 'all') params.category = category;
+    if (provider) params.provider = provider;
     try {
-      const res = await api.get<Game[]>('/api/games/popular');
-      set({ popularGames: Array.isArray(res) ? res : [] });
+      return await api.get<Game[]>('/api/games/search', params);
     } catch {
-      set({ popularGames: [] });
+      return [];
     }
   },
 
-  fetchRecentGames: async () => {
+  launchGame: async (gameUid, platform = 1) => {
+    set({ isLaunching: true });
     try {
-      const res = await api.get<Game[]>('/api/games/recent');
-      set({ recentGames: Array.isArray(res) ? res : [] });
-    } catch {
-      set({ recentGames: [] });
+      const data = await api.post<{ gameUrl: string; balance?: number }>(
+        '/api/games/launch',
+        { gameUid, platform }
+      );
+      set({ isLaunching: false });
+      return data.gameUrl;
+    } catch (err) {
+      set({ isLaunching: false });
+      throw err;
     }
   },
 
-  launchGame: async (gameId, platform) => {
-    return await api.post<GameLaunchResponse>('/api/games/launch', {
-      gameId,
-      platform,
-    });
+  launchDemo: async (gameUid, platform = 1) => {
+    set({ isLaunching: true });
+    try {
+      const data = await api.post<{ gameUrl: string }>(
+        '/api/games/demo',
+        { gameUid, platform }
+      );
+      set({ isLaunching: false });
+      return data.gameUrl;
+    } catch (err) {
+      set({ isLaunching: false });
+      throw err;
+    }
   },
 
-  launchDemoGame: async (gameId, platform) => {
-    return await api.post<GameLaunchResponse>('/api/games/demo', {
-      gameId,
-      platform,
-    });
-  },
+  setSelectedCategory: (category) => set({ selectedCategory: category }),
+  setSelectedProvider: (provider) => set({ selectedProvider: provider }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
 
-  setSelectedCategory: (category) => {
-    set({
-      selectedCategory: category,
-      selectedProvider: null,
-      games: [],
-      currentPage: 1,
-      hasMore: true,
-    });
-  },
+  filteredGames: () => {
+    const { games, selectedCategory, selectedProvider, searchQuery } = get();
+    let filtered = games;
 
-  setSelectedProvider: (providerCode) => {
-    set({
-      selectedProvider: providerCode,
-      games: [],
-      currentPage: 1,
-      hasMore: true,
-    });
-  },
-
-  setSearchQuery: (query) => {
-    set({ searchQuery: query });
-  },
-
-  reset: () => {
-    set({
-      providers: [],
-      games: [],
-      selectedCategory: null,
-      selectedProvider: null,
-      searchQuery: '',
-      isLoading: false,
-      isLoadingMore: false,
-      currentPage: 1,
-      hasMore: true,
-      totalGames: 0,
-    });
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter((g) => g.category === selectedCategory);
+    }
+    if (selectedProvider) {
+      filtered = filtered.filter((g) => g.provider === selectedProvider);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (g) => g.name.toLowerCase().includes(q) || g.providerName.toLowerCase().includes(q)
+      );
+    }
+    return filtered;
   },
 }));

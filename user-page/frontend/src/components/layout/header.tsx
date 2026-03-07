@@ -33,11 +33,6 @@ import { LoginModal } from '@/components/common/login-modal';
 
 const NAV_LINKS = [
   {
-    href: '/games?category=casino',
-    label: 'Casino',
-    icon: '/images/ui-icons/icon_casino.webp',
-  },
-  {
     href: '/sports',
     label: 'Sports',
     icon: '/images/ui-icons/icon_sport.webp',

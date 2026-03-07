@@ -2,102 +2,69 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Play, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Game } from '../../../../shared/types/game';
+import type { Game } from '@/stores/game-store';
+import { getProviderImage } from '@/lib/provider-images';
 
 interface GameCardProps {
   game: Game;
-  isAuthenticated: boolean;
   onPlay: (game: Game) => void;
-  onDemo: (game: Game) => void;
-  launchCount?: number;
+  compact?: boolean;
 }
 
-export const GameCard = ({
-  game,
-  isAuthenticated,
-  onPlay,
-  onDemo,
-  launchCount = 0,
-}: GameCardProps) => {
-  const [imageError, setImageError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const isPopular = launchCount > 1000;
+export function GameCard({ game, onPlay, compact }: GameCardProps) {
+  const hue = game.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+  const logoSrc = getProviderImage(game.provider, game.providerName);
+  const [imgError, setImgError] = useState(false);
 
   return (
-    <div
-      className="group relative overflow-hidden rounded-lg border border-border bg-card transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <button
+      onClick={() => onPlay(game)}
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-[12px] bg-white border border-[#e8e8e8] transition-all hover:-translate-y-1 hover:shadow-md hover:border-[#feb614]/40 text-left',
+        compact ? 'w-[120px]' : 'w-full'
+      )}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-[4/3] overflow-hidden">
-        {game.thumbnail && !imageError ? (
+      <div
+        className={cn(
+          'relative w-full overflow-hidden flex items-center justify-center',
+          compact ? 'h-[90px]' : 'aspect-[4/3]'
+        )}
+        style={{
+          background: `linear-gradient(135deg, hsl(${hue}, 60%, 45%), hsl(${(hue + 40) % 360}, 70%, 35%))`,
+        }}
+      >
+        {/* Provider logo as card visual */}
+        {logoSrc && !imgError ? (
           <Image
-            src={game.thumbnail}
-            alt={game.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            onError={() => setImageError(true)}
+            src={logoSrc}
+            alt={game.providerName}
+            width={compact ? 48 : 64}
+            height={compact ? 48 : 64}
+            className="object-contain drop-shadow-lg opacity-90"
+            onError={() => setImgError(true)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-secondary to-accent/20">
-            <span className="text-3xl font-bold text-muted-foreground/50">
-              {game.name.charAt(0)}
-            </span>
-          </div>
+          <span className="text-white/90 text-[11px] font-bold text-center px-2 leading-tight line-clamp-2">
+            {game.name}
+          </span>
         )}
-
-        {/* Popular badge */}
-        {isPopular && (
-          <Badge
-            className="absolute left-1.5 top-1.5 bg-destructive text-white text-[10px] px-1.5 py-0.5"
-          >
-            HOT
-          </Badge>
-        )}
-
         {/* Hover overlay */}
-        <div
-          className={cn(
-            'absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 transition-opacity duration-200',
-            isHovered ? 'opacity-100' : 'opacity-0'
-          )}
-        >
-          {isAuthenticated ? (
-            <Button
-              size="sm"
-              className="gap-1.5"
-              onClick={() => onPlay(game)}
-            >
-              <Play className="size-4" />
-              플레이
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="gap-1.5"
-              onClick={() => onDemo(game)}
-            >
-              <Eye className="size-4" />
-              무료 체험
-            </Button>
-          )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="rounded-full bg-[#feb614] px-4 py-1.5 text-[12px] font-bold text-[#252531]">
+            Play
+          </span>
         </div>
       </div>
 
       {/* Info */}
-      <div className="p-2.5">
-        <p className="truncate text-sm font-medium">{game.name}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {game.providerName}
-        </p>
+      <div className={cn('flex flex-col px-2 py-2', compact ? 'items-center' : '')}>
+        <span className="line-clamp-1 text-[11px] font-semibold text-[#252531]" title={game.name}>
+          {game.name}
+        </span>
+        <span className="text-[10px] text-[#98a7b5] mt-0.5">{game.providerName}</span>
       </div>
-    </div>
+    </button>
   );
-};
+}

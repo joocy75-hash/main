@@ -66,28 +66,6 @@ export class AdminApiClient {
     throw lastError || new Error('Admin API request failed');
   }
 
-  // Game-related proxy methods
-  async getProviders() {
-    return this.request<{ data: unknown[] }>('/api/v1/user-proxy/casino/providers');
-  }
-
-  async getGamesByProvider(code: string) {
-    return this.request<{ data: unknown[] }>(`/api/v1/user-proxy/casino/games/${code}`);
-  }
-
-  async launchGame(body: { userId: number; gameId: string; platform: number; homeUrl: string }) {
-    return this.request<{ data: { url: string } }>('/api/v1/user-proxy/casino/launch', {
-      method: 'POST',
-      body: {
-        user_id: body.userId,
-        game_id: body.gameId,
-        platform: body.platform,
-        home_url: body.homeUrl,
-        currency: 'KRW',
-      },
-    });
-  }
-
   // Sports-related proxy methods
   async getLiveEvents(status = 'LIVE') {
     return this.request<{ data: unknown[] }>('/api/v1/user-proxy/sports/events', {

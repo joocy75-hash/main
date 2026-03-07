@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 
 const TABS = [
   {
-    name: 'Menu',
-    href: '/games',
-    icon: '/images/ui-icons/menu_icon.webp',
-    activeIcon: '/images/ui-icons/menu_icon.webp',
+    name: 'Sports',
+    href: '/sports',
+    icon: '/images/ui-icons/icon_sport.webp',
+    activeIcon: '/images/ui-icons/icon_sport.webp',
   },
   {
     name: 'Home',

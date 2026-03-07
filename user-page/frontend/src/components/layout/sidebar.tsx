@@ -27,15 +27,15 @@ const BOTTOM_NAV_ITEMS: GameItem[] = [
 /* --- Game Category Items --- */
 
 const GAME_ITEMS: GameItem[] = [
-  { name: '라이브 카지노', href: '/games?category=casino', icon: '/images/category-icons/live_casino.webp', hasSubmenu: true },
-  { name: '슬롯', href: '/games?category=slot', icon: '/images/category-icons/slots.webp', hasSubmenu: true },
-  { name: '스프라이브', href: '/games?category=spribe', icon: '/images/providers/spribe.webp' },
+  { name: '전체게임', href: '/games', icon: '/images/category-icons/hot_games.webp' },
+  { name: '라이브카지노', href: '/games?category=live', icon: '/images/category-icons/live_casino.webp' },
+  { name: '슬롯', href: '/games?category=slot', icon: '/images/category-icons/slots.webp' },
+  { name: '크래시', href: '/games?category=crash', icon: '/images/category-icons/3d.webp' },
+  { name: '테이블', href: '/games?category=table', icon: '/images/category-icons/card_game.webp' },
+  { name: '아케이드', href: '/games?category=arcade', icon: '/images/category-icons/arcade.webp' },
   { name: '스포츠', href: '/sports', icon: '/images/category-icons/sports.webp', hasSubmenu: true },
-  { name: '라이브스포츠', href: '/sports/live', icon: '/images/category-icons/sports.webp' },
   { name: 'E스포츠', href: '/esports', icon: '/images/category-icons/esports.webp' },
-  { name: '홀덤', href: '/games?category=holdem', icon: '/images/category-icons/card_game.webp' },
   { name: '미니게임', href: '/minigame', icon: '/images/category-icons/marble.webp' },
-  { name: '가상게임', href: '/games?category=virtual', icon: '/images/category-icons/arcade.webp' },
 ];
 
 /* --- Sidebar Component --- */
@@ -55,7 +55,6 @@ export const Sidebar = ({ className }: { className?: string }) => {
 
   const isActive = (href: string) => {
     if (href.includes('?')) return fullUrl === href;
-    if (href === '/games') return pathname === '/games' && !category && !sort;
     if (href === '/sports') return pathname === '/sports';
     return pathname.startsWith(href) && href !== '/';
   };

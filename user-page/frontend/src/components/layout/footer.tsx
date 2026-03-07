@@ -3,14 +3,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const GAME_LINKS = [
-  { name: 'Slots', href: '/games?category=slot' },
-  { name: 'Live Casino', href: '/games?category=casino' },
   { name: 'Sports', href: '/sports' },
-  { name: 'Fishing', href: '/games?category=shooting' },
-  { name: 'Card Game', href: '/games?category=holdem' },
-  { name: 'Lottery', href: '/games?category=coin' },
   { name: 'ESports', href: '/esports' },
-  { name: '3D', href: '/games?category=mini_game' },
   { name: 'Arcade', href: '/minigame' },
 ];
 

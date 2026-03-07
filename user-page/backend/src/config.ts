@@ -58,4 +58,9 @@ export const config = {
       baseUrl: 'https://api.cryptomus.com/v1',
     },
   },
+  gamblly: {
+    apiKey: process.env.GAMBLLY_API_KEY || '',
+    playerPrefix: process.env.GAMBLLY_PLAYER_PREFIX || '',
+    serverUrl: process.env.GAMBLLY_SERVER_URL || 'https://game.gamblly-api.com/production',
+  },
 } as const;

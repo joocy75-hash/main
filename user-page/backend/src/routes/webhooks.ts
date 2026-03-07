@@ -1,13 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Prisma } from '@prisma/client';
 import {
-  getPaymentProvider,
   getCryptomus,
   getHeleket,
-  verifyWebhookSign,
   normalizePaymentStatus,
   normalizePayoutStatus,
-  mapProviderToNetwork,
 } from '../services/payment-provider.js';
 import { config } from '../config.js';
 
@@ -98,9 +95,9 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       if (newStatus === 'APPROVED') {
         // Deposit confirmed - credit user balance
         await fastify.prisma.$transaction(async (tx) => {
-          // Update deposit record
-          await tx.deposit.update({
-            where: { id: deposit.id },
+          // Atomic status guard: prevents double-credit from concurrent webhooks
+          const updated = await tx.deposit.updateMany({
+            where: { id: deposit.id, status: 'PENDING' },
             data: {
               status: 'APPROVED',
               txHash: body.txid || null,
@@ -114,6 +111,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
               processedAt: new Date(),
             },
           });
+          if (updated.count === 0) return;
 
           // Credit user balance (use merchant_amount if available, else original amount)
           const creditAmount = deposit.amount;
@@ -154,22 +152,25 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
         }, 'Deposit approved via webhook');
       } else if (newStatus === 'REJECTED') {
         // Deposit failed/cancelled
-        await fastify.prisma.deposit.update({
-          where: { id: deposit.id },
-          data: {
-            status: 'REJECTED',
-            processedAt: new Date(),
-          },
-        });
+        await fastify.prisma.$transaction(async (tx) => {
+          const updated = await tx.deposit.updateMany({
+            where: { id: deposit.id, status: 'PENDING' },
+            data: {
+              status: 'REJECTED',
+              processedAt: new Date(),
+            },
+          });
+          if (updated.count === 0) return;
 
-        await fastify.prisma.message.create({
-          data: {
-            userId: deposit.userId,
-            type: 'transaction',
-            title: '입금 실패',
-            content: `${deposit.amount} ${deposit.coinType} 입금이 실패하였습니다. 사유: ${body.status}`,
-            isRead: false,
-          },
+          await tx.message.create({
+            data: {
+              userId: deposit.userId,
+              type: 'transaction',
+              title: '입금 실패',
+              content: `${deposit.amount} ${deposit.coinType} 입금이 실패하였습니다. 사유: ${body.status}`,
+              isRead: false,
+            },
+          });
         });
 
         fastify.log.info({ depositId: deposit.id }, 'Deposit rejected via webhook');
@@ -233,8 +234,9 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       if (newStatus === 'APPROVED') {
         // Payout completed
         await fastify.prisma.$transaction(async (tx) => {
-          await tx.withdrawal.update({
-            where: { id: withdrawal.id },
+          // Atomic status guard: prevents duplicate processing from concurrent webhooks
+          const updated = await tx.withdrawal.updateMany({
+            where: { id: withdrawal.id, status: 'PENDING' },
             data: {
               status: 'APPROVED',
               txHash: body.txid || null,
@@ -242,6 +244,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
               processedAt: new Date(),
             },
           });
+          if (updated.count === 0) return;
 
           await tx.message.create({
             data: {
@@ -262,21 +265,23 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       } else if (newStatus === 'REJECTED') {
         // Payout failed - refund user balance
         await fastify.prisma.$transaction(async (tx) => {
+          // Atomic status guard: prevents double-refund from concurrent webhooks
+          const updated = await tx.withdrawal.updateMany({
+            where: { id: withdrawal.id, status: 'PENDING' },
+            data: {
+              status: 'REJECTED',
+              payoutStatus: body.status,
+              processedAt: new Date(),
+            },
+          });
+          if (updated.count === 0) return;
+
           const totalRefund = withdrawal.amount.add(withdrawal.fee);
 
           const updatedUser = await tx.user.update({
             where: { id: withdrawal.userId },
             data: { balance: { increment: totalRefund } },
             select: { balance: true },
-          });
-
-          await tx.withdrawal.update({
-            where: { id: withdrawal.id },
-            data: {
-              status: 'REJECTED',
-              payoutStatus: body.status,
-              processedAt: new Date(),
-            },
           });
 
           // Refund money log

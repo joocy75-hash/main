@@ -189,7 +189,7 @@ export const useEventStore = create<EventState>((set, get) => ({
     set({ isSpinning: true });
     try {
       const result = await api.post<SpinResult>('/api/spin/execute');
-      set({ lastSpinResult: result });
+      set({ lastSpinResult: result, isSpinning: false });
       await get().fetchSpinStatus();
       return result;
     } catch (err) {

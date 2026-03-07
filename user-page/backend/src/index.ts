@@ -9,15 +9,18 @@ import corsPlugin from './plugins/cors.js';
 import authPlugin from './plugins/auth.js';
 import rateLimitPlugin from './middleware/rate-limit.js';
 
+// Services
+import { GambllyGameService } from './services/gamblly-game-service.js';
+
 // Routes
 import healthRoutes from './routes/health.js';
 import authRoutes from './routes/auth.js';
-import gameRoutes from './routes/games.js';
 import walletRoutes from './routes/wallet.js';
 import eventRoutes from './routes/events.js';
 import sportsRoutes from './routes/sports.js';
 import profileRoutes from './routes/profile.js';
 import minigameRoutes from './routes/minigame.js';
+import gameRoutes from './routes/games.js';
 import webhookRoutes from './routes/webhooks.js';
 
 const app = Fastify({
@@ -37,12 +40,12 @@ await app.register(rateLimitPlugin);
 // Register routes
 await app.register(healthRoutes);
 await app.register(authRoutes);
-await app.register(gameRoutes);
 await app.register(walletRoutes);
 await app.register(eventRoutes);
 await app.register(sportsRoutes);
 await app.register(profileRoutes);
 await app.register(minigameRoutes);
+await app.register(gameRoutes);
 await app.register(webhookRoutes);
 
 // Start server
@@ -50,6 +53,14 @@ const start = async () => {
   try {
     await app.listen({ port: config.port, host: '0.0.0.0' });
     app.log.info(`Server running on http://localhost:${config.port}`);
+
+    // Warm game cache in background (non-blocking)
+    const gameService = new GambllyGameService();
+    gameService.getAllGames().then(() => {
+      app.log.info('Game cache warmed successfully');
+    }).catch((err) => {
+      app.log.warn(err, 'Game cache warming failed (will retry on first request)');
+    });
   } catch (err) {
     app.log.error(err);
     process.exit(1);

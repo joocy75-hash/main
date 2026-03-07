@@ -108,11 +108,11 @@ export const useWalletStore = create<WalletState>((set) => ({
 
   fetchBalance: async () => {
     try {
-      const res = await api.get<{ success: boolean; data: BalanceResponse }>('/api/wallet/balance');
+      const res = await api.get<BalanceResponse>('/api/wallet/balance');
       set({
-        balance: res.data.balance,
-        points: res.data.points,
-        bonusBalance: res.data.bonusBalance,
+        balance: res.balance,
+        points: res.points,
+        bonusBalance: res.bonusBalance,
         balanceError: null,
       });
     } catch {
@@ -122,8 +122,8 @@ export const useWalletStore = create<WalletState>((set) => ({
 
   fetchAddresses: async () => {
     try {
-      const res = await api.get<{ success: boolean; data: WalletAddress[] }>('/api/wallet/addresses');
-      set({ addresses: res.data });
+      const res = await api.get<WalletAddress[]>('/api/wallet/addresses');
+      set({ addresses: res });
     } catch {
       set({ addresses: [] });
     }
@@ -131,8 +131,8 @@ export const useWalletStore = create<WalletState>((set) => ({
 
   addAddress: async (coinType, network, address, label) => {
     await api.post('/api/wallet/addresses', { coinType, network, address, label });
-    const res = await api.get<{ success: boolean; data: WalletAddress[] }>('/api/wallet/addresses');
-    set({ addresses: res.data });
+    const res = await api.get<WalletAddress[]>('/api/wallet/addresses');
+    set({ addresses: res });
   },
 
   deleteAddress: async (id) => {
@@ -143,8 +143,8 @@ export const useWalletStore = create<WalletState>((set) => ({
   },
 
   createDeposit: async (coinType, network, amount) => {
-    const res = await api.post<{ success: boolean; data: Deposit }>('/api/wallet/deposit', { coinType, network, amount });
-    return res.data;
+    const res = await api.post<Deposit>('/api/wallet/deposit', { coinType, network, amount });
+    return res;
   },
 
   createWithdrawal: async (coinType, network, address, amount, password) => {
@@ -160,12 +160,12 @@ export const useWalletStore = create<WalletState>((set) => ({
       if (filters?.page) params.page = String(filters.page);
       if (filters?.limit) params.limit = String(filters.limit);
 
-      const res = await api.get<{ success: boolean; data: TransactionsResponse }>('/api/wallet/transactions', params);
+      const res = await api.get<TransactionsResponse>('/api/wallet/transactions', params);
       set({
-        transactions: res.data.data,
-        transactionsTotal: res.data.total,
-        transactionsPage: res.data.page,
-        transactionsHasMore: res.data.hasMore,
+        transactions: res.data,
+        transactionsTotal: res.total,
+        transactionsPage: res.page,
+        transactionsHasMore: res.hasMore,
         isLoading: false,
       });
     } catch {
@@ -175,11 +175,11 @@ export const useWalletStore = create<WalletState>((set) => ({
 
   fetchDeposits: async () => {
     try {
-      const res = await api.get<{ success: boolean; data: TransactionsResponse }>('/api/wallet/transactions', {
+      const res = await api.get<TransactionsResponse>('/api/wallet/transactions', {
         type: 'deposit',
         limit: '5',
       });
-      set({ deposits: res.data.data });
+      set({ deposits: res.data });
     } catch {
       set({ deposits: [] });
     }
@@ -187,11 +187,11 @@ export const useWalletStore = create<WalletState>((set) => ({
 
   fetchWithdrawals: async () => {
     try {
-      const res = await api.get<{ success: boolean; data: TransactionsResponse }>('/api/wallet/transactions', {
+      const res = await api.get<TransactionsResponse>('/api/wallet/transactions', {
         type: 'withdrawal',
         limit: '5',
       });
-      set({ withdrawals: res.data.data });
+      set({ withdrawals: res.data });
     } catch {
       set({ withdrawals: [] });
     }
