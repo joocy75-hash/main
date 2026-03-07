@@ -9,27 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { COINS, DEFAULT_NETWORK } from '@/lib/constants';
+import { cn, safeDecimal, formatAmount } from '@/lib/utils';
+import Decimal from 'decimal.js';
+import { COINS, DEFAULT_NETWORK, validateAddress } from '@/lib/constants';
 import { useWalletStore } from '@/stores/wallet-store';
+import { useProfileStore } from '@/stores/profile-store';
 import type { Transaction } from '@/stores/wallet-store';
-
-const FEES: Record<string, number> = {
-  'USDT/TRC20': 1,
-  'USDT/ERC20': 5,
-  'TRX/TRC20': 0,
-  'ETH/ERC20': 0.001,
-  'BTC/BTC': 0.0001,
-  'BNB/BEP20': 0.005,
-};
-
-const DAILY_LIMITS: Record<string, number> = {
-  USDT: 10000,
-  TRX: 500000,
-  ETH: 5,
-  BTC: 0.5,
-  BNB: 50,
-};
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variants: Record<string, { label: string; className: string }> = {
@@ -50,27 +35,33 @@ export default function WithdrawPage() {
     balance,
     addresses,
     withdrawals,
+    withdrawConfig,
     fetchBalance,
     fetchAddresses,
     fetchWithdrawals,
+    fetchWithdrawConfig,
     createWithdrawal,
   } = useWalletStore();
+
+  const { profile, fetchProfile } = useProfileStore();
 
   const [selectedCoin, setSelectedCoin] = useState('USDT');
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [manualAddress, setManualAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [password, setPassword] = useState('');
+  const [withdrawPin, setWithdrawPin] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const network = DEFAULT_NETWORK[selectedCoin] || 'TRC20';
-  const feeKey = `${selectedCoin}/${network}`;
-  const fee = FEES[feeKey] ?? 0;
-  const dailyLimit = DAILY_LIMITS[selectedCoin] || 10000;
+  const fees = withdrawConfig?.fees ?? {};
+  const dailyLimits = withdrawConfig?.dailyLimits ?? {};
+  const fee = safeDecimal(fees[`${selectedCoin}/${network}`]);
+  const dailyLimit = safeDecimal(dailyLimits[selectedCoin]);
 
-  const numAmount = parseFloat(amount) || 0;
-  const netAmount = Math.max(numAmount - fee, 0);
+  const decAmount = safeDecimal(amount);
+  const netAmount = Decimal.max(decAmount.minus(fee), new Decimal(0));
 
   const filteredAddresses = useMemo(
     () => (addresses || []).filter((a) => a.coinType === selectedCoin),
@@ -83,25 +74,36 @@ export default function WithdrawPage() {
     return found?.address || '';
   }, [selectedAddressId, manualAddress, addresses]);
 
+  const addressValidation = useMemo(() => {
+    if (!withdrawAddress) return { valid: true };
+    return validateAddress(network, withdrawAddress);
+  }, [network, withdrawAddress]);
+
   const isFormValid = useMemo(() => {
+    const pinOk = !profile?.hasWithdrawPin || /^\d{6}$/.test(withdrawPin);
     return (
       withdrawAddress.length > 0 &&
-      numAmount > fee &&
-      numAmount <= parseFloat(balance) &&
-      password.length > 0
+      addressValidation.valid &&
+      decAmount.gt(fee) &&
+      decAmount.lte(safeDecimal(balance)) &&
+      password.length > 0 &&
+      pinOk
     );
-  }, [withdrawAddress, numAmount, fee, balance, password]);
+  }, [withdrawAddress, addressValidation.valid, amount, balance, password, withdrawPin, profile?.hasWithdrawPin, withdrawConfig, selectedCoin]);
 
   useEffect(() => {
     fetchBalance();
     fetchAddresses();
     fetchWithdrawals();
+    fetchWithdrawConfig();
+    fetchProfile();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setSelectedAddressId('');
     setManualAddress('');
     setAmount('');
+    setWithdrawPin('');
     setError('');
   }, [selectedCoin]);
 
@@ -113,23 +115,23 @@ export default function WithdrawPage() {
       return;
     }
 
-    if (numAmount <= 0) {
+    if (decAmount.lte(0)) {
       setError('유효한 금액을 입력하세요');
       return;
     }
 
-    if (numAmount <= fee) {
+    if (decAmount.lte(fee)) {
       setError(`출금 금액이 수수료(${fee} ${selectedCoin})보다 커야 합니다`);
       return;
     }
 
-    if (numAmount > parseFloat(balance)) {
+    if (decAmount.gt(safeDecimal(balance))) {
       setError('잔액이 부족합니다');
       return;
     }
 
-    if (numAmount > dailyLimit) {
-      setError(`일일 출금 한도(${dailyLimit.toLocaleString('ko-KR')} ${selectedCoin})를 초과합니다`);
+    if (decAmount.gt(dailyLimit)) {
+      setError(`일일 출금 한도(${formatAmount(dailyLimit.toString())} ${selectedCoin})를 초과합니다`);
       return;
     }
 
@@ -140,9 +142,10 @@ export default function WithdrawPage() {
 
     setIsSubmitting(true);
     try {
-      await createWithdrawal(selectedCoin, network, withdrawAddress, numAmount, password);
+      await createWithdrawal(selectedCoin, network, withdrawAddress, decAmount.toNumber(), password, withdrawPin);
       setAmount('');
       setPassword('');
+      setWithdrawPin('');
       setSelectedAddressId('');
       setManualAddress('');
       await fetchWithdrawals();
@@ -153,8 +156,8 @@ export default function WithdrawPage() {
       setIsSubmitting(false);
     }
   }, [
-    withdrawAddress, numAmount, fee, selectedCoin, balance, dailyLimit,
-    password, network, createWithdrawal, fetchWithdrawals, fetchBalance,
+    withdrawAddress, amount, selectedCoin, balance, withdrawConfig,
+    password, withdrawPin, network, createWithdrawal, fetchWithdrawals, fetchBalance,
   ]);
 
   const formatDate = (dateStr: string) => {
@@ -183,7 +186,7 @@ export default function WithdrawPage() {
             <div>
               <p className="text-[12px] font-extrabold text-[#64748b] mb-0.5">보유 잔액</p>
               <p className="text-[18px] font-black text-[#1e293b] flex items-baseline gap-1">
-                {parseFloat(balance).toLocaleString('ko-KR')}
+                {formatAmount(balance)}
                 <span className="text-[13px] font-bold text-[#94a3b8]">USDT</span>
               </p>
             </div>
@@ -245,12 +248,17 @@ export default function WithdrawPage() {
             </Select>
 
             {selectedAddressId === 'manual' && (
-              <input
-                className="mt-3 w-full rounded-xl border border-[#f59e0b] bg-yellow-50/30 px-4 py-3.5 text-[14px] font-mono text-[#1e293b] placeholder:text-[#9ca3af] placeholder:font-sans shadow-[inset_0_2px_4px_rgba(245,158,11,0.05)] focus:border-[#f59e0b] focus:outline-none focus:ring-2 focus:ring-[#f59e0b]"
-                placeholder={`${selectedCoin} 주소 입력`}
-                value={manualAddress}
-                onChange={(e) => setManualAddress(e.target.value)}
-              />
+              <>
+                <input
+                  className="mt-3 w-full rounded-xl border border-[#f59e0b] bg-yellow-50/30 px-4 py-3.5 text-[14px] font-mono text-[#1e293b] placeholder:text-[#9ca3af] placeholder:font-sans shadow-[inset_0_2px_4px_rgba(245,158,11,0.05)] focus:border-[#f59e0b] focus:outline-none focus:ring-2 focus:ring-[#f59e0b]"
+                  placeholder={`${selectedCoin} 주소 입력`}
+                  value={manualAddress}
+                  onChange={(e) => setManualAddress(e.target.value)}
+                />
+                {!addressValidation.valid && (
+                  <p className="mt-1 text-[12px] text-red-500">{addressValidation.message}</p>
+                )}
+              </>
             )}
           </div>
 
@@ -280,16 +288,16 @@ export default function WithdrawPage() {
             <div className="mt-3 flex flex-col gap-1.5 rounded-xl border border-[#e2e8f0] bg-white p-3.5 shadow-sm">
               <div className="flex justify-between items-center text-[12px] font-extrabold text-[#64748b]">
                 <span>수수료</span>
-                <span className="text-[#475569] bg-[#f1f5f9] px-2 py-0.5 rounded">{fee} {selectedCoin}</span>
+                <span className="text-[#475569] bg-[#f1f5f9] px-2 py-0.5 rounded">{fee.toString()} {selectedCoin}</span>
               </div>
               <div className="flex justify-between items-center text-[13px] font-extrabold text-[#64748b] pt-1.5 border-t border-[#f1f5f9] border-dashed">
                 <span>실수령 금액</span>
                 <span className="text-[16px] font-black text-[#10b981]">
-                  {netAmount > 0 ? netAmount.toLocaleString('ko-KR') : '0'} <span className="text-[13px] font-bold opacity-80">{selectedCoin}</span>
+                  {netAmount.gt(0) ? formatAmount(netAmount.toString()) : '0'} <span className="text-[13px] font-bold opacity-80">{selectedCoin}</span>
                 </span>
               </div>
               <div className="flex justify-between items-center text-[11px] font-bold text-[#94a3b8] mt-1">
-                <span>일일 한도: {dailyLimit.toLocaleString('ko-KR')}</span>
+                <span>일일 한도: {formatAmount(dailyLimit.toString())}</span>
                 <span>{selectedCoin}</span>
               </div>
             </div>
@@ -311,6 +319,29 @@ export default function WithdrawPage() {
               className="w-full rounded-xl border border-[#cbd5e1] bg-white px-4 py-3.5 text-[15px] font-black text-[#1e293b] placeholder:text-[#9ca3af] placeholder:font-medium shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#f59e0b] transition-all"
             />
           </div>
+
+          {/* Withdraw PIN (if set) */}
+          {profile?.hasWithdrawPin && (
+            <div>
+              <label className="mb-2.5 block text-[13px] font-extrabold text-[#64748b]">
+                출금 PIN
+              </label>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="6자리 출금 PIN을 입력하세요"
+                value={withdrawPin}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setWithdrawPin(val);
+                  setError('');
+                }}
+                className="w-full rounded-xl border border-[#cbd5e1] bg-white px-4 py-3.5 text-[15px] font-black text-[#1e293b] placeholder:text-[#9ca3af] placeholder:font-medium shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#f59e0b] transition-all tracking-[0.3em] text-center"
+              />
+              <p className="mt-1.5 text-[11px] text-[#94a3b8]">프로필에서 설정한 6자리 출금 PIN</p>
+            </div>
+          )}
 
           {/* Error message */}
           {error && (
@@ -378,7 +409,7 @@ export default function WithdrawPage() {
                           {w.coinType}
                         </td>
                         <td className="px-3 py-2.5 text-right text-sm font-medium text-red-500">
-                          -{parseFloat(w.amount).toLocaleString('ko-KR')}
+                          -{formatAmount(w.amount)}
                         </td>
                         <td className="px-3 py-2.5 font-mono text-xs text-[#6b7280]">
                           {truncateHash(w.txHash || '')}
@@ -409,7 +440,7 @@ export default function WithdrawPage() {
                       </span>
                     </div>
                     <span className="text-sm font-semibold text-red-500">
-                      -{parseFloat(w.amount).toLocaleString('ko-KR')}
+                      -{formatAmount(w.amount)}
                     </span>
                   </div>
                 ))}

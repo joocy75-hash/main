@@ -5,7 +5,7 @@ import { Loader2, Check, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
 
-const REWARD_TABLE = [
+const FALLBACK_REWARD_TABLE = [
   { deposit: '0', bet: '0', days: ['1,000P', '2,000P', '2,500P', '3,000P', '3,500P', '4,000P', '5,000P'], weekBonus: '10,000P' },
   { deposit: '50,000', bet: '50,000', days: ['2,000P', '3,000P', '3,500P', '4,000P', '4,500P', '5,000P', '8,000P'], weekBonus: '15,000P' },
 ];
@@ -201,7 +201,7 @@ export default function AttendancePage() {
               </tr>
             </thead>
             <tbody>
-              {REWARD_TABLE.map((row, idx) => (
+              {FALLBACK_REWARD_TABLE.map((row, idx) => (
                 <tr
                   key={idx}
                   className={cn(

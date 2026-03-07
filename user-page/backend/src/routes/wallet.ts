@@ -55,6 +55,7 @@ const withdrawSchema = z.object({
   address: z.string().min(1, '출금 주소를 입력해주세요'),
   amount: z.number().positive('출금액은 0보다 커야 합니다'),
   password: z.string().min(1, '비밀번호를 입력해주세요'),
+  pin: z.string().regex(/^\d{6}$/, '출금 PIN은 6자리 숫자여야 합니다').default(''),
 }).refine((data) => isValidCoinNetwork(data.coinType, data.network), {
   message: '유효하지 않은 코인-네트워크 조합입니다',
   path: ['network'],
@@ -232,6 +233,29 @@ export default async function walletRoutes(fastify: FastifyInstance) {
     },
   );
 
+  // GET /api/wallet/withdraw-config
+  fastify.get(
+    '/api/wallet/withdraw-config',
+    { preHandler: [fastify.authenticate] },
+    async (_request: FastifyRequest, reply: FastifyReply) => {
+      return reply.send({
+        success: true,
+        data: {
+          fees: {
+            'USDT/TRC20': '1', 'USDT/ERC20': '5', 'TRX/TRC20': '0',
+            'ETH/ERC20': '0.001', 'BTC/BTC': '0.0001', 'BNB/BEP20': '0.005',
+          },
+          dailyLimits: {
+            USDT: '10000', TRX: '500000', ETH: '5', BTC: '0.5', BNB: '50',
+          },
+          minWithdraw: {
+            USDT: '10', TRX: '100', ETH: '0.01', BTC: '0.001', BNB: '0.1',
+          },
+        },
+      });
+    },
+  );
+
   // POST /api/wallet/withdraw
   fastify.post(
     '/api/wallet/withdraw',
@@ -248,7 +272,7 @@ export default async function walletRoutes(fastify: FastifyInstance) {
 
       try {
         const userId = request.user.userId;
-        const { coinType, network, address, amount, password } = parsed.data;
+        const { coinType, network, address, amount, password, pin } = parsed.data;
         const data = await walletService.createWithdrawal(
           fastify.prisma,
           fastify.redis,
@@ -258,6 +282,7 @@ export default async function walletRoutes(fastify: FastifyInstance) {
           address,
           amount,
           password,
+          pin,
         );
         return reply.code(201).send({ success: true, data });
       } catch (err: any) {

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Copy, Check, AlertTriangle, Loader2, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { QRCodeSVG } from 'qrcode.react';
+import { cn, safeDecimal, formatAmount } from '@/lib/utils';
 import { COINS, DEFAULT_NETWORK } from '@/lib/constants';
 import { useWalletStore } from '@/stores/wallet-store';
 import type { Deposit } from '@/stores/wallet-store';
@@ -58,21 +59,21 @@ export default function DepositPage() {
 
   const handleSubmit = useCallback(async () => {
     setError('');
-    const numAmount = parseFloat(amount);
+    const decAmount = safeDecimal(amount);
 
-    if (!amount || isNaN(numAmount) || numAmount <= 0) {
+    if (!amount || decAmount.lte(0)) {
       setError('유효한 금액을 입력하세요');
       return;
     }
 
-    if (numAmount < minAmount) {
+    if (decAmount.lt(minAmount)) {
       setError(`최소 입금액은 ${minAmount} ${selectedCoin} 입니다`);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const deposit = await createDeposit(selectedCoin, network, numAmount);
+      const deposit = await createDeposit(selectedCoin, network, decAmount.toNumber());
       setLastDeposit(deposit);
       setAmount('');
       await fetchDeposits();
@@ -109,7 +110,7 @@ export default function DepositPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#6b7280]">금액</span>
-                <span className="text-sm font-medium text-[#252531]">{parseFloat(lastDeposit.amount).toLocaleString('ko-KR')} {lastDeposit.coinType}</span>
+                <span className="text-sm font-medium text-[#252531]">{formatAmount(lastDeposit.amount)} {lastDeposit.coinType}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#6b7280]">상태</span>
@@ -128,6 +129,19 @@ export default function DepositPage() {
                       {copied ? '복사됨' : '복사'}
                     </button>
                   </div>
+                </div>
+              )}
+              {lastDeposit.depositAddress && (
+                <div className="mt-4 flex flex-col items-center gap-3">
+                  <div className="rounded-xl bg-white p-4 shadow-sm border border-[#e8e8e8]">
+                    <QRCodeSVG
+                      value={lastDeposit.depositAddress}
+                      size={180}
+                      level="H"
+                      marginSize={4}
+                    />
+                  </div>
+                  <p className="text-[12px] text-[#98a7b5]">QR 코드를 스캔하여 입금하세요</p>
                 </div>
               )}
             </div>
@@ -319,7 +333,7 @@ export default function DepositPage() {
                           {d.coinType}
                         </td>
                         <td className="px-3 py-2.5 text-right text-sm font-medium text-green-600">
-                          +{parseFloat(d.amount).toLocaleString('ko-KR')}
+                          +{formatAmount(d.amount)}
                         </td>
                         <td className="px-3 py-2.5 font-mono text-xs text-[#6b7280]">
                           {truncateHash(d.txHash || '')}
@@ -350,7 +364,7 @@ export default function DepositPage() {
                       </span>
                     </div>
                     <span className="text-sm font-semibold text-green-600">
-                      +{parseFloat(d.amount).toLocaleString('ko-KR')}
+                      +{formatAmount(d.amount)}
                     </span>
                   </div>
                 ))}

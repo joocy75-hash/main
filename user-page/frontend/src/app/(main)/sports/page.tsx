@@ -442,10 +442,16 @@ export default function SportsPage() {
                  </div>
                </div>
 
-               <button className="w-full mt-4 h-[52px] bg-gradient-to-b from-[#4da1ff] to-[#1e6adb] hover:from-[#5cadef] hover:to-[#1a5ca8] border-none text-white text-[17px] font-black rounded-xl shadow-[inset_0_-4px_0_rgba(0,0,0,0.2),_inset_0_3px_5px_rgba(255,255,255,0.4),_0_8px_12px_rgba(30,106,219,0.3)] transform hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-[inset_0_0px_0_rgba(0,0,0,0),_0_2px_4px_rgba(30,106,219,0.3)] transition-all flex items-center justify-center gap-2">
-                 <div className="w-[24px] h-[24px] bg-white/20 rounded-full flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">🛒</div>
-                 베팅하기
+               <button
+                 disabled
+                 className="w-full mt-4 h-[52px] rounded-xl bg-[#6b7280] text-[17px] font-bold text-white cursor-not-allowed opacity-60"
+                 title="스포츠 베팅 기능은 준비 중입니다"
+               >
+                 준비 중
                </button>
+               <p className="mt-2 text-center text-[12px] text-[#98a7b5]">
+                 스포츠 베팅 서비스는 곧 오픈됩니다
+               </p>
             </div>
           </div>
         </div>
@@ -526,9 +532,16 @@ export default function SportsPage() {
                 <span className="text-[#64748b] font-extrabold">적중예상금액</span>
                 <span className="text-[16px] font-black text-[#3b82f6]">{payout > 0 ? formatNum(payout.toString()) : '0'}</span>
               </div>
-              <button className="w-full h-[48px] bg-gradient-to-b from-[#4da1ff] to-[#1e6adb] text-white text-[16px] font-black rounded-xl shadow-[0_4px_12px_rgba(30,106,219,0.3)] active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-                🛒 베팅하기
+              <button
+                disabled
+                className="w-full h-[48px] rounded-xl bg-[#6b7280] text-[16px] font-bold text-white cursor-not-allowed opacity-60"
+                title="스포츠 베팅 기능은 준비 중입니다"
+              >
+                준비 중
               </button>
+              <p className="mt-2 text-center text-[12px] text-[#98a7b5]">
+                스포츠 베팅 서비스는 곧 오픈됩니다
+              </p>
             </div>
           </div>
         </div>

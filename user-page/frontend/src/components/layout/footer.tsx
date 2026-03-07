@@ -18,33 +18,23 @@ const INFO_LINKS = [
 ];
 
 const PAYMENT_METHODS = [
-  { name: 'Bitcoin', src: '/images/payment-icons/bitcoin.webp' },
-  { name: 'Crypto', src: '/images/payment-icons/crypto.webp' },
-  { name: 'GPay', src: '/images/payment-icons/gpay.webp' },
-  { name: 'Local Bank', src: '/images/payment-icons/local_bank.webp' },
-  { name: 'Mastercard', src: '/images/payment-icons/mastercard.webp' },
-  { name: 'Net Banking', src: '/images/payment-icons/net_banking.webp' },
-  { name: 'UPI', src: '/images/payment-icons/upi.webp' },
-  { name: 'VISA', src: '/images/payment-icons/visa.webp' },
+  { name: 'USDT', src: '/images/currency/USDT.webp' },
+  { name: 'TRX', src: '/images/currency/TRX.png' },
+  { name: 'ETH', src: '/images/currency/ETH.webp' },
+  { name: 'BTC', src: '/images/currency/MBTC.webp' },
+  { name: 'BNB', src: '/images/currency/BNB.png' },
 ];
 
 const CURRENCIES = [
-  { name: 'USDT', src: '/images/currency/USDT.webp' },
-  { name: 'CNY', src: '/images/currency/CNY.webp' },
-  { name: 'PHP', src: '/images/currency/PHP.webp' },
-  { name: 'IDR', src: '/images/currency/IDR.webp' },
-  { name: 'INR', src: '/images/currency/INR.webp' },
-  { name: 'JPY', src: '/images/currency/JPY.webp' },
-  { name: 'THB', src: '/images/currency/THB.webp' },
-  { name: 'VND', src: '/images/currency/VND.webp' },
-  { name: 'MXN', src: '/images/currency/MXN.webp' },
-  { name: 'TRY', src: '/images/currency/TRY.webp' },
+  { name: 'KRW', src: '/images/currency/KRW.webp' },
 ];
 
 const CRYPTO_ACCEPTED = [
-  { name: 'MBTC', src: '/images/currency/MBTC.webp' },
-  { name: 'ETH', src: '/images/currency/ETH.webp' },
   { name: 'USDT', src: '/images/currency/USDT.webp' },
+  { name: 'TRX', src: '/images/currency/TRX.png' },
+  { name: 'ETH', src: '/images/currency/ETH.webp' },
+  { name: 'BTC', src: '/images/currency/MBTC.webp' },
+  { name: 'BNB', src: '/images/currency/BNB.png' },
 ];
 
 export const Footer = ({ className }: { className?: string }) => {
@@ -129,7 +119,7 @@ export const Footer = ({ className }: { className?: string }) => {
         {/* --- Payment / Currency / Crypto --- */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <div>
-            <h4 className="mb-4 text-[15px] font-bold tracking-wide text-white drop-shadow-sm">Payment Method</h4>
+            <h4 className="mb-4 text-[15px] font-bold tracking-wide text-white drop-shadow-sm">Deposit Methods</h4>
             <div className="flex flex-wrap gap-2.5">
               {PAYMENT_METHODS.map((m) => (
                 <span 

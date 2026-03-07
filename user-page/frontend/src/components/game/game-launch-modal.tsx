@@ -18,11 +18,13 @@ export function GameLaunchModal({ game, onClose }: GameLaunchModalProps) {
   const { open: openLogin } = useLoginModalStore();
   const { launchGame, launchDemo, isLaunching } = useGameStore();
   const [error, setError] = useState('');
+  const [gameImgError, setGameImgError] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
   if (!game) return null;
 
   const logoSrc = getProviderImage(game.provider, game.providerName);
+  const hasGameImage = game.image && !gameImgError;
 
   const openGameWindow = () => {
     const w = window.open('', '_blank');
@@ -55,6 +57,15 @@ export function GameLaunchModal({ game, onClose }: GameLaunchModalProps) {
     return w;
   };
 
+  const isValidGameUrl = (url: string): boolean => {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+    } catch {
+      return false;
+    }
+  };
+
   const handlePlay = async () => {
     if (!isAuthenticated) {
       onClose();
@@ -67,8 +78,13 @@ export function GameLaunchModal({ game, onClose }: GameLaunchModalProps) {
     try {
       const isMobile = window.innerWidth < 768;
       const url = await launchGame(game.uid, isMobile ? 2 : 1);
+      if (!isValidGameUrl(url)) {
+        throw new Error('유효하지 않은 게임 URL입니다');
+      }
       if (gameWindow && !gameWindow.closed) {
         gameWindow.location.href = url;
+      } else {
+        window.location.href = url;
       }
     } catch (err) {
       if (gameWindow && !gameWindow.closed) gameWindow.close();
@@ -83,8 +99,13 @@ export function GameLaunchModal({ game, onClose }: GameLaunchModalProps) {
     try {
       const isMobile = window.innerWidth < 768;
       const url = await launchDemo(game.uid, isMobile ? 2 : 1);
+      if (!isValidGameUrl(url)) {
+        throw new Error('유효하지 않은 게임 URL입니다');
+      }
       if (gameWindow && !gameWindow.closed) {
         gameWindow.location.href = url;
+      } else {
+        window.location.href = url;
       }
     } catch (err) {
       if (gameWindow && !gameWindow.closed) gameWindow.close();
@@ -110,22 +131,36 @@ export function GameLaunchModal({ game, onClose }: GameLaunchModalProps) {
 
         {/* Game Preview */}
         <div
-          className="relative flex h-[180px] flex-col items-center justify-center gap-3"
+          className="relative flex h-[180px] flex-col items-center justify-center gap-3 overflow-hidden"
           style={{
-            background: `linear-gradient(135deg, hsl(${hue}, 60%, 45%), hsl(${(hue + 40) % 360}, 70%, 35%))`,
+            background: hasGameImage
+              ? '#1a1a2e'
+              : `linear-gradient(135deg, hsl(${hue}, 60%, 45%), hsl(${(hue + 40) % 360}, 70%, 35%))`,
           }}
         >
-          {logoSrc && !logoError ? (
-            <Image
-              src={logoSrc}
-              alt={game.providerName}
-              width={72}
-              height={72}
-              className="object-contain drop-shadow-lg"
-              onError={() => setLogoError(true)}
+          {hasGameImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={game.image}
+              alt={game.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={() => setGameImgError(true)}
             />
-          ) : null}
-          <span className="text-white text-[20px] font-bold text-center px-6">{game.name}</span>
+          ) : (
+            <>
+              {logoSrc && !logoError ? (
+                <Image
+                  src={logoSrc}
+                  alt={game.providerName}
+                  width={72}
+                  height={72}
+                  className="object-contain drop-shadow-lg"
+                  onError={() => setLogoError(true)}
+                />
+              ) : null}
+              <span className="text-white text-[20px] font-bold text-center px-6">{game.name}</span>
+            </>
+          )}
         </div>
 
         {/* Content */}

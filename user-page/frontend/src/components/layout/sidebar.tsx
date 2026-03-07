@@ -14,14 +14,12 @@ interface GameItem {
   hasSubmenu?: boolean;
 }
 
-/* --- Bottom Nav Items (Figma sidebar bottom section) --- */
-
 const BOTTOM_NAV_ITEMS: GameItem[] = [
-  { name: 'Profile', href: '/profile', icon: '/images/theme/profile_icon.webp' },
-  { name: 'Promotions', href: '/promotions', icon: '/images/theme/promotion_icon.webp' },
-  { name: 'Sponsor', href: '/promotions/vip', icon: '/images/theme/sponsor_icon.webp' },
-  { name: 'Affiliate', href: '/affiliate', icon: '/images/theme/affiliate_icon.webp' },
-  { name: 'Live Support', href: '/support', icon: '/images/theme/cs_icon.webp' },
+  { name: '프로필', href: '/profile', icon: '/images/theme/profile_icon.webp' },
+  { name: '이벤트', href: '/promotions', icon: '/images/theme/promotion_icon.webp' },
+  { name: 'VIP', href: '/promotions/vip', icon: '/images/theme/sponsor_icon.webp' },
+  { name: '파트너', href: '/affiliate', icon: '/images/theme/affiliate_icon.webp' },
+  { name: '고객센터', href: '/support', icon: '/images/theme/cs_icon.webp' },
 ];
 
 /* --- Game Category Items --- */
@@ -310,18 +308,6 @@ export const Sidebar = ({ className }: { className?: string }) => {
             );
           })}
         </nav>
-
-        {/* --- Light / Dark Toggle (Figma) --- */}
-        <div className="mx-3 mb-4 flex rounded-[6px] bg-[#f1f2f7] overflow-hidden">
-          <div className="flex flex-1 items-center justify-center gap-1.5 py-2.5 bg-white rounded-[6px] cursor-pointer">
-            <Image src="/images/theme/theme_light.webp" alt="Light" width={17} height={17} />
-            <span className="text-[14px] font-bold text-[#252531]">Light</span>
-          </div>
-          <div className="flex flex-1 items-center justify-center gap-1.5 py-2.5 cursor-pointer">
-            <Image src="/images/theme/theme_dark.webp" alt="Dark" width={17} height={17} />
-            <span className="text-[14px] font-bold text-[#ccc3c3]">Dark</span>
-          </div>
-        </div>
 
       </div>
     </aside>

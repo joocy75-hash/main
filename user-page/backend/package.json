@@ -13,25 +13,26 @@
     "generate": "prisma generate"
   },
   "dependencies": {
-    "fastify": "^5",
+    "@fastify/compress": "^8.3.1",
     "@fastify/cookie": "^11",
     "@fastify/cors": "^11",
     "@fastify/jwt": "^9",
-    "@fastify/redis": "^7",
     "@fastify/rate-limit": "^10",
+    "@fastify/redis": "^7",
     "@prisma/client": "^6",
     "bcryptjs": "^2.4",
-    "zod": "^3.24",
     "dotenv": "^16",
+    "fastify": "^5",
     "fastify-plugin": "^5",
-    "ua-parser-js": "^2"
+    "ua-parser-js": "^2",
+    "zod": "^3.24"
   },
   "devDependencies": {
-    "prisma": "^6",
-    "typescript": "^5.7",
-    "tsx": "^4",
-    "@types/node": "^22",
     "@types/bcryptjs": "^2.4",
-    "@types/ua-parser-js": "^0.7"
+    "@types/node": "^22",
+    "@types/ua-parser-js": "^0.7",
+    "prisma": "^6",
+    "tsx": "^4",
+    "typescript": "^5.7"
   }
 }

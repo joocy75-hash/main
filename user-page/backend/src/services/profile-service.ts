@@ -80,6 +80,7 @@ export class ProfileService {
         losingRate: true,
         lastLoginAt: true,
         createdAt: true,
+        withdrawPin: true,
       },
     });
 
@@ -87,7 +88,8 @@ export class ProfileService {
       throw { statusCode: 404, message: '사용자를 찾을 수 없습니다' };
     }
 
-    return user;
+    const { withdrawPin, ...rest } = user;
+    return { ...rest, hasWithdrawPin: !!withdrawPin };
   }
 
   async updateProfile(
@@ -145,6 +147,78 @@ export class ProfileService {
     });
 
     return { message: '비밀번호가 변경되었습니다' };
+  }
+
+  async setWithdrawPin(
+    prisma: PrismaClient,
+    userId: number,
+    password: string,
+    pin: string,
+  ) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true, withdrawPin: true },
+    });
+
+    if (!user) {
+      throw { statusCode: 404, message: '사용자를 찾을 수 없습니다' };
+    }
+
+    const valid = await compare(password, user.passwordHash);
+    if (!valid) {
+      throw { statusCode: 401, message: '비밀번호가 일치하지 않습니다' };
+    }
+
+    if (user.withdrawPin) {
+      throw { statusCode: 409, message: '이미 출금 PIN이 설정되어 있습니다. 변경을 원하시면 PIN 변경을 이용해주세요' };
+    }
+
+    const pinHash = await hash(pin, BCRYPT_ROUNDS);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { withdrawPin: pinHash },
+    });
+
+    return { message: '출금 PIN이 설정되었습니다' };
+  }
+
+  async changeWithdrawPin(
+    prisma: PrismaClient,
+    userId: number,
+    password: string,
+    currentPin: string,
+    newPin: string,
+  ) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true, withdrawPin: true },
+    });
+
+    if (!user) {
+      throw { statusCode: 404, message: '사용자를 찾을 수 없습니다' };
+    }
+
+    const valid = await compare(password, user.passwordHash);
+    if (!valid) {
+      throw { statusCode: 401, message: '비밀번호가 일치하지 않습니다' };
+    }
+
+    if (!user.withdrawPin) {
+      throw { statusCode: 400, message: '출금 PIN이 설정되어 있지 않습니다. 먼저 PIN을 설정해주세요' };
+    }
+
+    const pinValid = await compare(currentPin, user.withdrawPin);
+    if (!pinValid) {
+      throw { statusCode: 401, message: '현재 출금 PIN이 일치하지 않습니다' };
+    }
+
+    const pinHash = await hash(newPin, BCRYPT_ROUNDS);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { withdrawPin: pinHash },
+    });
+
+    return { message: '출금 PIN이 변경되었습니다' };
   }
 
   // ===== BET HISTORY =====

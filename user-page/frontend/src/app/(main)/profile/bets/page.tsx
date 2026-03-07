@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, safeDecimal } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
 const CATEGORY_FILTERS = [
@@ -30,7 +30,7 @@ const RESULT_STYLE: Record<string, { label: string; className: string }> = {
 };
 
 const formatAmount = (value: string) =>
-  new Intl.NumberFormat('ko-KR').format(Number(value));
+  new Intl.NumberFormat('ko-KR').format(safeDecimal(value).toNumber());
 
 const formatDateTime = (dateStr: string) => {
   const d = new Date(dateStr);

@@ -120,6 +120,7 @@ model User {
   username        String         @unique @db.VarChar(20)
   nickname        String         @db.VarChar(20)
   passwordHash    String         @map("password_hash")
+  withdrawPin     String?        @map("withdraw_pin")
   phone           String?        @db.VarChar(15)
   status          UserStatus     @default(ACTIVE)
   balance         Decimal        @default(0) @db.Decimal(18, 2)

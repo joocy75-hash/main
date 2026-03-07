@@ -19,7 +19,7 @@ export interface WalletAddress {
 export interface DepositRequest {
   coinType: CoinType;
   network: NetworkType;
-  amount: string;
+  amount: number;
   txHash?: string;
 }
 
@@ -33,7 +33,7 @@ export interface WithdrawalRequest {
 
 export interface Transaction {
   id: number;
-  type: 'DEPOSIT' | 'WITHDRAWAL';
+  type: 'deposit' | 'withdrawal';
   coinType: CoinType;
   network: NetworkType;
   amount: string;

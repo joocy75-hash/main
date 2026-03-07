@@ -60,11 +60,19 @@ interface TransactionsResponse {
   hasMore: boolean;
 }
 
+export interface WithdrawConfig {
+  fees: Record<string, string>;
+  dailyLimits: Record<string, string>;
+  minWithdraw: Record<string, string>;
+}
+
 interface TransactionFilters {
   type?: 'deposit' | 'withdrawal';
   status?: 'pending' | 'approved' | 'rejected';
   page?: number;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface WalletState {
@@ -78,15 +86,17 @@ interface WalletState {
   transactionsTotal: number;
   transactionsPage: number;
   transactionsHasMore: boolean;
+  withdrawConfig: WithdrawConfig | null;
   isLoading: boolean;
   balanceError: string | null;
 
+  fetchWithdrawConfig: () => Promise<void>;
   fetchBalance: () => Promise<void>;
   fetchAddresses: () => Promise<void>;
   addAddress: (coinType: string, network: string, address: string, label?: string) => Promise<void>;
   deleteAddress: (id: number) => Promise<void>;
   createDeposit: (coinType: string, network: string, amount: number) => Promise<Deposit>;
-  createWithdrawal: (coinType: string, network: string, address: string, amount: number, password: string) => Promise<void>;
+  createWithdrawal: (coinType: string, network: string, address: string, amount: number, password: string, pin: string) => Promise<void>;
   fetchTransactions: (filters?: TransactionFilters) => Promise<void>;
   fetchDeposits: () => Promise<void>;
   fetchWithdrawals: () => Promise<void>;
@@ -103,8 +113,18 @@ export const useWalletStore = create<WalletState>((set) => ({
   transactionsTotal: 0,
   transactionsPage: 1,
   transactionsHasMore: false,
+  withdrawConfig: null,
   isLoading: false,
   balanceError: null,
+
+  fetchWithdrawConfig: async () => {
+    try {
+      const data = await api.get<WithdrawConfig>('/api/wallet/withdraw-config');
+      set({ withdrawConfig: data });
+    } catch {
+      // keep existing config on error
+    }
+  },
 
   fetchBalance: async () => {
     try {
@@ -125,7 +145,7 @@ export const useWalletStore = create<WalletState>((set) => ({
       const res = await api.get<WalletAddress[]>('/api/wallet/addresses');
       set({ addresses: res });
     } catch {
-      set({ addresses: [] });
+      // Preserve existing data on error - don't overwrite with empty
     }
   },
 
@@ -147,8 +167,8 @@ export const useWalletStore = create<WalletState>((set) => ({
     return res;
   },
 
-  createWithdrawal: async (coinType, network, address, amount, password) => {
-    await api.post('/api/wallet/withdraw', { coinType, network, address, amount, password });
+  createWithdrawal: async (coinType, network, address, amount, password, pin) => {
+    await api.post('/api/wallet/withdraw', { coinType, network, address, amount, password, pin });
   },
 
   fetchTransactions: async (filters) => {
@@ -159,6 +179,8 @@ export const useWalletStore = create<WalletState>((set) => ({
       if (filters?.status) params.status = filters.status;
       if (filters?.page) params.page = String(filters.page);
       if (filters?.limit) params.limit = String(filters.limit);
+      if (filters?.startDate) params.startDate = filters.startDate;
+      if (filters?.endDate) params.endDate = filters.endDate;
 
       const res = await api.get<TransactionsResponse>('/api/wallet/transactions', params);
       set({
@@ -169,7 +191,7 @@ export const useWalletStore = create<WalletState>((set) => ({
         isLoading: false,
       });
     } catch {
-      set({ transactions: [], isLoading: false });
+      set({ isLoading: false });
     }
   },
 
@@ -181,7 +203,7 @@ export const useWalletStore = create<WalletState>((set) => ({
       });
       set({ deposits: res.data });
     } catch {
-      set({ deposits: [] });
+      // Preserve existing data on error
     }
   },
 
@@ -193,7 +215,7 @@ export const useWalletStore = create<WalletState>((set) => ({
       });
       set({ withdrawals: res.data });
     } catch {
-      set({ withdrawals: [] });
+      // Preserve existing data on error
     }
   },
 }));

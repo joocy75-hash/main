@@ -4,10 +4,11 @@ import { GambllyGameService } from '../services/gamblly-game-service.js';
 const gameService = new GambllyGameService();
 
 export default async function gameRoutes(fastify: FastifyInstance) {
-  // GET /api/games/categories — game category list
+  // GET /api/games/categories — game category list (static, cache 24h)
   fastify.get(
     '/api/games/categories',
     async (_request: FastifyRequest, reply: FastifyReply) => {
+      reply.header('Cache-Control', 'public, max-age=86400');
       return reply.send({ success: true, data: gameService.getCategories() });
     }
   );
@@ -28,6 +29,7 @@ export default async function gameRoutes(fastify: FastifyInstance) {
     async (_request: FastifyRequest, reply: FastifyReply) => {
       try {
         const providers = await gameService.getProvidersWithStats();
+        reply.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
         return reply.send({ success: true, data: { providers } });
       } catch (err) {
         _request.log.error(err, 'Failed to fetch provider stats');
@@ -43,6 +45,7 @@ export default async function gameRoutes(fastify: FastifyInstance) {
       try {
         const { refresh } = request.query as { refresh?: string };
         const result = await gameService.getAllGames(refresh === '1');
+        reply.header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
         return reply.send({
           success: true,
           data: {
@@ -66,6 +69,7 @@ export default async function gameRoutes(fastify: FastifyInstance) {
       const { code } = request.params as { code: string };
       try {
         const games = await gameService.getGamesByProvider(code);
+        reply.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
         return reply.send({ success: true, data: games });
       } catch (err) {
         request.log.error(err, `Failed to fetch games for provider ${code}`);

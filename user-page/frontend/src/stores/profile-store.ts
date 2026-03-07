@@ -15,6 +15,7 @@ export interface Profile {
   myReferralCode: string;
   createdAt: string;
   lastLoginAt: string;
+  hasWithdrawPin: boolean;
 }
 
 export interface BetRecord {
@@ -153,6 +154,8 @@ interface ProfileState {
   fetchProfile: () => Promise<void>;
   updateProfile: (nickname: string, phone: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  setWithdrawPin: (password: string, pin: string) => Promise<void>;
+  changeWithdrawPin: (password: string, currentPin: string, newPin: string) => Promise<void>;
 
   // Bet actions
   fetchBets: (filters?: { category?: string; startDate?: string; endDate?: string; page?: number; limit?: number }) => Promise<void>;
@@ -229,6 +232,17 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   changePassword: async (currentPassword, newPassword) => {
     await api.post('/api/profile/password', { currentPassword, newPassword });
+  },
+
+  setWithdrawPin: async (password, pin) => {
+    await api.post('/api/profile/withdraw-pin', { password, pin });
+    set((state) => ({
+      profile: state.profile ? { ...state.profile, hasWithdrawPin: true } : null,
+    }));
+  },
+
+  changeWithdrawPin: async (password, currentPin, newPin) => {
+    await api.put('/api/profile/withdraw-pin', { password, currentPin, newPin });
   },
 
   // Bets

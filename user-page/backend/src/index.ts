@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
+import compress from '@fastify/compress';
 import { config } from './config.js';
 
 // Plugins
@@ -8,6 +9,7 @@ import redisPlugin from './plugins/redis.js';
 import corsPlugin from './plugins/cors.js';
 import authPlugin from './plugins/auth.js';
 import rateLimitPlugin from './middleware/rate-limit.js';
+import { csrfGuard } from './middleware/csrf-guard.js';
 
 // Services
 import { GambllyGameService } from './services/gamblly-game-service.js';
@@ -31,11 +33,13 @@ const app = Fastify({
 
 // Register plugins (order matters)
 await app.register(corsPlugin);
+await app.register(compress, { global: true, threshold: 1024 });
 await app.register(cookie);
 await app.register(prismaPlugin);
 await app.register(redisPlugin);
 await app.register(authPlugin);
 await app.register(rateLimitPlugin);
+app.addHook('onRequest', csrfGuard);
 
 // Register routes
 await app.register(healthRoutes);

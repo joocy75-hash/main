@@ -31,6 +31,24 @@ const MIN_DEPOSIT_AMOUNTS: Record<string, number> = {
   'BNB': 0.1,
 };
 
+// Daily withdrawal limits per coinType
+const DAILY_WITHDRAWAL_LIMITS: Record<string, number> = {
+  'USDT': 10000,
+  'TRX': 500000,
+  'ETH': 5,
+  'BTC': 0.5,
+  'BNB': 50,
+};
+
+// Minimum withdrawal amounts per coinType
+const MIN_WITHDRAW_AMOUNTS: Record<string, number> = {
+  'USDT': 10,
+  'TRX': 100,
+  'ETH': 0.01,
+  'BTC': 0.001,
+  'BNB': 0.1,
+};
+
 // Max addresses per user
 const MAX_ADDRESSES_PER_USER = 10;
 
@@ -257,7 +275,20 @@ export class WalletService {
     address: string,
     amount: number,
     password: string,
+    pin: string,
   ) {
+    // 0. Validate minimum withdrawal amount
+    const minWithdraw = MIN_WITHDRAW_AMOUNTS[coinType] ?? 0;
+    if (amount < minWithdraw) {
+      throw { statusCode: 400, message: `최소 출금 금액은 ${minWithdraw} ${coinType}입니다` };
+    }
+
+    // 0b. Validate single-request daily limit (quick reject before lock check)
+    const dailyLimit = DAILY_WITHDRAWAL_LIMITS[coinType] ?? 0;
+    if (dailyLimit > 0 && amount > dailyLimit) {
+      throw { statusCode: 400, message: `일일 출금 한도(${dailyLimit} ${coinType})를 초과했습니다` };
+    }
+
     // 1. Check brute-force lockout
     const lockKey = `wd_lock:${userId}`;
     const attemptsKey = `wd_attempts:${userId}`;
@@ -277,11 +308,14 @@ export class WalletService {
     const totalDecimalAmount = new Prisma.Decimal(amount).add(new Prisma.Decimal(fee));
     const totalAmount = totalDecimalAmount.toNumber();
 
-    // 3. Atomic balance check, password verification, and deduction within transaction
+    // 3. Atomic balance check, password verification, daily limit, and deduction within transaction
+    const pinLockKey = `wd_pin_lock:${userId}`;
+    const pinAttemptsKey = `wd_pin_attempts:${userId}`;
+
     const result = await prisma.$transaction(async (tx) => {
       // Lock user row and fetch balance + passwordHash atomically
-      const users = await tx.$queryRaw<Array<{ id: number; balance: Prisma.Decimal; password_hash: string }>>`
-        SELECT id, balance, password_hash FROM users WHERE id = ${userId} FOR UPDATE
+      const users = await tx.$queryRaw<Array<{ id: number; balance: Prisma.Decimal; password_hash: string; withdraw_pin: string | null }>>`
+        SELECT id, balance, password_hash, withdraw_pin FROM users WHERE id = ${userId} FOR UPDATE
       `;
 
       if (!users || users.length === 0) {
@@ -309,6 +343,56 @@ export class WalletService {
 
       // Clear failed attempts on successful password
       await redis.del(attemptsKey);
+
+      // Verify withdrawal PIN with brute-force protection (C-02 fix)
+      if (users[0].withdraw_pin) {
+        const pinLocked = await redis.get(pinLockKey);
+        if (pinLocked) {
+          const ttl = await redis.ttl(pinLockKey);
+          throw {
+            statusCode: 429,
+            message: `PIN 시도 횟수 초과. ${Math.ceil(ttl / 60)}분 후 다시 시도해주세요`,
+          };
+        }
+
+        const pinValid = await compare(pin, users[0].withdraw_pin);
+        if (!pinValid) {
+          const pinAttempts = await redis.incr(pinAttemptsKey);
+          await redis.expire(pinAttemptsKey, WITHDRAWAL_PW_LOCKOUT_SECONDS);
+          if (pinAttempts >= WITHDRAWAL_PW_MAX_ATTEMPTS) {
+            await redis.set(pinLockKey, '1', 'EX', WITHDRAWAL_PW_LOCKOUT_SECONDS);
+            await redis.del(pinAttemptsKey);
+            throw {
+              statusCode: 429,
+              message: 'PIN 시도 횟수 초과. 15분 후 다시 시도해주세요',
+            };
+          }
+          throw {
+            statusCode: 401,
+            message: `출금 PIN이 일치하지 않습니다 (${WITHDRAWAL_PW_MAX_ATTEMPTS - pinAttempts}회 남음)`,
+          };
+        }
+        await redis.del(pinAttemptsKey);
+      }
+
+      // Daily limit check INSIDE transaction (C-01 TOCTOU fix)
+      if (dailyLimit > 0) {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const todayWithdrawals = await tx.withdrawal.aggregate({
+          _sum: { amount: true },
+          where: {
+            userId,
+            coinType: coinType as any,
+            status: { not: 'REJECTED' as any },
+            createdAt: { gte: startOfDay },
+          },
+        });
+        const todayTotal = new Prisma.Decimal(todayWithdrawals._sum.amount || 0).add(new Prisma.Decimal(amount)).toNumber();
+        if (todayTotal > dailyLimit) {
+          throw { statusCode: 400, message: `오늘 출금 한도를 초과합니다. 남은 한도: ${new Prisma.Decimal(dailyLimit).sub(new Prisma.Decimal(todayWithdrawals._sum.amount || 0)).toString()} ${coinType}` };
+        }
+      }
 
       const currentBalance = new Prisma.Decimal(users[0].balance.toString());
       if (currentBalance.lt(totalDecimalAmount)) {
@@ -384,10 +468,15 @@ export class WalletService {
     } catch (err: any) {
       // Payout API failed - mark as api_error for manual retry
       // Balance already deducted, admin can retry or refund
-      await prisma.withdrawal.update({
-        where: { id: result.withdrawal.id },
-        data: { payoutStatus: 'api_error' },
-      });
+      try {
+        await prisma.withdrawal.update({
+          where: { id: result.withdrawal.id },
+          data: { payoutStatus: 'api_error' },
+        });
+      } catch {
+        // Status update also failed - log but don't mask the original error
+        // Admin will see PENDING status and investigate manually
+      }
 
       throw new Error(
         `출금 요청이 등록되었으나 자동 송금에 실패했습니다. 관리자가 수동 처리합니다. (${err.message || 'payout API error'})`

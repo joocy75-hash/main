@@ -1,0 +1,742 @@
+'use client';
+
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { useMinigameStore } from '@/stores/minigame-store';
+import type { BepickRound } from '../../../../../shared/types/minigame';
+
+const REFRESH_INTERVAL = 10_000;
+const ROUND_INTERVAL = 300;
+const DISPLAY_ROUNDS = 30;
+
+// --- Label helpers ---
+const oddEvenLabel = (v: 1 | 2) => (v === 1 ? '홀' : '짝');
+const underOverLabel = (v: 1 | 2) => (v === 1 ? '언더' : '오버');
+const smlLabel = (v: 1 | 2 | 3) => (v === 1 ? '소' : v === 2 ? '중' : '대');
+const leftRightLabel = (v: 1 | 2) => (v === 1 ? '좌' : '우');
+const ladderCountLabel = (v: 1 | 2) => (v === 1 ? '3줄' : '4줄');
+
+const oddEvenColor = (v: 1 | 2) => (v === 1 ? 'text-red-400' : 'text-blue-400');
+const underOverColor = (v: 1 | 2) => (v === 1 ? 'text-green-400' : 'text-orange-400');
+
+// --- Countdown hook ---
+function useCountdown() {
+  const [secondsLeft, setSecondsLeft] = useState(0);
+
+  useEffect(() => {
+    const calcRemaining = () => {
+      const now = new Date();
+      const totalSeconds = now.getMinutes() * 60 + now.getSeconds();
+      const elapsed = totalSeconds % ROUND_INTERVAL;
+      return ROUND_INTERVAL - elapsed;
+    };
+    setSecondsLeft(calcRemaining());
+    const timer = setInterval(() => setSecondsLeft(calcRemaining()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return { minutes: Math.floor(secondsLeft / 60), seconds: secondsLeft % 60, secondsLeft };
+}
+
+// --- Ball components ---
+function PowerBallDisplay({ ball }: { ball: number }) {
+  const isOdd = ball % 2 === 1;
+  return (
+    <div
+      className={cn(
+        'flex size-14 items-center justify-center rounded-full text-xl font-bold text-white shadow-lg sm:size-16 sm:text-2xl',
+        isOdd
+          ? 'bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/30'
+          : 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-500/30'
+      )}
+    >
+      {ball}
+    </div>
+  );
+}
+
+function NormalBall({ number }: { number: number }) {
+  return (
+    <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-zinc-600 to-zinc-800 text-xs font-bold text-white shadow-md sm:size-10 sm:text-sm">
+      {number}
+    </div>
+  );
+}
+
+// --- Stat bar ---
+function StatBar({ label, items }: { label: string; items: { name: string; pct: number; color: string }[] }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+      <div className="flex h-5 w-full overflow-hidden rounded-full bg-muted/30">
+        {items.map((item) => (
+          <div
+            key={item.name}
+            className={cn('flex items-center justify-center text-[10px] font-bold text-white transition-all', item.color)}
+            style={{ width: `${Math.max(item.pct, 8)}%` }}
+          >
+            {item.name} {Math.round(item.pct)}%
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// --- Betting option button ---
+interface BetOptionProps {
+  label: string;
+  sublabel?: string;
+  odds: string;
+  color: 'red' | 'blue' | 'green' | 'orange' | 'purple' | 'cyan' | 'yellow';
+  selected: boolean;
+  onClick: () => void;
+}
+
+const colorMap: Record<BetOptionProps['color'], { bg: string; border: string; text: string; selectedBg: string }> = {
+  red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', selectedBg: 'bg-red-500/25 border-red-500' },
+  blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400', selectedBg: 'bg-blue-500/25 border-blue-500' },
+  green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-400', selectedBg: 'bg-green-500/25 border-green-500' },
+  orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', selectedBg: 'bg-orange-500/25 border-orange-500' },
+  purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', selectedBg: 'bg-purple-500/25 border-purple-500' },
+  cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400', selectedBg: 'bg-cyan-500/25 border-cyan-500' },
+  yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', selectedBg: 'bg-yellow-500/25 border-yellow-500' },
+};
+
+function BetOption({ label, sublabel, odds, color, selected, onClick }: BetOptionProps) {
+  const c = colorMap[color];
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex flex-col items-center gap-0.5 rounded-lg border px-3 py-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]',
+        selected ? c.selectedBg : `${c.bg} ${c.border} hover:border-opacity-60`
+      )}
+    >
+      <span className={cn('text-sm font-bold', c.text)}>{label}</span>
+      {sublabel && <span className="text-[10px] text-muted-foreground">{sublabel}</span>}
+      <span className="mt-0.5 text-xs font-semibold text-foreground/80">{odds}</span>
+    </button>
+  );
+}
+
+// --- Betting panel ---
+interface BetSelection {
+  market: string;
+  option: string;
+  odds: string;
+}
+
+function BettingPanel({ game, currentRound }: { game: string; currentRound: BepickRound | null }) {
+  const { minutes, seconds, secondsLeft } = useCountdown();
+  const [selections, setSelections] = useState<BetSelection[]>([]);
+  const [betAmount, setBetAmount] = useState('');
+  const isClosed = secondsLeft <= 10;
+
+  const toggleSelection = (market: string, option: string, odds: string) => {
+    setSelections((prev) => {
+      const exists = prev.find((s) => s.market === market && s.option === option);
+      if (exists) return prev.filter((s) => !(s.market === market && s.option === option));
+      const withoutMarket = prev.filter((s) => s.market !== market);
+      return [...withoutMarket, { market, option, odds }];
+    });
+  };
+
+  const isSelected = (market: string, option: string) =>
+    selections.some((s) => s.market === market && s.option === option);
+
+  const totalOdds = selections.length > 0
+    ? selections.reduce((acc, s) => acc * parseFloat(s.odds), 1).toFixed(2)
+    : '0.00';
+
+  const expectedReturn = betAmount && selections.length > 0
+    ? (parseFloat(betAmount) * parseFloat(totalOdds)).toLocaleString()
+    : '0';
+
+  const quickAmounts = [5000, 10000, 50000, 100000];
+
+  return (
+    <Card className="border-border/50">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold">배팅</CardTitle>
+          <div className="flex items-center gap-2">
+            {isClosed ? (
+              <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
+                마감
+              </Badge>
+            ) : (
+              <Badge variant="destructive" className="gap-1">
+                <span className="relative flex size-1.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                </span>
+                LIVE
+              </Badge>
+            )}
+            <span className="font-mono text-sm font-bold tabular-nums text-primary">
+              {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+            </span>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {currentRound ? `${currentRound.AllRound.toLocaleString()}회차` : '---'}
+          {' · '}다음 회차까지 {minutes}분 {seconds}초
+        </p>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        {game === 'powerball' ? (
+          <>
+            {/* 파워볼 홀짝 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">파워볼 홀/짝</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="홀" odds="1.95" color="red" selected={isSelected('pb_oe', '홀')} onClick={() => toggleSelection('pb_oe', '홀', '1.95')} />
+                <BetOption label="짝" odds="1.95" color="blue" selected={isSelected('pb_oe', '짝')} onClick={() => toggleSelection('pb_oe', '짝', '1.95')} />
+              </div>
+            </div>
+            {/* 파워볼 언오버 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">파워볼 언더/오버</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="언더" sublabel="0~4" odds="1.95" color="green" selected={isSelected('pb_uo', '언더')} onClick={() => toggleSelection('pb_uo', '언더', '1.95')} />
+                <BetOption label="오버" sublabel="5~9" odds="1.95" color="orange" selected={isSelected('pb_uo', '오버')} onClick={() => toggleSelection('pb_uo', '오버', '1.95')} />
+              </div>
+            </div>
+            {/* 일반볼 홀짝 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">일반볼 홀/짝</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="홀" odds="1.95" color="red" selected={isSelected('nb_oe', '홀')} onClick={() => toggleSelection('nb_oe', '홀', '1.95')} />
+                <BetOption label="짝" odds="1.95" color="blue" selected={isSelected('nb_oe', '짝')} onClick={() => toggleSelection('nb_oe', '짝', '1.95')} />
+              </div>
+            </div>
+            {/* 일반볼 언오버 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">일반볼 언더/오버</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="언더" sublabel="15~72" odds="1.95" color="green" selected={isSelected('nb_uo', '언더')} onClick={() => toggleSelection('nb_uo', '언더', '1.95')} />
+                <BetOption label="오버" sublabel="73~130" odds="1.95" color="orange" selected={isSelected('nb_uo', '오버')} onClick={() => toggleSelection('nb_uo', '오버', '1.95')} />
+              </div>
+            </div>
+            {/* 일반볼 대중소 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">일반볼 대/중/소</p>
+              <div className="grid grid-cols-3 gap-2">
+                <BetOption label="소" sublabel="15~64" odds="2.80" color="green" selected={isSelected('nb_sml', '소')} onClick={() => toggleSelection('nb_sml', '소', '2.80')} />
+                <BetOption label="중" sublabel="65~80" odds="3.50" color="yellow" selected={isSelected('nb_sml', '중')} onClick={() => toggleSelection('nb_sml', '중', '3.50')} />
+                <BetOption label="대" sublabel="81~130" odds="2.80" color="red" selected={isSelected('nb_sml', '대')} onClick={() => toggleSelection('nb_sml', '대', '2.80')} />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* 사다리 좌우 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">출발</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="좌" odds="1.95" color="blue" selected={isSelected('pl_lr', '좌')} onClick={() => toggleSelection('pl_lr', '좌', '1.95')} />
+                <BetOption label="우" odds="1.95" color="red" selected={isSelected('pl_lr', '우')} onClick={() => toggleSelection('pl_lr', '우', '1.95')} />
+              </div>
+            </div>
+            {/* 줄수 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">줄수</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="3줄" odds="1.95" color="purple" selected={isSelected('pl_lc', '3줄')} onClick={() => toggleSelection('pl_lc', '3줄', '1.95')} />
+                <BetOption label="4줄" odds="1.95" color="cyan" selected={isSelected('pl_lc', '4줄')} onClick={() => toggleSelection('pl_lc', '4줄', '1.95')} />
+              </div>
+            </div>
+            {/* 홀짝 */}
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">홀/짝</p>
+              <div className="grid grid-cols-2 gap-2">
+                <BetOption label="홀" odds="1.95" color="red" selected={isSelected('pl_oe', '홀')} onClick={() => toggleSelection('pl_oe', '홀', '1.95')} />
+                <BetOption label="짝" odds="1.95" color="blue" selected={isSelected('pl_oe', '짝')} onClick={() => toggleSelection('pl_oe', '짝', '1.95')} />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Bet slip */}
+        <div className="mt-1 rounded-lg border border-border/50 bg-muted/20 p-3">
+          {selections.length > 0 ? (
+            <div className="mb-2 flex flex-col gap-1">
+              {selections.map((s) => (
+                <div key={`${s.market}-${s.option}`} className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{s.market.replace('pb_oe', '파워볼 홀짝').replace('pb_uo', '파워볼 언오버').replace('nb_oe', '일반볼 홀짝').replace('nb_uo', '일반볼 언오버').replace('nb_sml', '대중소').replace('pl_lr', '출발').replace('pl_lc', '줄수').replace('pl_oe', '홀짝')}</span>
+                  <span className="font-bold">{s.option} <span className="text-primary">x{s.odds}</span></span>
+                </div>
+              ))}
+              <div className="mt-1 flex items-center justify-between border-t border-border/30 pt-1 text-xs font-bold">
+                <span>총 배당</span>
+                <span className="text-primary">x{totalOdds}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="mb-2 text-center text-xs text-muted-foreground">배팅할 항목을 선택하세요</p>
+          )}
+
+          <div className="flex gap-1.5">
+            {quickAmounts.map((amt) => (
+              <button
+                key={amt}
+                type="button"
+                onClick={() => setBetAmount(String(amt))}
+                className="flex-1 rounded bg-muted/50 px-1 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {(amt / 10000).toFixed(amt >= 10000 ? 0 : 0.5)}만
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-2 flex gap-2">
+            <Input
+              type="number"
+              placeholder="배팅금액"
+              value={betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+              className="h-9 text-sm"
+            />
+            <Button
+              size="sm"
+              className="h-9 min-w-[72px] font-bold"
+              disabled={isClosed || selections.length === 0 || !betAmount || parseFloat(betAmount) <= 0}
+            >
+              배팅
+            </Button>
+          </div>
+
+          {selections.length > 0 && betAmount && parseFloat(betAmount) > 0 && (
+            <p className="mt-1.5 text-right text-xs text-muted-foreground">
+              예상 당첨금: <span className="font-bold text-primary">{expectedReturn}원</span>
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// --- Live result display (PowerBall) ---
+function PowerBallLiveResult({ currentRound }: { currentRound: BepickRound | null }) {
+  const pb = currentRound?.PowerBall;
+
+  if (!pb) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-6">
+        <Skeleton className="size-14 rounded-full" />
+        <div className="flex gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="size-10 rounded-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
+        {/* Power ball */}
+        <div className="flex flex-col items-center gap-1.5">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">파워볼</span>
+          <PowerBallDisplay ball={pb.pBall} />
+          <div className="flex gap-1">
+            <Badge variant="outline" className={cn('text-[10px]', oddEvenColor(pb.pOddEven))}>{oddEvenLabel(pb.pOddEven)}</Badge>
+            <Badge variant="outline" className={cn('text-[10px]', underOverColor(pb.pUnderOver))}>{underOverLabel(pb.pUnderOver)}</Badge>
+          </div>
+        </div>
+
+        <div className="hidden h-16 w-px bg-border/50 sm:block" />
+
+        {/* Normal balls */}
+        <div className="flex flex-col items-center gap-1.5">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">일반볼</span>
+          <div className="flex gap-1.5">
+            <NormalBall number={pb.nBall1} />
+            <NormalBall number={pb.nBall2} />
+            <NormalBall number={pb.nBall3} />
+            <NormalBall number={pb.nBall4} />
+            <NormalBall number={pb.nBall5} />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-bold">합 <span className="text-primary">{pb.nBallSum}</span></span>
+            <Badge variant="outline" className={cn('text-[10px]', oddEvenColor(pb.nOddEven))}>{oddEvenLabel(pb.nOddEven)}</Badge>
+            <Badge variant="outline" className={cn('text-[10px]', underOverColor(pb.nUnderOver))}>{underOverLabel(pb.nUnderOver)}</Badge>
+            <Badge variant="outline" className="text-[10px]">{smlLabel(pb.nSML)}</Badge>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Live result display (PowerLadder) ---
+function PowerLadderLiveResult({ currentRound }: { currentRound: BepickRound | null }) {
+  const pl = currentRound?.PowerLadder;
+
+  if (!pl) {
+    return (
+      <div className="flex justify-center gap-3 py-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 w-24 rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      <div className="flex flex-col items-center gap-1 rounded-xl border border-border/50 bg-muted/20 p-3">
+        <span className="text-[10px] font-medium text-muted-foreground">출발</span>
+        <span className={cn('text-2xl font-bold', pl.leftRight === 1 ? 'text-blue-400' : 'text-red-400')}>
+          {leftRightLabel(pl.leftRight)}
+        </span>
+      </div>
+      <div className="flex flex-col items-center gap-1 rounded-xl border border-border/50 bg-muted/20 p-3">
+        <span className="text-[10px] font-medium text-muted-foreground">줄수</span>
+        <span className="text-2xl font-bold text-purple-400">
+          {ladderCountLabel(pl.ladderCount)}
+        </span>
+      </div>
+      <div className="flex flex-col items-center gap-1 rounded-xl border border-border/50 bg-muted/20 p-3">
+        <span className="text-[10px] font-medium text-muted-foreground">홀짝</span>
+        <span className={cn('text-2xl font-bold', oddEvenColor(pl.oddEven))}>
+          {oddEvenLabel(pl.oddEven)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// --- Results table ---
+function ResultsTable({ rounds, game }: { rounds: BepickRound[]; game: string }) {
+  if (game === 'powerball') {
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border/50 text-muted-foreground">
+              <th className="px-2 py-1.5 text-left text-[11px] font-medium">회차</th>
+              <th className="px-2 py-1.5 text-center text-[11px] font-medium">P볼</th>
+              <th className="px-2 py-1.5 text-center text-[11px] font-medium">홀짝</th>
+              <th className="px-2 py-1.5 text-center text-[11px] font-medium">언오</th>
+              <th className="px-2 py-1.5 text-center text-[11px] font-medium">합계</th>
+              <th className="px-2 py-1.5 text-center text-[11px] font-medium">홀짝</th>
+              <th className="px-2 py-1.5 text-center text-[11px] font-medium">소중대</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rounds.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-6 text-center text-xs text-muted-foreground">
+                  데이터를 불러오는 중...
+                </td>
+              </tr>
+            ) : (
+              rounds.slice(0, DISPLAY_ROUNDS).map((r) => {
+                const p = r.PowerBall;
+                return (
+                  <tr key={r.ID} className="border-b border-border/20 transition-colors hover:bg-muted/20">
+                    <td className="px-2 py-1.5 text-left font-mono text-[11px] text-muted-foreground">{r.Round}</td>
+                    <td className="px-2 py-1.5 text-center">
+                      <span className={cn(
+                        'inline-flex size-6 items-center justify-center rounded-full text-[10px] font-bold text-white',
+                        p.pBall % 2 === 1 ? 'bg-red-600' : 'bg-blue-600'
+                      )}>
+                        {p.pBall}
+                      </span>
+                    </td>
+                    <td className={cn('px-2 py-1.5 text-center text-[11px] font-bold', oddEvenColor(p.pOddEven))}>
+                      {oddEvenLabel(p.pOddEven)}
+                    </td>
+                    <td className={cn('px-2 py-1.5 text-center text-[11px] font-bold', underOverColor(p.pUnderOver))}>
+                      {underOverLabel(p.pUnderOver)}
+                    </td>
+                    <td className="px-2 py-1.5 text-center font-mono text-[11px] font-bold">{p.nBallSum}</td>
+                    <td className={cn('px-2 py-1.5 text-center text-[11px] font-bold', oddEvenColor(p.nOddEven))}>
+                      {oddEvenLabel(p.nOddEven)}
+                    </td>
+                    <td className="px-2 py-1.5 text-center">
+                      <span className={cn(
+                        'inline-block rounded px-1.5 py-0.5 text-[9px] font-bold',
+                        p.nSML === 1 ? 'bg-green-500/20 text-green-400' :
+                        p.nSML === 2 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      )}>
+                        {smlLabel(p.nSML)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border/50 text-muted-foreground">
+            <th className="px-3 py-1.5 text-left text-[11px] font-medium">회차</th>
+            <th className="px-3 py-1.5 text-center text-[11px] font-medium">좌/우</th>
+            <th className="px-3 py-1.5 text-center text-[11px] font-medium">줄수</th>
+            <th className="px-3 py-1.5 text-center text-[11px] font-medium">홀짝</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rounds.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="py-6 text-center text-xs text-muted-foreground">
+                데이터를 불러오는 중...
+              </td>
+            </tr>
+          ) : (
+            rounds.slice(0, DISPLAY_ROUNDS).map((r) => {
+              const ladder = r.PowerLadder;
+              return (
+                <tr key={r.ID} className="border-b border-border/20 transition-colors hover:bg-muted/20">
+                  <td className="px-3 py-1.5 text-left font-mono text-[11px] text-muted-foreground">{r.Round}</td>
+                  <td className="px-3 py-1.5 text-center">
+                    <span className={cn(
+                      'inline-block rounded px-2 py-0.5 text-[10px] font-bold',
+                      ladder.leftRight === 1 ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'
+                    )}>
+                      {leftRightLabel(ladder.leftRight)}
+                    </span>
+                  </td>
+                  <td className="px-3 py-1.5 text-center text-[11px] font-bold text-purple-400">
+                    {ladderCountLabel(ladder.ladderCount)}
+                  </td>
+                  <td className={cn('px-3 py-1.5 text-center text-[11px] font-bold', oddEvenColor(ladder.oddEven))}>
+                    {oddEvenLabel(ladder.oddEven)}
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// --- Stats panel ---
+function StatsPanel({ rounds, game }: { rounds: BepickRound[]; game: string }) {
+  const stats = useMemo(() => {
+    if (rounds.length === 0) return null;
+    const total = rounds.length;
+
+    if (game === 'powerball') {
+      let pOdd = 0, pEven = 0, pUnder = 0, pOver = 0;
+      let nOdd = 0, nEven = 0, nUnder = 0, nOver = 0;
+      let nSmall = 0, nMedium = 0, nLarge = 0;
+
+      for (const r of rounds) {
+        const pb = r.PowerBall;
+        if (pb.pOddEven === 1) pOdd++; else pEven++;
+        if (pb.pUnderOver === 1) pUnder++; else pOver++;
+        if (pb.nOddEven === 1) nOdd++; else nEven++;
+        if (pb.nUnderOver === 1) nUnder++; else nOver++;
+        if (pb.nSML === 1) nSmall++; else if (pb.nSML === 2) nMedium++; else nLarge++;
+      }
+
+      return [
+        { label: '파워볼 홀/짝', items: [{ name: '홀', pct: (pOdd / total) * 100, color: 'bg-red-600' }, { name: '짝', pct: (pEven / total) * 100, color: 'bg-blue-600' }] },
+        { label: '파워볼 언/오', items: [{ name: '언더', pct: (pUnder / total) * 100, color: 'bg-green-600' }, { name: '오버', pct: (pOver / total) * 100, color: 'bg-orange-600' }] },
+        { label: '일반볼 홀/짝', items: [{ name: '홀', pct: (nOdd / total) * 100, color: 'bg-red-600' }, { name: '짝', pct: (nEven / total) * 100, color: 'bg-blue-600' }] },
+        { label: '일반볼 언/오', items: [{ name: '언더', pct: (nUnder / total) * 100, color: 'bg-green-600' }, { name: '오버', pct: (nOver / total) * 100, color: 'bg-orange-600' }] },
+        { label: '소/중/대', items: [{ name: '소', pct: (nSmall / total) * 100, color: 'bg-green-600' }, { name: '중', pct: (nMedium / total) * 100, color: 'bg-yellow-600' }, { name: '대', pct: (nLarge / total) * 100, color: 'bg-red-600' }] },
+      ];
+    }
+
+    let left = 0, right = 0, line3 = 0, line4 = 0, odd = 0, even = 0;
+    for (const r of rounds) {
+      const ladder = r.PowerLadder;
+      if (ladder.leftRight === 1) left++; else right++;
+      if (ladder.ladderCount === 1) line3++; else line4++;
+      if (ladder.oddEven === 1) odd++; else even++;
+    }
+
+    return [
+      { label: '좌/우', items: [{ name: '좌', pct: (left / total) * 100, color: 'bg-blue-600' }, { name: '우', pct: (right / total) * 100, color: 'bg-red-600' }] },
+      { label: '3줄/4줄', items: [{ name: '3줄', pct: (line3 / total) * 100, color: 'bg-purple-600' }, { name: '4줄', pct: (line4 / total) * 100, color: 'bg-cyan-600' }] },
+      { label: '홀/짝', items: [{ name: '홀', pct: (odd / total) * 100, color: 'bg-red-600' }, { name: '짝', pct: (even / total) * 100, color: 'bg-blue-600' }] },
+    ];
+  }, [rounds, game]);
+
+  if (!stats) return null;
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      {stats.map((s) => (
+        <StatBar key={s.label} label={s.label} items={s.items} />
+      ))}
+    </div>
+  );
+}
+
+// --- Main page ---
+export default function MinigamePage() {
+  const {
+    rounds,
+    currentRound,
+    selectedGame,
+    isLoading,
+    fetchRounds,
+    fetchCurrentRound,
+    setSelectedGame,
+  } = useMinigameStore();
+
+  const [activeTab, setActiveTab] = useState<'results' | 'stats'>('results');
+
+  const loadData = useCallback(() => {
+    fetchCurrentRound();
+    fetchRounds();
+  }, [fetchCurrentRound, fetchRounds]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchCurrentRound();
+      fetchRounds();
+    }, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [fetchCurrentRound, fetchRounds]);
+
+  useEffect(() => {
+    loadData();
+  }, [selectedGame]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const gameTitle = selectedGame === 'powerball' ? 'EOS 파워볼' : 'EOS 파워사다리';
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Game selection header */}
+      <Card className="border-border/50">
+        <CardContent className="py-3">
+          <Tabs value={selectedGame} onValueChange={(v) => setSelectedGame(v)}>
+            <TabsList className="w-full">
+              <TabsTrigger value="powerball" className="flex-1 gap-1.5">
+                <span className="text-base">🎱</span>
+                <span className="hidden sm:inline">EOS</span> 파워볼
+              </TabsTrigger>
+              <TabsTrigger value="ladder" className="flex-1 gap-1.5">
+                <span className="text-base">🪜</span>
+                <span className="hidden sm:inline">EOS</span> 파워사다리
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {isLoading && rounds.length === 0 ? (
+        <div className="grid gap-3 lg:grid-cols-[1fr_320px]">
+          <Card>
+            <CardContent className="pt-5">
+              <Skeleton className="mb-4 h-6 w-40" />
+              <div className="flex items-center gap-4">
+                <Skeleton className="size-14 rounded-full" />
+                <div className="flex gap-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="size-10 rounded-full" />
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-7 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-5">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="mb-2 h-10 w-full rounded-lg" />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid gap-3 lg:grid-cols-[1fr_320px]">
+          {/* Left column: Live result + History/Stats */}
+          <div className="flex flex-col gap-3">
+            {/* Live result card */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold">{gameTitle} 현재 결과</CardTitle>
+                  <span className="text-xs text-muted-foreground">
+                    {currentRound ? `${currentRound.AllRound.toLocaleString()}회` : '---'}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {selectedGame === 'powerball' ? (
+                  <PowerBallLiveResult currentRound={currentRound} />
+                ) : (
+                  <PowerLadderLiveResult currentRound={currentRound} />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Results / Stats tabs */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-1">
+                    <Button
+                      variant={activeTab === 'results' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setActiveTab('results')}
+                    >
+                      최근 결과
+                    </Button>
+                    <Button
+                      variant={activeTab === 'stats' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setActiveTab('stats')}
+                    >
+                      통계
+                    </Button>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">{DISPLAY_ROUNDS}회 기준</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {activeTab === 'results' ? (
+                  <ResultsTable rounds={rounds} game={selectedGame} />
+                ) : (
+                  <StatsPanel rounds={rounds} game={selectedGame} />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right column: Betting panel (desktop sidebar / mobile below) */}
+          <div className="lg:sticky lg:top-4 lg:self-start">
+            <BettingPanel game={selectedGame} currentRound={currentRound} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

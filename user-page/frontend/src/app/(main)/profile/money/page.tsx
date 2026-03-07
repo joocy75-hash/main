@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, safeDecimal } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 
 const TYPE_FILTERS = [
@@ -25,13 +25,13 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 const formatAmount = (value: string) => {
-  const num = Number(value);
-  const formatted = new Intl.NumberFormat('ko-KR').format(Math.abs(num));
-  return num >= 0 ? `+${formatted}` : `-${formatted}`;
+  const d = safeDecimal(value);
+  const formatted = new Intl.NumberFormat('ko-KR').format(d.abs().toNumber());
+  return d.gte(0) ? `+${formatted}` : `-${formatted}`;
 };
 
 const formatBalance = (value: string) =>
-  new Intl.NumberFormat('ko-KR').format(Number(value));
+  new Intl.NumberFormat('ko-KR').format(safeDecimal(value).toNumber());
 
 const formatDateTime = (dateStr: string) => {
   const d = new Date(dateStr);

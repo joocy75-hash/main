@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Loader2, User, Lock, Phone, Gift, Eye, EyeOff, Check, X } from 'lucide-react';
 import { z } from 'zod';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLoginModalStore } from '@/stores/login-modal-store';
 
 const TOTAL_STEPS = 4;
 
@@ -478,12 +478,13 @@ const RegisterPage = () => {
 
           <p className="mt-4 text-center text-sm text-[#6b7280]">
             이미 계정이 있으신가요?{' '}
-            <Link
-              href="/login"
+            <button
+              type="button"
+              onClick={() => useLoginModalStore.getState().open()}
               className="font-medium text-[#feb614] hover:underline"
             >
               로그인
-            </Link>
+            </button>
           </p>
         </div>
       </div>

@@ -11,7 +11,7 @@ import {
   RefreshCw,
   Menu,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +28,7 @@ import {
 import { cn, formatUSDT } from '@/lib/utils';
 import { useProfileStore } from '@/stores/profile-store';
 import { useAuthStore } from '@/stores/auth-store';
+import { useWalletStore } from '@/stores/wallet-store';
 import { useLoginModalStore } from '@/stores/login-modal-store';
 import { LoginModal } from '@/components/common/login-modal';
 
@@ -137,8 +138,20 @@ export const Header = ({ className }: { className?: string }) => {
                   USDT {formatUSDT(Number(authUser.balance) || 0)}
                 </span>
                 <button
-                  onClick={() => setIsSpinning(true)}
-                  onAnimationEnd={() => setIsSpinning(false)}
+                  onClick={async () => {
+                    setIsSpinning(true);
+                    try {
+                      await useWalletStore.getState().fetchBalance();
+                      const { balance } = useWalletStore.getState();
+                      useAuthStore.setState((s) => ({
+                        user: s.user ? { ...s.user, balance } : null,
+                      }));
+                    } catch {
+                      // ignore refresh errors
+                    } finally {
+                      setIsSpinning(false);
+                    }
+                  }}
                   className="ml-0.5 text-[#b0b0b0] hover:text-[#252531]"
                 >
                   <RefreshCw
@@ -185,10 +198,6 @@ export const Header = ({ className }: { className?: string }) => {
                 <DropdownMenuTrigger asChild>
                   <button className="flex size-[36px] items-center justify-center overflow-hidden rounded-full border border-[#e8e8e8] outline-none transition-transform hover:scale-105">
                     <Avatar className="size-full">
-                      <AvatarImage
-                        src="https://i.pravatar.cc/150?img=11"
-                        alt="Profile"
-                      />
                       <AvatarFallback className="bg-[#feb614]/20 text-[#feb614]">
                         {authUser.nickname?.charAt(0) ?? '?'}
                       </AvatarFallback>

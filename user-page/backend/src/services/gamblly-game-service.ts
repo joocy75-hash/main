@@ -37,6 +37,7 @@ export interface GameProvider {
   ko: boolean;
   total: number;
   categories: Record<string, number>;
+  image?: string;
 }
 
 export interface Game {
@@ -46,6 +47,7 @@ export interface Game {
   providerName: string;
   type: string;
   category: string;
+  image?: string;
   ko: boolean;
   status: number;
 }
@@ -119,7 +121,7 @@ export class GambllyGameService {
       return cached.games;
     }
 
-    const allRawGames: Array<{ game_uid: string; game_name: string; game_type?: string; status?: number }> = [];
+    const allRawGames: Array<{ game_uid: string; game_name: string; game_type?: string; img?: string; status?: number }> = [];
     let page = 1;
     const perPage = 100;
 
@@ -136,6 +138,7 @@ export class GambllyGameService {
         game_uid: string;
         game_name: string;
         game_type?: string;
+        img?: string;
         status?: number;
       }>;
 
@@ -156,6 +159,7 @@ export class GambllyGameService {
       providerName: provider?.name || providerCode,
       type: g.game_type || 'Other',
       category: TYPE_CATEGORY_MAP[g.game_type || 'Other'] || 'other',
+      image: g.img || undefined,
       ko: provider?.ko || false,
       status: g.status ?? 1,
     }));
@@ -206,10 +210,13 @@ export class GambllyGameService {
           typeCounts[g.category] = (typeCounts[g.category] || 0) + 1;
         }
 
+        const representativeImage = games.find(g => g.image)?.image;
+
         providerStats.push({
           ...provider,
           total: games.length,
           categories: typeCounts,
+          image: representativeImage,
         });
         allGames.push(...games);
       }

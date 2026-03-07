@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { ProfileService } from '../services/profile-service.js';
+import { authRateLimit } from '../middleware/rate-limit.js';
 
 const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -17,6 +18,17 @@ const changePasswordSchema = z.object({
   newPassword: z.string()
     .min(8, '새 비밀번호는 8자 이상이어야 합니다')
     .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, '비밀번호는 영문과 숫자를 포함해야 합니다'),
+});
+
+const setWithdrawPinSchema = z.object({
+  password: z.string().min(1, '비밀번호를 입력해주세요'),
+  pin: z.string().regex(/^\d{6}$/, 'PIN은 6자리 숫자여야 합니다'),
+});
+
+const changeWithdrawPinSchema = z.object({
+  password: z.string().min(1, '비밀번호를 입력해주세요'),
+  currentPin: z.string().regex(/^\d{6}$/, '현재 PIN은 6자리 숫자여야 합니다'),
+  newPin: z.string().regex(/^\d{6}$/, '새 PIN은 6자리 숫자여야 합니다'),
 });
 
 const gameCategoryEnum = z.enum(['casino', 'slot', 'holdem', 'sports', 'shooting', 'coin', 'mini_game']);
@@ -134,6 +146,72 @@ export default async function profileRoutes(fastify: FastifyInstance) {
         return reply.code(statusCode).send({
           success: false,
           error: err.message || '서버 오류가 발생했습니다',
+        });
+      }
+    },
+  );
+
+  // POST /api/profile/withdraw-pin - Set withdrawal PIN (auth + rate limit)
+  fastify.post(
+    '/api/profile/withdraw-pin',
+    { preHandler: [fastify.authenticate], ...authRateLimit },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const parsed = setWithdrawPinSchema.safeParse(request.body);
+      if (!parsed.success) {
+        const firstError = parsed.error.errors[0];
+        return reply.code(400).send({
+          success: false,
+          error: firstError.message,
+        });
+      }
+
+      try {
+        const userId = request.user.userId;
+        const { password, pin } = parsed.data;
+        const data = await profileService.setWithdrawPin(fastify.prisma, userId, password, pin);
+        return reply.send({ success: true, data });
+      } catch (err: unknown) {
+        const error = err as { statusCode?: number; message?: string };
+        const statusCode = error.statusCode || 500;
+        if (statusCode >= 500) {
+          fastify.log.error(err, 'Set withdraw PIN error');
+        }
+        return reply.code(statusCode).send({
+          success: false,
+          error: error.message || '서버 오류가 발생했습니다',
+        });
+      }
+    },
+  );
+
+  // PUT /api/profile/withdraw-pin - Change withdrawal PIN (auth + rate limit)
+  fastify.put(
+    '/api/profile/withdraw-pin',
+    { preHandler: [fastify.authenticate], ...authRateLimit },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const parsed = changeWithdrawPinSchema.safeParse(request.body);
+      if (!parsed.success) {
+        const firstError = parsed.error.errors[0];
+        return reply.code(400).send({
+          success: false,
+          error: firstError.message,
+        });
+      }
+
+      try {
+        const userId = request.user.userId;
+        const { password, currentPin, newPin } = parsed.data;
+        const data = await profileService.changeWithdrawPin(fastify.prisma, userId, password, currentPin, newPin);
+        return reply.send({ success: true, data });
+      } catch (err: unknown) {
+        const error = err as { statusCode?: number; message?: string };
+        const statusCode = error.statusCode || 500;
+        if (statusCode >= 500) {
+          fastify.log.error(err, 'Change withdraw PIN error');
+        }
+        return reply.code(statusCode).send({
+          success: false,
+          error: error.message || '서버 오류가 발생했습니다',
         });
       }
     },

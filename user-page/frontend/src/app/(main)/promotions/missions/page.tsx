@@ -151,7 +151,7 @@ export default function MissionsPage() {
   const {
     missions,
     missionTab,
-    isClaimingMission,
+    claimingMissionId,
     isLoading,
     fetchMissions,
     claimMission,
@@ -285,7 +285,7 @@ export default function MissionsPage() {
                 key={mission.id}
                 mission={mission}
                 onClaim={handleClaim}
-                isClaiming={isClaimingMission}
+                isClaiming={claimingMissionId === mission.id}
               />
             ))}
           </div>

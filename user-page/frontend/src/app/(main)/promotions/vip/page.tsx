@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -52,7 +52,7 @@ const VIP_BENEFITS = [
   { label: '생일 보너스', icon: Cake, key: 'birthdayBonus' },
 ];
 
-const BENEFIT_VALUES: Record<number, Record<string, string>> = {
+const FALLBACK_BENEFIT_VALUES: Record<number, Record<string, string>> = {
   1: { withdrawalsPerDay: '10', dailyWithdrawLimit: '2,000', upgradeBonus: '-', dailyBonus: '12', weeklyBonus: '12', monthlyBonus: '21', birthdayBonus: '33' },
   2: { withdrawalsPerDay: '15', dailyWithdrawLimit: '5,000', upgradeBonus: '100', dailyBonus: '25', weeklyBonus: '50', monthlyBonus: '100', birthdayBonus: '100' },
   3: { withdrawalsPerDay: '20', dailyWithdrawLimit: '10,000', upgradeBonus: '500', dailyBonus: '50', weeklyBonus: '100', monthlyBonus: '250', birthdayBonus: '300' },
@@ -91,6 +91,11 @@ export default function VipPage() {
   const levels = vipLevels.length > 0 ? vipLevels : FALLBACK_VIP_LEVELS;
   const currentLevel = vipInfo?.currentLevel || 1;
 
+  const progressPercent = useMemo(() => {
+    const raw = vipInfo?.progress ?? 0;
+    return Math.min(100, Math.max(0, raw));
+  }, [vipInfo?.progress]);
+
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (!carouselRef.current) return;
     const scrollAmount = 200;
@@ -100,7 +105,9 @@ export default function VipPage() {
     });
   };
 
-  const benefitValues = BENEFIT_VALUES[selectedLevel] || BENEFIT_VALUES[1];
+  const benefitValues = useMemo(() => {
+    return FALLBACK_BENEFIT_VALUES[selectedLevel] || FALLBACK_BENEFIT_VALUES[1];
+  }, [selectedLevel]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -123,12 +130,12 @@ export default function VipPage() {
             <div className="flex flex-col gap-1.5 w-full sm:w-1/3 min-w-[200px] bg-white rounded-xl p-3 border border-[#e2e8f0] shadow-sm">
               <div className="flex items-center justify-between text-[11px] font-extrabold text-[#64748b]">
                 <span>다음 등급: VIP {currentLevel + 1}</span>
-                <span className="text-[#f59e0b]">{vipInfo?.progress || 0}%</span>
+                <span className="text-[#f59e0b]">{progressPercent}%</span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-[#f1f5f9] shadow-inner overflow-hidden border border-[#e2e8f0]">
                 <div 
                   className="h-full bg-gradient-to-r from-[#ffd651] to-[#f59e0b] rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]" 
-                  style={{ width: `${vipInfo?.progress || 0}%` }}
+                  style={{ width: `${progressPercent}%` }}
                 />
               </div>
             </div>
@@ -152,7 +159,7 @@ export default function VipPage() {
 
           <div
             ref={carouselRef}
-            className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide snap-x"
+            className="flex gap-4 overflow-x-auto px-6 pt-5 pb-5 -mt-3 -mb-3 scrollbar-hide snap-x"
           >
             {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
               const vip = VIP_DISPLAY[level] || VIP_DISPLAY[1];
@@ -327,7 +334,7 @@ export default function VipPage() {
                 {levels.map((level) => {
                   const display = VIP_DISPLAY[level.level] || VIP_DISPLAY[1];
                   const isCurrent = level.level === currentLevel;
-                  const values = BENEFIT_VALUES[level.level] || BENEFIT_VALUES[1];
+                  const values = FALLBACK_BENEFIT_VALUES[level.level] || FALLBACK_BENEFIT_VALUES[1];
                   return (
                     <tr
                       key={level.level}

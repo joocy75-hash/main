@@ -13,6 +13,7 @@ export interface GameProvider {
   ko: boolean;
   total: number;
   categories: Record<string, number>;
+  image?: string;
 }
 
 export interface Game {
@@ -22,6 +23,7 @@ export interface Game {
   providerName: string;
   type: string;
   category: string;
+  image?: string;
   ko: boolean;
   status: number;
 }

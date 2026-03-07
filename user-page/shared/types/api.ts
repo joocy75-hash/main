@@ -5,7 +5,8 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+export interface PaginatedResponse<T> extends ApiResponse {
+  data: T[];
   pagination: {
     page: number;
     limit: number;

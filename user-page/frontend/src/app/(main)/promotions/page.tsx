@@ -1,9 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useEventStore } from '@/stores/event-store';
+
+type PromoCard = {
+  id: number;
+  title: string;
+  subtitle: string;
+  href: string;
+  category: string;
+  gradient: string;
+  emoji: string;
+  dark: boolean;
+};
 
 const CATEGORY_FILTERS = [
   { value: 'all', label: 'All Promotions' },
@@ -13,7 +24,15 @@ const CATEGORY_FILTERS = [
   { value: 'payback', label: 'Cashback' },
 ];
 
-const PROMO_CARDS = [
+const CATEGORY_STYLES: Record<string, { gradient: string; emoji: string; defaultHref: string }> = {
+  checkin: { gradient: 'from-[#2c2d33] to-blue-900/40', emoji: '📅', defaultHref: '/promotions/attendance' },
+  deposit: { gradient: 'from-amber-600 via-yellow-500 to-orange-500', emoji: '🎁', defaultHref: '#' },
+  event: { gradient: 'from-indigo-900 via-purple-800 to-blue-700', emoji: '🚀', defaultHref: '/promotions/missions' },
+  payback: { gradient: 'from-emerald-700 via-green-600 to-teal-600', emoji: '💰', defaultHref: '#' },
+};
+const DEFAULT_CATEGORY_STYLE = { gradient: 'from-gray-900 via-gray-800 to-gray-700', emoji: '🎉', defaultHref: '#' };
+
+const FALLBACK_PROMO_CARDS: PromoCard[] = [
   {
     id: 1,
     title: 'Check-in',
@@ -107,7 +126,7 @@ const PROMO_CARDS = [
 ];
 
 export default function PromotionsHubPage() {
-  const { fetchPromotions, setPromotionCategory } = useEventStore();
+  const { fetchPromotions, setPromotionCategory, promotions } = useEventStore();
 
   const [activeFilter, setActiveFilter] = useState('all');
 
@@ -115,14 +134,33 @@ export default function PromotionsHubPage() {
     fetchPromotions();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const displayCards: PromoCard[] = useMemo(() => {
+    if (promotions.length === 0) return FALLBACK_PROMO_CARDS;
+    return promotions
+      .filter((p) => p.isActive)
+      .map((p) => {
+        const style = CATEGORY_STYLES[p.category] || DEFAULT_CATEGORY_STYLE;
+        return {
+          id: p.id,
+          title: p.title,
+          subtitle: p.description,
+          href: style.defaultHref,
+          category: p.category,
+          gradient: style.gradient,
+          emoji: style.emoji,
+          dark: true,
+        };
+      });
+  }, [promotions]);
+
   const handleFilter = (value: string) => {
     setActiveFilter(value);
     setPromotionCategory(value);
   };
 
   const filteredCards = activeFilter === 'all'
-    ? PROMO_CARDS
-    : PROMO_CARDS.filter((c) => c.category === activeFilter);
+    ? displayCards
+    : displayCards.filter((c) => c.category === activeFilter);
 
   return (
     <div className="flex flex-col gap-4">

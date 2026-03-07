@@ -31,6 +31,7 @@ async function doRefresh(): Promise<boolean> {
     // Cookie is sent automatically via credentials: 'include'
     const res = await fetch(`${API_URL}/api/auth/refresh`, {
       method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'include',
     });
     return res.ok;
@@ -62,6 +63,7 @@ class ApiClient {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
       ...((init.headers as Record<string, string>) || {}),
     };
 

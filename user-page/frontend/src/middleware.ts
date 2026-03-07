@@ -11,6 +11,8 @@ const PROTECTED_ROUTES = [
   '/promotions/spin',
   '/promotions/points',
   '/promotions/vip',
+  '/minigame',
+  '/esports',
 ];
 
 const AUTH_PAGES = ['/register'];

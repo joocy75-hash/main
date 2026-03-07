@@ -18,7 +18,7 @@ export const config = {
   },
   cookie: {
     secure: (process.env.NODE_ENV || 'development') === 'production',
-    sameSite: 'lax' as const,
+    sameSite: 'strict' as const,
     httpOnly: true,
   },
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3002,http://localhost:3001')

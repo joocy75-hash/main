@@ -52,7 +52,7 @@ interface EventState {
   // Missions
   missions: Mission[];
   missionTab: 'daily' | 'weekly';
-  isClaimingMission: boolean;
+  claimingMissionId: number | null;
 
   // Spin
   spinStatus: SpinStatus | null;
@@ -109,7 +109,7 @@ export const useEventStore = create<EventState>((set, get) => ({
   isCheckingIn: false,
   missions: [],
   missionTab: 'daily',
-  isClaimingMission: false,
+  claimingMissionId: null,
   spinStatus: null,
   lastSpinResult: null,
   isSpinning: false,
@@ -160,13 +160,13 @@ export const useEventStore = create<EventState>((set, get) => ({
   },
 
   claimMission: async (missionId: number) => {
-    set({ isClaimingMission: true });
+    set({ claimingMissionId: missionId });
     try {
       await api.post(`/api/missions/${missionId}/claim`);
       await get().fetchMissions();
-      set({ isClaimingMission: false });
+      set({ claimingMissionId: null });
     } catch (err) {
-      set({ isClaimingMission: false });
+      set({ claimingMissionId: null });
       throw err;
     }
   },
